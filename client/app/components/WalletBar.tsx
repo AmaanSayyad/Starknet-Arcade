@@ -16,9 +16,11 @@ const WalletBar: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
           <button
             onClick={() => setIsModalOpen(true)}
             className={`
-              py-2 px-4 bg-[#9370DB] rounded-full text-sm leading-5 
-              hover:bg-[#483D8B] text-white font-semibold transition-colors
-              ${isMobile ? "w-full py-3 text-base" : "sm:py-3 sm:w-[200px]"}
+              font-['Press_Start_2P'] text-xs  text-purple-200
+              py-3 px-6 sm:px-8 rounded-lg border border-pink-400 bg-[#1e002e]
+              hover:bg-[#2b0050] transition-all duration-300 whitespace-nowrap
+              shadow-[4px_4px_0_0_#EC4899] hover:shadow-[2px_2px_0_0_#EC4899]
+              ${isMobile ? "w-full text-sm" : "sm:w-[240px]"}
             `}
           >
             Connect Wallet

@@ -4,6 +4,7 @@ import StarknetProvider from "./components/StarknetProvider";
 import { Navbar } from "./components/Navbar";
 import { useEffect } from "react";
 import { LotteryProvider } from "./contexts/LotteryContext";
+import Head from "next/head";
 
 export default function RootLayout({
   children,
@@ -19,7 +20,14 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className="min-h-screen bg-purple-100">
+      <Head>
+        <title>Starknet Arcade - Gamifying Starknet</title>
+        <meta name="description" content="Play games on Starknet blockchain" />
+        <link rel="icon" href="/favicon.ico" />
+        <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"/>
+
+      </Head>
+      <body className="min-h-screen bg-[#070005]">
         <StarknetProvider>
           <LotteryProvider>
             <Navbar />

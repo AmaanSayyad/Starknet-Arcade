@@ -117,14 +117,13 @@ export function WalletModal({ isOpen, setIsOpen }: WalletModalProps) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-sm transform rounded-3xl bg-white border border-[#E6E6FA] p-4 shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-sm transform rounded-none bg-[#F4F4D4] border-[4px] border-[#483D8B] p-4 shadow-[0_0_10px_#000] transition-all font-retro">
+
                 <div className="flex relative justify-center mt-2 text-center items-center mb-4">
-                  <Dialog.Title
-                    as="h3"
-                    className="text-xl font-medium text-[#483D8B]"
-                  >
-                    Connect wallet
-                  </Dialog.Title>
+                <span className="animate-pulse text-[#FF00FF] font-retro">
+  Select Wallet
+</span>
+
                   <button
                     onClick={handleClose}
                     className="text-[#9370DB] hover:text-[#483D8B] absolute right-2 transition-colors"
@@ -146,11 +145,11 @@ export function WalletModal({ isOpen, setIsOpen }: WalletModalProps) {
                       <button
                         key={connector.id}
                         onClick={() => connectWallet(connector)}
-                        className={`w-full flex items-center justify-between p-3 rounded-full
-                          border ${
-                            isSelected ? "border-[#9370DB]" : "border-[#E6E6FA]"
-                          } 
-                          hover:border-[#9370DB] transition-colors`}
+                        className={`w-full flex items-center justify-between p-3 rounded-none border-[3px] font-retro tracking-wider
+                          ${
+                            isSelected ? "bg-[#00FF00] text-black" : "bg-[#FAF089] text-[#483D8B]"
+                          }
+                          hover:bg-[#FF0080] hover:text-white transition-all`}
                       >
                         <div className="flex justify-center mx-auto items-center gap-2">
                           <div className="relative w-6 h-6">
@@ -175,20 +174,6 @@ export function WalletModal({ isOpen, setIsOpen }: WalletModalProps) {
                     );
                   })}
                 </div>
-
-                <button
-                  className={`w-full mb-2 mt-6 py-3 rounded-full 
-                    ${
-                      selectedConnector
-                        ? "bg-[#9370DB] hover:bg-[#483D8B]"
-                        : "bg-[#E6E6FA] hover:bg-[#9370DB]"
-                    } 
-                    text-white text-sm transition-colors`}
-                  onClick={() => connectWallet(selectedConnector)}
-                  disabled={!selectedConnector}
-                >
-                  Continue
-                </button>
               </Dialog.Panel>
             </Transition.Child>
           </div>
