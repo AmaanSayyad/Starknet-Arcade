@@ -117,10 +117,10 @@ export function WalletModal({ isOpen, setIsOpen }: WalletModalProps) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-sm transform rounded-none bg-[#F4F4D4] border-[4px] border-[#483D8B] p-4 shadow-[0_0_10px_#000] transition-all font-retro">
+              <Dialog.Panel className="w-full max-w-sm transform rounded-none bg-[#F4F4D4] border-[4px] border-[#483D8B] p-4 shadow-[0_0_10px_#000] transition-all font-techno">
 
                 <div className="flex relative justify-center mt-2 text-center items-center mb-4">
-                <span className="animate-pulse text-[#FF00FF] font-retro">
+                <span className="animate-pulse text-[#FF00FF] font-techno">
   Select Wallet
 </span>
 
@@ -145,7 +145,7 @@ export function WalletModal({ isOpen, setIsOpen }: WalletModalProps) {
                       <button
                         key={connector.id}
                         onClick={() => connectWallet(connector)}
-                        className={`w-full flex items-center justify-between p-3 rounded-none border-[3px] font-retro tracking-wider
+                        className={`w-full flex items-center justify-between p-3 rounded-none border-[3px] font-techno tracking-wider
                           ${
                             isSelected ? "bg-[#00FF00] text-black" : "bg-[#FAF089] text-[#483D8B]"
                           }

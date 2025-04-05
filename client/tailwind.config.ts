@@ -14,6 +14,8 @@ export default {
       },
       fontFamily: {
         retro: ['"Press Start 2P"', 'cursive'],
+        techno: ['"Orbitron"', 'sans-serif'],
+        silk:["'Silkscreen', sans-serif"]
       },
     },
   },

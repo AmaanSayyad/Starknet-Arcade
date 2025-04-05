@@ -2,133 +2,83 @@ import React from 'react'
 
 const Games = () => {
   return (
-    <section className="py-16 px-6 max-w-7xl mx-auto">
-    <h2 className="text-4xl font-bold mb-12 text-center">
-      Games on Starknet
-    </h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {/* Game Card 1 */}
-      <div className="bg-black bg-opacity-40 rounded-xl overflow-hidden hover:transform hover:scale-105 transition-transform">
-        <div className="h-64 bg-gradient-to-b from-purple-800 to-pink-700 relative">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-3xl font-bold">Chess Masters</div>
-          </div>
-        </div>
-        <div className="p-6">
-          <h3 className="text-xl font-semibold mb-2">StarkChess</h3>
-          <p className="text-gray-300 mb-4">
-            A Starknet community chess game, where each player makes a
-            move as Black or White. Play with STARK; if your team wins,
-            earn tokens.
-          </p>
-          <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
-            Play Now
-          </button>
-        </div>
-      </div>
+    <section className="py-20 px-6 max-w-7xl mx-auto">
+      <h2 className="text-5xl font-retro font-extrabold mb-16 text-center text-yellow-400 drop-shadow-[2px_2px_0_rgba(0,0,0,0.8)] tracking-widest">
+        🎮 Games on Starknet
+      </h2>
 
-      {/* Game Card 2 */}
-      <div className="bg-black bg-opacity-40 rounded-xl overflow-hidden hover:transform hover:scale-105 transition-transform">
-        <div className="h-64 bg-gradient-to-b from-blue-800 to-purple-700 relative">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-3xl font-bold">Snake & Ladders</div>
-          </div>
-        </div>
-        <div className="p-6">
-          <h3 className="text-xl font-semibold mb-2">
-            StarkSnakes & Ladders
-          </h3>
-          <p className="text-gray-300 mb-4">
-            Classic board game reimagined on Starknet. Roll the dice,
-            climb ladders, avoid snakes, and race to the finish line to
-            win tokens.
-          </p>
-          <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
-            Play Now
-          </button>
-        </div>
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        {[
+          {
+            title: 'StarkChess',
+            subtitle: '♟ Chess Masters',
+            description:
+              'Make your move as Black or White. Earn tokens when your team wins. Classic chess with a Starknet twist!',
+            bg: 'bg-gradient-to-br from-yellow-300 to-red-500',
+            btn: 'Play Now',
+          },
+          {
+            title: 'Snakes & Ladders',
+            subtitle: '🐍🎲 Classic Chaos',
+            description:
+              'Roll the dice, climb fast, dodge snakes! Board game mayhem meets on-chain rewards.',
+            bg: 'bg-gradient-to-br from-green-300 to-blue-500',
+            btn: 'Play Now',
+          },
+          {
+            title: 'Token Flip',
+            subtitle: '🪙 Double or Nothing',
+            description:
+              'Flip a token and let luck decide. Win 2x your STARK — fast, flashy, and fair!',
+            bg: 'bg-gradient-to-br from-pink-400 to-purple-600',
+            btn: 'Play Now',
+          },
+          {
+            title: 'Rock Paper Scissors',
+            subtitle: '✊🖐✌ RPS Showdown',
+            description:
+              'On-chain RPS battles! Pick a side and win with style. Fast hands, faster rewards.',
+            bg: 'bg-gradient-to-br from-indigo-400 to-green-400',
+            btn: 'Play Now',
+          },
+          {
+            title: 'Starknet Score',
+            subtitle: '⭐ Degen Stats',
+            description:
+              'Track your Starknet journey. Brag about your degen moves. Score high, stay fly.',
+            bg: 'bg-gradient-to-br from-yellow-400 to-orange-500',
+            btn: 'Check Score',
+          },
+          {
+            title: 'Dust Cleaner',
+            subtitle: '🧼 Clean It',
+            description:
+              'Turn small token dust into STARK. The cleanest way to earn something from nothing.',
+            bg: 'bg-gradient-to-br from-cyan-300 to-blue-400',
+            btn: 'Clean Wallet',
+          },
+        ].map((game, i) => (
+          <div
+            key={i}
+            className={`rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] border-4 border-black text-black ${game.bg} p-5 transition-transform duration-300 hover:scale-105 hover:rotate-[-1deg]`}
+          >
+            <div className="h-56 flex items-center justify-center text-3xl font-extrabold text-center">
+              {game.subtitle}
+            </div>
+            <div className="mt-4">
+              <h3 className="text-2xl font-bold mb-2">{game.title}</h3>
+              <p className="text-sm leading-relaxed mb-4">{game.description}</p>
+              <button
+  className="w-full text-white bg-red-600 py-2 rounded hover:bg-red-400 hover:text-black transition-all font-bold tracking-wide active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,0.8)] shadow-[4px_4px_0px_rgba(0,0,0,1)] border-2 border-black"
+>
+  {game.btn}
+</button>
 
-      {/* Game Card 3 */}
-      <div className="bg-black bg-opacity-40 rounded-xl overflow-hidden hover:transform hover:scale-105 transition-transform">
-        <div className="h-64 bg-gradient-to-b from-pink-800 to-red-700 relative">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-3xl font-bold">Token Flip</div>
+            </div>
           </div>
-        </div>
-        <div className="p-6">
-          <h3 className="text-xl font-semibold mb-2">
-            Double or Nothing
-          </h3>
-          <p className="text-gray-300 mb-4">
-            Flip the coin for a chance to win 2x your STARK tokens.
-            Simple, fast, and exciting with provably fair outcomes
-            on-chain.
-          </p>
-          <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
-            Play Now
-          </button>
-        </div>
+        ))}
       </div>
-
-      {/* Game Card 4 */}
-      <div className="bg-black bg-opacity-40 rounded-xl overflow-hidden hover:transform hover:scale-105 transition-transform">
-        <div className="h-64 bg-gradient-to-b from-green-800 to-blue-700 relative">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-3xl font-bold">Rock Paper Scissors</div>
-          </div>
-        </div>
-        <div className="p-6">
-          <h3 className="text-xl font-semibold mb-2">StarkRPS</h3>
-          <p className="text-gray-300 mb-4">
-            Challenge other players to Rock Paper Scissors on Starknet.
-            Choose your move, commit on-chain, and win STARK tokens.
-          </p>
-          <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
-            Play Now
-          </button>
-        </div>
-      </div>
-
-      {/* Game Card 5 */}
-      <div className="bg-black bg-opacity-40 rounded-xl overflow-hidden hover:transform hover:scale-105 transition-transform">
-        <div className="h-64 bg-gradient-to-b from-yellow-700 to-orange-600 relative">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-3xl font-bold">Starknet Score</div>
-          </div>
-        </div>
-        <div className="p-6">
-          <h3 className="text-xl font-semibold mb-2">Activity Score</h3>
-          <p className="text-gray-300 mb-4">
-            Show the world your degen side. View and share your Starknet
-            activity score based on your on-chain activity.
-          </p>
-          <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
-            Check Score
-          </button>
-        </div>
-      </div>
-
-      {/* Game Card 6 */}
-      <div className="bg-black bg-opacity-40 rounded-xl overflow-hidden hover:transform hover:scale-105 transition-transform">
-        <div className="h-64 bg-gradient-to-b from-blue-700 to-cyan-600 relative">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-3xl font-bold">Clean It</div>
-          </div>
-        </div>
-        <div className="p-6">
-          <h3 className="text-xl font-semibold mb-2">Dust Cleaner</h3>
-          <p className="text-gray-300 mb-4">
-            Clean up token dust in your wallet and convert small balances
-            into STARK tokens with this useful utility.
-          </p>
-          <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
-            Clean Wallet
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
   )
 }
 

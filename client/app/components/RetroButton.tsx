@@ -1,5 +1,5 @@
 import React from 'react';
-import '@fontsource/press-start-2p';
+
 
 interface RetroButtonProps {
   children: React.ReactNode;

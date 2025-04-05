@@ -1,5 +1,4 @@
 import React from "react";
-import "@fontsource/press-start-2p";
 import RetroButton from "../RetroButton";
 
 const Hero = () => {
@@ -178,8 +177,8 @@ const Hero = () => {
       {/* Main Content */}
       <div className="relative z-10">
         <h1
-          className="text-4xl md:text-6xl font-bold mb-6"
-          style={{ fontFamily: '"Press Start 2P", cursive' }}
+          className="text-4xl md:text-6xl font-bold mb-6 font-silk"
+        //   style={{ fontFamily: '"Press Start 2P", cursive' }}
         >
           STARKNET ARCADE
         </h1>
