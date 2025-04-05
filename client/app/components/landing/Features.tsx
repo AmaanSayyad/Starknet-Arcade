@@ -56,7 +56,7 @@ const Features = () => {
         ].map((feature, idx) => (
           <div
             key={idx}
-            className={`text-center p-6 border-4 border-black bg-[#1a1a1a] shadow-[6px_6px_0_rgba(0,0,0,1)] transition-transform hover:translate-y-1 hover:shadow-[2px_2px_0_rgba(0,0,0,1)]`}
+            className={`text-center p-6 border-4 border-black bg-gradient-to-r from-purple-900 to-pink-900 bg-opacity-30 shadow-[6px_6px_0_rgba(0,0,0,1)] transition-transform hover:translate-y-1 hover:shadow-[2px_2px_0_rgba(0,0,0,1)]`}
           >
             <div
               className={`w-16 h-16 ${feature.color} border-2 border-black rounded-full flex items-center justify-center mx-auto mb-6`}
