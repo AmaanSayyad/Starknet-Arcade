@@ -4,18 +4,16 @@ const Features = () => {
   return (
     <section
       className="py-20 px-6 w-full mx-auto font-['Press_Start_2P,_sans-serif'] text-white"
-      style={{
-        background: 'radial-gradient(104.56% 104.56% at 50% 52.81%, rgba(0, 0, 0, 0) 0%, rgba(229, 4, 152, 0.2) 100%)',
-      }}
+     
     >
-      <h2 className="text-3xl md:text-4xl font-bold mb-16 font-silk text-center text-yellow-400 drop-shadow-[4px_4px_0_rgba(0,0,0,1)]">
+      <h2 className="text-3xl md:text-4xl font-bold mb-16 font-techno text-center text-white ">
         Why Play on Starknet Arcade?
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
         {[
           {
-            color: 'bg-purple-600',
+            color: 'bg-gray-800',
             title: 'Fast & Low Fees',
             desc: `Enjoy lightning-fast transactions with minimal gas fees on Starknet's Layer 2.`,
             icon: (
@@ -28,7 +26,7 @@ const Features = () => {
             ),
           },
           {
-            color: 'bg-pink-600',
+            color: 'bg-gray-700',
             title: 'Secure Gaming',
             desc: `All games are provably fair and verified on-chain using ZK tech.`,
             icon: (
@@ -41,7 +39,7 @@ const Features = () => {
             ),
           },
           {
-            color: 'bg-blue-600',
+            color: 'bg-gray-600',
             title: 'Win Tokens',
             desc: `Earn STARK tokens by completing challenges and climbing the leaderboard.`,
             icon: (
@@ -56,14 +54,14 @@ const Features = () => {
         ].map((feature, idx) => (
           <div
             key={idx}
-            className={`text-center p-6 border-4 border-black bg-gradient-to-r from-purple-900 to-pink-900 bg-opacity-30 shadow-[6px_6px_0_rgba(0,0,0,1)] transition-transform hover:translate-y-1 hover:shadow-[2px_2px_0_rgba(0,0,0,1)]`}
+            className={`text-center p-6 border-4 border-black bg-gradient-to-br from-blue-900 to-violet-800 shadow-[6px_6px_0_rgba(0,0,0,1)] transition-transform hover:translate-y-1 hover:shadow-[2px_2px_0_rgba(0,0,0,1)]`}
           >
             <div
               className={`w-16 h-16 ${feature.color} border-2 border-black rounded-full flex items-center justify-center mx-auto mb-6`}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-8 w-8 text-white"
+                className="h-8 w-8 text-yellow-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -71,8 +69,8 @@ const Features = () => {
                 {feature.icon}
               </svg>
             </div>
-            <h3 className="text-lg mb-4 text-red-300 font-techno">{feature.title}</h3>
-            <p className="text-sm text-gray-300 leading-relaxed font-techno">
+            <h3 className="text-lg mb-4 text-red-300 font-mono">{feature.title}</h3>
+            <p className="text-sm text-gray-300 leading-relaxed font-mono">
               {feature.desc}
             </p>
           </div>

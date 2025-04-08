@@ -1,7 +1,6 @@
 "use client";
 import "./globals.css";
 import StarknetProvider from "./components/StarknetProvider";
-import { Navbar } from "./components/Navbar";
 import { useEffect } from "react";
 import { LotteryProvider } from "./contexts/LotteryContext";
 import Head from "next/head";
@@ -31,10 +30,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Exo:wght@400;700&display=swap" rel="stylesheet"/>
       </Head>
-      <body className="min-h-screen bg-[#070005]">
+      <body className="min-h-screen ">
         <StarknetProvider>
           <LotteryProvider>
-            <Navbar />
             <main className="w-full">{children}</main>
           </LotteryProvider>
         </StarknetProvider>

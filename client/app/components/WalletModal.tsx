@@ -30,50 +30,21 @@ const walletIcons = {
 export function WalletModal({ isOpen, setIsOpen }: WalletModalProps) {
   const { fetchProfile } = useLottery();
   const { connectors, connectAsync } = useConnect();
-  const [selectedConnector, setSelectedConnector] = useState<Connector | null>(
-    null
-  );
+  const [selectedConnector, setSelectedConnector] = useState<Connector | null>(null);
 
   const getWalletDetails = (connector: Connector): WalletDetails => {
-    if (connector.id === "webwallet") {
-      return {
-        name: "Argent",
-        subtext: "MOBILE",
-        icon: walletIcons.webwallet,
-      };
-    }
-
     switch (connector.id) {
       case "argentX":
-        return {
-          name: "Argent",
-          subtext: "WEBSITE",
-          icon: walletIcons.argentX,
-        };
+        return { name: "Argent", subtext: "WEBSITE", icon: walletIcons.argentX };
       case "braavos":
-        return {
-          name: "Braavos",
-          subtext: "WEBSITE",
-          icon: walletIcons.braavos,
-        };
+        return { name: "Braavos", subtext: "WEBSITE", icon: walletIcons.braavos };
       case "argentMobile":
-        return {
-          name: "Argent",
-          subtext: "MOBILE",
-          icon: walletIcons.argentMobile,
-        };
+        return { name: "Argent", subtext: "MOBILE", icon: walletIcons.argentMobile };
+      case "webwallet":
       case "argentWebWallet":
-        return {
-          name: "Argent Web Wallet",
-          subtext: "WEBSITE",
-          icon: walletIcons.webwallet,
-        };
+        return { name: "Argent Web Wallet", subtext: "WEBSITE", icon: walletIcons.webwallet };
       default:
-        return {
-          name: connector.id,
-          subtext: "WEBSITE",
-          icon: walletIcons.argentX,
-        };
+        return { name: connector.id, subtext: "WEBSITE", icon: walletIcons.argentX };
     }
   };
 
@@ -103,7 +74,7 @@ export function WalletModal({ isOpen, setIsOpen }: WalletModalProps) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/60" />
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -117,26 +88,25 @@ export function WalletModal({ isOpen, setIsOpen }: WalletModalProps) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-sm transform rounded-none bg-[#F4F4D4] border-[4px] border-[#483D8B] p-4 shadow-[0_0_10px_#000] transition-all font-techno">
+              <Dialog.Panel className="w-full max-w-sm transform rounded-xl bg-[#1a1a1a] border-2 border-gray-400 p-6 shadow-[0_0_25px_#000] transition-all font-techno text-white">
 
-                <div className="flex relative justify-center mt-2 text-center items-center mb-4">
-                <span className="animate-pulse text-[#FF00FF] font-techno">
-  Select Wallet
-</span>
-
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-lg font-bold text-gray-border-gray-400 tracking-wider animate-pulse">
+                    Select Wallet
+                  </h2>
                   <button
                     onClick={handleClose}
-                    className="text-[#9370DB] hover:text-[#483D8B] absolute right-2 transition-colors"
+                    className="text-gray-700 hover:text-gray-border-gray-400 transition"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <p className="text-[#483D8B] text-sm my-4 text-center">
-                  Choose a wallet you want to connect
+                <p className="text-sm text-[#cccccc] text-center mb-6">
+                  Choose a wallet to connect with Starknet
                 </p>
 
-                <div className="space-y-4 flex justify-center items-center flex-col mb-4">
+                <div className="space-y-4">
                   {connectors.map((connector) => {
                     const walletDetails = getWalletDetails(connector);
                     const isSelected = selectedConnector?.id === connector.id;
@@ -145,35 +115,31 @@ export function WalletModal({ isOpen, setIsOpen }: WalletModalProps) {
                       <button
                         key={connector.id}
                         onClick={() => connectWallet(connector)}
-                        className={`w-full flex items-center justify-between p-3 rounded-none border-[3px] font-techno tracking-wider
-                          ${
-                            isSelected ? "bg-[#00FF00] text-black" : "bg-[#FAF089] text-[#483D8B]"
-                          }
-                          hover:bg-[#FF0080] hover:text-white transition-all`}
+                        className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all
+                          ${isSelected ? "bg-[#00FF00] text-black" : "bg-[#222] border-gray-700 text-white hover:bg-gray-border-gray-400 hover:text-white"}`}
                       >
-                        <div className="flex justify-center mx-auto items-center gap-2">
-                          <div className="relative w-6 h-6">
-                            <Image
-                              src={walletDetails.icon}
-                              alt={walletDetails.name}
-                              width={24}
-                              height={24}
-                              className="rounded-full"
-                            />
-                          </div>
-                          <div className="flex flex-col items-start">
-                            <span className="text-[#483D8B] text-sm font-medium">
+                        <div className="flex items-center gap-3">
+                          <Image
+                            src={walletDetails.icon}
+                            alt={walletDetails.name}
+                            width={28}
+                            height={28}
+                            className="rounded-full"
+                          />
+                          <div className="text-left">
+                            <p className="text-sm font-medium">
                               {walletDetails.name}
-                            </span>
-                            <span className="text-xs text-[#9370DB]">
+                            </p>
+                            <p className="text-xs text-[#aaaaaa]">
                               {walletDetails.subtext}
-                            </span>
+                            </p>
                           </div>
                         </div>
                       </button>
                     );
                   })}
                 </div>
+
               </Dialog.Panel>
             </Transition.Child>
           </div>
