@@ -2,8 +2,6 @@
 
 import { useAccount } from "@starknet-react/core";
 import { MoreVertical } from "lucide-react";
-import Image from "next/image";
-import userIcon from "../../public/user.png";
 import DisconnectModal from "./disconnect-modal";
 
 import { useState } from "react";
