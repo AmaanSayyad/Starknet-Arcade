@@ -101,7 +101,7 @@ export function LotteryProvider({ children }: { children: React.ReactNode }) {
         provider
       ).typedv2(LotteryABI);
       const details = await lotteryContract.get_lottery_details();
-      console.log(details);
+
 
       const participants = details[1].map((participant: bigint) =>
         convertToStarknetAddress(participant)

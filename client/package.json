@@ -27,8 +27,11 @@
     "puppeteer": "^23.11.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "starknet": "^6.11.0",
-    "starknetkit": "^2.6.1"
+    "starknetkit": "^2.6.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
