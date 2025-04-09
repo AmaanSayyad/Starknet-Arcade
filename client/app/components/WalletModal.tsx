@@ -5,7 +5,7 @@ import { Fragment, useState } from "react";
 import { useConnect, Connector } from "@starknet-react/core";
 import { X } from "lucide-react";
 import Image from "next/image";
-import { useLottery } from "../contexts/LotteryContext";
+import { useLottery } from "../contexts/GameContext";
 
 interface WalletModalProps {
   isOpen: boolean;

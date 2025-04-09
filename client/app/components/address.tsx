@@ -5,7 +5,7 @@ import { MoreVertical } from "lucide-react";
 import DisconnectModal from "./disconnect-modal";
 
 import { useState } from "react";
-import { useLottery } from "../contexts/LotteryContext";
+import { useLottery } from "../contexts/GameContext";
 import Image from "next/image";
 
 interface AddressProps {

@@ -15,7 +15,7 @@ export type LotteryDetails = {
   state: LotteryState;
 };
 
-export interface LotteryContextType {
+export interface GameContextType {
   lotteries: LotteryDetails[];
   loading: boolean;
   filteredLotteries: LotteryDetails[];
@@ -24,27 +24,13 @@ export interface LotteryContextType {
   profile: Profile | null;
   setActiveSection: (section: LotterySection) => void;
   setMyLotteryType: (type: MyLotteryType) => void;
-  fetchProfile: () => Promise<void>;
-  createProfile: (
-    username: string,
-    profilePicture: string,
-    bio: string
+  declareRPSResult: (id: number, winner_address: string) => Promise<void>;
+  playRPSRound: (
+    id: number,
+    round: number,
+    player_move: number
   ) => Promise<void>;
-  createLottery: (
-    token: string,
-    participantFees: string,
-    minimumParticipants: string
-  ) => Promise<void>;
-  enrollInLottery: (
-    lotteryAddress: string,
-    participantFees: string,
-    token: string
-  ) => Promise<void>;
-  unenrollFromLottery: (lotteryAddress: string) => Promise<void>;
-  selectWinner: (lotteryAddress: string) => Promise<void>;
-  withdrawOracleFees: (lotteryAddress: string) => Promise<void>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  refreshLotteries: () => Promise<any[]>;
+  joinRPSGame: (_amount: string, rounds: number) => Promise<void>;
 }
 
 export type Profile = {

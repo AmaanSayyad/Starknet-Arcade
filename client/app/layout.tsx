@@ -2,7 +2,7 @@
 import "./globals.css";
 import StarknetProvider from "./components/StarknetProvider";
 import { useEffect } from "react";
-import { LotteryProvider } from "./contexts/LotteryContext";
+import { LotteryProvider } from "./contexts/GameContext";
 import Head from "next/head";
 import '@fontsource/press-start-2p';
 import '@fontsource/orbitron'; // Optional weights: /400.css, /700.css

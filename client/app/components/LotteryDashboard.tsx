@@ -14,7 +14,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { LotteryDetails, LotteryState } from "../types";
-import { useLottery } from "../contexts/LotteryContext";
+import { useLottery } from "../contexts/GameContext";
 import Loader from "./Loader";
 import { voyagerScanBaseUrl } from "../constants";
 import Image from "next/image";

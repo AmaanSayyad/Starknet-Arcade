@@ -6,7 +6,7 @@ import eth from "../public/eth.svg";
 import usdc from "../public/usdc.svg";
 import usdt from "../public/usdt.svg";
 
-export const LOTTERY_FACTORY_ADDRESS =
+export const RPS_ADDRESS =
   "0x02f5814a6a3c29855972b58ae15f7ba2afa86ceb69a1f992a371e299402ca0d3";
 export const ETH_TOKEN_ADDRESS =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
@@ -22,9 +22,9 @@ export const provider = new RpcProvider({
   nodeUrl: "https://starknet-sepolia.public.blastapi.io",
 });
 
-export const factory_contract = new Contract(
+export const rps_contract = new Contract(
   FactoryABI,
-  LOTTERY_FACTORY_ADDRESS,
+  RPS_ADDRESS,
   provider
 ).typedv2(FactoryABI);
 
