@@ -52,7 +52,7 @@ export default function CoinFlipGame() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+    <div className="flex flex-col items-center justify-center  h-full p-4">
       {/* Background grid */}
       <div className="absolute inset-0 bg-gradient-to-br from-black to-gray-900 opacity-80">
         <div
@@ -112,7 +112,7 @@ export default function CoinFlipGame() {
         }
       `}</style>
 
-      <div className="bg-gradient-to-br from-black via-gray-500 to-gray-900 rounded-xl shadow-lg p-6 w-full max-w-md border border-gray-700 relative z-10">
+      <div className="bg-gradient-to-br from-black via-gray-500 to-gray-900 rounded-xl shadow-lg p-6 w-full max-w-md border border-gray-700 relative z-10 mt-24">
         <h1 className="text-2xl font-techno font-bold text-center mb-6 text-white">
           StarkNet vs Reclaim
         </h1>
