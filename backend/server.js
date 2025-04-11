@@ -42,21 +42,21 @@ io.on("connection", (socket) => {
   socket.on("choice", ({ username, choice, roomId }) => {
     const room = rooms[roomId];
     if (!room) return;
-
+  
     room.choices[username] = choice;
-
-    // Wait for both players
+  
     if (Object.keys(room.choices).length === 2) {
       const [p1, p2] = room.players.map((p) => p.username);
       const c1 = room.choices[p1];
       const c2 = room.choices[p2];
-
+  
       const result = determineResult(p1, c1, p2, c2);
       if (result === "draw") {
         io.to(roomId).emit("roundResult", {
           result: `It's a draw! Both chose ${c1}.`,
           round: room.round,
           score: room.score,
+          choices: { [p1]: c1, [p2]: c2 }, // send both choices
         });
       } else {
         const winner = result;
@@ -65,12 +65,12 @@ io.on("connection", (socket) => {
           result: `${winner} wins the round!`,
           round: room.round,
           score: room.score,
+          choices: { [p1]: c1, [p2]: c2 }, // send both choices
         });
-
-        // First to 5 wins
+  
         if (room.score[winner] === 5) {
           io.to(roomId).emit("gameWinner", { winner });
-          // Reset everything
+          // Reset game state
           room.choices = {};
           room.score = {};
           room.round = 1;
@@ -80,11 +80,12 @@ io.on("connection", (socket) => {
           return;
         }
       }
-
+  
       room.choices = {};
       room.round++;
     }
   });
+  
 
   socket.on("disconnect", () => {
     console.log("A user disconnected");
