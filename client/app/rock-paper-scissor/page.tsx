@@ -1,68 +1,346 @@
-import React from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
+import { v4 as uuidv4 } from "uuid";
+import Paper from "../components/rock-paper-scissor-components/paper";
+import Scissors from "../components/rock-paper-scissor-components/scissors";
+import Rock from "../components/rock-paper-scissor-components/rock";
+import {toast} from "react-hot-toast";
+const socket = io("http://localhost:4000");
 
-const RockPaperScissor = () => {
+interface Player {
+  username: string;
+}
+
+export default function Home() {
+  const [username, setUsername] = useState("");
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [joined, setJoined] = useState(false);
+  const [roomId, setRoomId] = useState("");
+  const [choice, setChoice] = useState("");
+  const [roundResult, setRoundResult] = useState("");
+  const [gameWinner, setGameWinner] = useState("");
+  const [round, setRound] = useState(1);
+  const [score, setScore] = useState<{ [key: string]: number }>({});
+  const [opponentChoice, setOpponentChoice] = useState("");
+
+  useEffect(() => {
+    const storedName = localStorage.getItem("username");
+    if (storedName) setUsername(storedName);
+
+    const params = new URLSearchParams(window.location.search);
+    const room = params.get("room");
+    if (room) setRoomId(room);
+  }, []);
+
+  useEffect(() => {
+    socket.on("players", (updatedPlayers: Player[]) => {
+      setPlayers(updatedPlayers);
+    });
+
+    socket.on(
+      "roundResult",
+      (data: {
+        result: string;
+        round: number;
+        score: any;
+        choices: { [key: string]: string };
+      }) => {
+        setRoundResult(data.result);
+        setScore(data.score);
+
+        // Identify opponent
+        const opponent = Object.keys(data.choices).find(
+          (name) => name !== username
+        );
+        if (opponent) {
+          setOpponentChoice(data.choices[opponent]);
+        }
+
+        setTimeout(() => {
+          setRound(data.round);
+          setRoundResult("");
+          setChoice("");
+          setOpponentChoice("");
+        }, 4000);
+      }
+    );
+    socket.on("gameWinner", (data: { winner: string }) => {
+      setGameWinner(data.winner);
+    });
+
+    return () => {
+      socket.off("players");
+      socket.off("roundResult");
+      socket.off("gameWinner");
+    };
+  }, []);
+
+  const handleCreateRoom = () => {
+    const newRoomId = uuidv4().split("-")[0];
+    setRoomId(newRoomId);
+    window.history.replaceState(null, "", `?room=${newRoomId}`);
+  };
+
+  const handleJoin = () => {
+    if (!username || !roomId) return;
+    localStorage.setItem("username", username);
+    socket.emit("join", { username, roomId });
+    setJoined(true);
+  };
+
+  const makeChoice = (value: string) => {
+    if (choice || gameWinner) return;
+    setChoice(value);
+    socket.emit("choice", { username, choice: value, roomId });
+  };
+
+  const resetGame = () => {
+    setChoice("");
+    setRoundResult("");
+    setGameWinner("");
+    setRound(1);
+    setScore({});
+  };
+
   return (
     <>
-      <form>
-        <input type="radio" id="rock-rock" name="rock-paper-scissors" />
-        <input type="radio" id="rock-paper" name="rock-paper-scissors" />
-        <input type="radio" id="rock-scissors" name="rock-paper-scissors" />
-        <input type="radio" id="paper-rock" name="rock-paper-scissors" />
-        <input type="radio" id="paper-paper" name="rock-paper-scissors" />
-        <input type="radio" id="paper-scissors" name="rock-paper-scissors" />
-        <input type="radio" id="scissors-rock" name="rock-paper-scissors" />
-        <input type="radio" id="scissors-paper" name="rock-paper-scissors" />
-        <input type="radio" id="scissors-scissors" name="rock-paper-scissors" />
-        <div>
-          <h1>CSS Rock-Paper-Scissors</h1>
-          <div id="hands">
-            <div className="hand" id="computer-hand">
-              <div className="fist"></div>
-              <div className="finger finger-1"></div>
-              <div className="finger finger-2"></div>
-              <div className="finger finger-3"></div>
-              <div className="finger finger-4"></div>
-              <div className="thumb"></div>
-              <div className="arm"></div>
-            </div>
+      <main className="flex flex-col font-techno mt-10 items-center justify-center min-h-screen bg-transparent text-white px-4">
+        <h1 className="text-4xl font-extrabold mt-1">RPS Multiplayer</h1>
 
-            <div className="hand" id="user-hand">
-              <div className="fist"></div>
-              <div className="finger finger-1"></div>
-              <div className="finger finger-2"></div>
-              <div className="finger finger-3"></div>
-              <div className="finger finger-4"></div>
-              <div className="thumb"></div>
-              <div className="arm"></div>
-            </div>
+        {!roomId && (
+          <button
+            onClick={handleCreateRoom}
+            className="mb-6 px-6 py-2 mt-8 bg-indigo-600 hover:bg-indigo-700 rounded text-lg"
+          >
+            Create Game Room
+          </button>
+        )}
 
-            <div id="icons">
-              <div>
-                <label htmlFor="rock-rock">✊</label>
-                <label htmlFor="paper-rock">✊</label>
-                <label htmlFor="scissors-rock">✊</label>
-              </div>
-              <div>
-                <label htmlFor="rock-paper">🖐️</label>
-                <label htmlFor="paper-paper">🖐️</label>
-                <label htmlFor="scissors-paper">🖐️</label>
-              </div>
-              <div>
-                <label htmlFor="rock-scissors">✌</label>
-                <label htmlFor="paper-scissors">✌</label>
-                <label htmlFor="scissors-scissors">✌</label>
-              </div>
-            </div>
+        {roomId && !joined && (
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-sm text-gray-400">
+              Room ID: <code className="text-green-400">{roomId}</code>
+            </p>
+            <input
+              type="text"
+              className="p-2 bg-gray-800 border border-gray-700 rounded text-white"
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <button
+              onClick={handleJoin}
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+            >
+              Join Room
+            </button>
           </div>
-        </div>
+        )}
 
-        <div id="message">
-          <h2></h2>
-          <input type="reset" value="Refresh Round" />
-        </div>
-      </form>
+        {joined && (
+          <div className="mt-6 w-full h-[90vh] p-6 rounded-lg  grid grid-cols-2 overflow-hidden">
+            <div className="flex flex-col p-6 rounded-lg shadow-lg">
+              <p className="text-md mb-2 text-gray-300">
+                You: <strong className="text-blue-400">{username}</strong>
+              </p>
+              <p className="mb-2 text-sm text-gray-400 mt-4">
+                Share this URL to invite your friend:
+              </p>
+              <div className="bg-gray-800 p-3 mt-4 rounded-lg mb-4 text-sm flex items-center justify-between">
+                <span className="break-all text-xs text-gray-300">
+                  {window.location.href}
+                </span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success("Link copied to clipboard!");
+                  }}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
+                >
+                  {
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 16v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-8a2 2 0 012-2h2m8 0h4a2 2 0 012 2v4m-6-6l6 6M8 8l8 8"
+                      />
+                    </svg>
+                  }
+                </button>
+              </div>
+
+              <p className="text-md mt-4 font-semibold mb-2 text-gray-200">
+                Players:
+              </p>
+              <ul className="mb-4 list-none pl-0 text-gray-300">
+                {players.map((p,i) => (
+                  <li
+                    key={p.username}
+                    className="py-1 px-2  rounded mb-2"
+                  >
+                    {i+1}.{p.username}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-4">
+                <p className="font-semibold text-white mb-2">Scoreboard:</p>
+                <table className="table-auto border-collapse border border-gray-700 text-sm text-gray-300 w-full">
+                  <thead>
+                    <tr className="bg-gray-800">
+                      <th className="border border-gray-700 px-4 py-2">
+                        Player
+                      </th>
+                      <th className="border border-gray-700 px-4 py-2">
+                        Score
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(score).map(([name, s]) => (
+                      <tr key={name} className="hover:bg-gray-700">
+                        <td className="border border-gray-700 px-4 py-2 text-center">
+                          {name}
+                        </td>
+                        <td className="border border-gray-700 px-4 py-2 text-center">
+                          {s}
+                        </td>
+                      </tr>
+                    ))}
+                    <tr>
+                      <td className="border border-gray-700 px-4 py-2 text-center text-red-500 font-semibold">
+                        Round
+                      </td>
+                      <td className="border border-gray-700 px-4 py-2 text-center text-red-500 font-semibold">
+                        {round}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="mt-10">
+              {players.length === 2 && !gameWinner && (
+                <>
+                  <p className="text-lg font-semibold text-center">
+                    Round {round}: Make your choice
+                  </p>
+
+                  <div className="mt-4">
+                    {choice ? (
+                      <>
+                        <div className="flex flex-col items-center justify-center h-full mt-10">
+                          <table className="table-auto border-collapse border border-gray-700 text-sm text-gray-300 w-full max-w-md">
+                          <thead>
+                            <tr className="bg-gray-800">
+                            <th className="border border-gray-700 px-4 py-2 text-center">
+                              You Picked
+                            </th>
+                            <th className="border border-gray-700 px-4 py-2 text-center">
+                              Opponent Picked
+                            </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                            <td className="border border-gray-700 px-4 py-2 text-center">
+                              {choice === "rock" && <Rock />}
+                              {choice === "paper" && <Paper />}
+                              {choice === "scissors" && <Scissors />}
+                              {roundResult === "win" && (
+                              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+                                <div className="w-16 h-16 border-4 border-white rounded-full"></div>
+                              </div>
+                              )}
+                            </td>
+                            <td className="border border-gray-700 px-4 py-2 text-center">
+                              {opponentChoice ? (
+                              <>
+                                {opponentChoice === "rock" && <Rock />}
+                                {opponentChoice === "paper" && <Paper />}
+                                {opponentChoice === "scissors" && <Scissors />}
+                              </>
+                              ) : (
+                              <p className="text-yellow-400">
+                                Waiting for opponent's choice...
+                              </p>
+                              )}
+                              {roundResult === "lose" && (
+                              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+                                <div className="w-16 h-16 border-4 border-white rounded-full"></div>
+                              </div>
+                              )}
+                            </td>
+                            </tr>
+                          </tbody>
+                          </table>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="flex flex-row mt-32 scale-90 sm:scale-125">
+                          <div
+                            onClick={() => makeChoice("paper")}
+                            className="absolute z-10 -mx-48 -my-12 transition hover:scale-125 duration-300 cursor-pointer"
+                          >
+                            <Paper />
+                          </div>
+                          <div
+                            onClick={() => makeChoice("scissors")}
+                            className="absolute z-10 mx-8 -my-12 transition hover:scale-125 duration-300 cursor-pointer"
+                          >
+                            <Scissors />
+                          </div>
+                          <div
+                            onClick={() => makeChoice("rock")}
+                            className="absolute z-10 -mx-20 my-32 transition hover:scale-125 duration-300 cursor-pointer"
+                          >
+                            <Rock />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {roundResult && (
+                    <p className="text-yellow-400 mt-4 text-center">{roundResult}</p>
+                  )}
+                </>
+              )}
+            </div>
+
+            {gameWinner && (
+              <div className="mt-4 text-center">
+                <p className="text-xl font-bold text-green-400 animate-pulse">
+                  🎉 {gameWinner} wins the game!
+                </p>
+                <button
+                  onClick={resetGame}
+                  className="mt-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded"
+                >
+                  Play Again
+                </button>
+              </div>
+            )}
+
+            {players.length < 2 && (
+              <p className="text-yellow-400 font-semibold">
+                Waiting for another player...
+              </p>
+            )}
+          </div>
+        )}
+      </main>
     </>
   );
-};
-
-export default RockPaperScissor;
+}

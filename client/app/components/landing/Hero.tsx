@@ -1,16 +1,10 @@
 import React from "react";
-// import RetroButton from "../RetroButton";
-import { Navbar } from "../Navbar";
 import FigmaCardsStack from "./GameCard";
 
 const Hero = () => {
   return (
     <section className="w-screen">
       <div className=" text-white flex flex-col  overflow-hidden ">
-    
-
-        <Navbar />
-
         {/* Main Content */}
         <main className="relative z-10 px-6 py-8">
           {/* Floating game items */}
