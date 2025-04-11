@@ -7,6 +7,7 @@ import Head from "next/head";
 import '@fontsource/press-start-2p';
 import '@fontsource/orbitron'; // Optional weights: /400.css, /700.css
 import '@fontsource/silkscreen'; 
+import { Navbar } from "./components/Navbar";
 
 export default function RootLayout({
   children,
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body className="min-h-screen ">
         <StarknetProvider>
           <LotteryProvider>
+          <Navbar />
             <main className="w-full">{children}</main>
           </LotteryProvider>
         </StarknetProvider>
