@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export type FetchedLottery = {
   token: bigint;
   participation_fee: bigint;
@@ -45,7 +47,7 @@ export interface LotteryContextType {
   withdrawOracleFees: (lotteryAddress: string) => Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   refreshLotteries: () => Promise<any[]>;
-  flipCoin : () => Promise<void>;
+  flipCoin: () => Promise<void>;
 }
 
 export type Profile = {
@@ -72,3 +74,48 @@ export enum LotteryState {
 
 export type LotterySection = "active" | "past" | "my";
 export type MyLotteryType = "enrolled" | "created";
+
+// Enum matching the contract's FlipState
+export enum FlipState {
+  Idle = 0,
+  Flipping = 1,
+  Complete = 2,
+}
+
+// Enum matching the contract's FlipChoice
+export enum FlipChoice {
+  Tails = 0,
+  Heads = 1,
+}
+
+// Interface for FlipDetails structure returned from the contract
+export interface FlipDetails {
+  player: string;
+  amount: bigint;
+  choice: FlipChoice;
+  result: FlipChoice | null;
+  state: FlipState;
+  request_id: bigint;
+}
+
+// Contract interaction status types
+export type Status = "idle" | "loading" | "success" | "error";
+
+// Context interface to define what the context will provide
+export interface CoinFlipContextValue {
+  // Core functionality
+  flipCoin: (choice: FlipChoice, amount: string) => Promise<void>;
+  getFlipDetails: (requestId: bigint) => Promise<FlipDetails | undefined>;
+  getContractBalance: (tokenAddress: string) => Promise<bigint | undefined>;
+
+  // State management
+  status: Status;
+  error: string | null;
+  currentFlip: FlipDetails | null;
+  setCurrentFlip: (flip: FlipDetails | null) => void;
+}
+
+export interface CoinFlipProviderProps {
+  children: ReactNode;
+  initialContractAddress?: string;
+}

@@ -2,14 +2,15 @@
 import "./globals.css";
 import StarknetProvider from "./components/StarknetProvider";
 import { useEffect } from "react";
-import { LotteryProvider } from "./contexts/LotteryContext";
+// import { LotteryProvider } from "./contexts/LotteryContext";
 import Head from "next/head";
 
-import '@fontsource/press-start-2p';
-import '@fontsource/orbitron'; // Optional weights: /400.css, /700.css
-import '@fontsource/silkscreen'; 
+import "@fontsource/press-start-2p";
+import "@fontsource/orbitron"; // Optional weights: /400.css, /700.css
+import "@fontsource/silkscreen";
 import { Toaster } from "react-hot-toast";
 import { Navbar } from "./components/Navbar";
+import { CoinFlipProvider } from "./contexts/CoinFlipContext";
 export default function RootLayout({
   children,
 }: {
@@ -43,10 +44,10 @@ export default function RootLayout({
       </Head>
       <body className="min-h-screen ">
         <StarknetProvider>
-          <LotteryProvider>
-          <Navbar />
+          <CoinFlipProvider>
+            <Navbar />
             <main className="w-full">{children}</main>
-          </LotteryProvider>
+          </CoinFlipProvider>
         </StarknetProvider>
         <Toaster />
       </body>

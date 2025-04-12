@@ -5,7 +5,7 @@ import { Fragment, useState } from "react";
 import { useConnect, Connector } from "@starknet-react/core";
 import { X } from "lucide-react";
 import Image from "next/image";
-import { useLottery } from "../contexts/LotteryContext";
+// import { useLottery } from "../contexts/LotteryContext";
 
 interface WalletModalProps {
   isOpen: boolean;
@@ -28,30 +28,52 @@ const walletIcons = {
 } as const;
 
 export function WalletModal({ isOpen, setIsOpen }: WalletModalProps) {
-  const { fetchProfile } = useLottery();
+  // const { fetchProfile } = useLottery();
   const { connectors, connectAsync } = useConnect();
-  const [selectedConnector, setSelectedConnector] = useState<Connector | null>(null);
+  const [selectedConnector, setSelectedConnector] = useState<Connector | null>(
+    null
+  );
 
   const getWalletDetails = (connector: Connector): WalletDetails => {
     switch (connector.id) {
       case "argentX":
-        return { name: "Argent", subtext: "WEBSITE", icon: walletIcons.argentX };
+        return {
+          name: "Argent",
+          subtext: "WEBSITE",
+          icon: walletIcons.argentX,
+        };
       case "braavos":
-        return { name: "Braavos", subtext: "WEBSITE", icon: walletIcons.braavos };
+        return {
+          name: "Braavos",
+          subtext: "WEBSITE",
+          icon: walletIcons.braavos,
+        };
       case "argentMobile":
-        return { name: "Argent", subtext: "MOBILE", icon: walletIcons.argentMobile };
+        return {
+          name: "Argent",
+          subtext: "MOBILE",
+          icon: walletIcons.argentMobile,
+        };
       case "webwallet":
       case "argentWebWallet":
-        return { name: "Argent Web Wallet", subtext: "WEBSITE", icon: walletIcons.webwallet };
+        return {
+          name: "Argent Web Wallet",
+          subtext: "WEBSITE",
+          icon: walletIcons.webwallet,
+        };
       default:
-        return { name: connector.id, subtext: "WEBSITE", icon: walletIcons.argentX };
+        return {
+          name: connector.id,
+          subtext: "WEBSITE",
+          icon: walletIcons.argentX,
+        };
     }
   };
 
   const connectWallet = async (connector: Connector | null) => {
     if (connector) {
       await connectAsync({ connector });
-      await fetchProfile();
+      // await fetchProfile();
       setSelectedConnector(connector);
       setIsOpen(false);
     }
@@ -89,7 +111,6 @@ export function WalletModal({ isOpen, setIsOpen }: WalletModalProps) {
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="w-full max-w-sm transform rounded-xl bg-[#1a1a1a] border-2 border-gray-400 p-6 shadow-[0_0_25px_#000] transition-all font-techno text-white">
-
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-lg font-bold text-gray-border-gray-400 tracking-wider animate-pulse">
                     Select Wallet
@@ -116,7 +137,11 @@ export function WalletModal({ isOpen, setIsOpen }: WalletModalProps) {
                         key={connector.id}
                         onClick={() => connectWallet(connector)}
                         className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all
-                          ${isSelected ? "bg-[#00FF00] text-black" : "bg-[#222] border-gray-700 text-white hover:bg-gray-border-gray-400 hover:text-white"}`}
+                          ${
+                            isSelected
+                              ? "bg-[#00FF00] text-black"
+                              : "bg-[#222] border-gray-700 text-white hover:bg-gray-border-gray-400 hover:text-white"
+                          }`}
                       >
                         <div className="flex items-center gap-3">
                           <Image
@@ -139,7 +164,6 @@ export function WalletModal({ isOpen, setIsOpen }: WalletModalProps) {
                     );
                   })}
                 </div>
-
               </Dialog.Panel>
             </Transition.Child>
           </div>
