@@ -115,7 +115,8 @@ mod CoinFlip {
         self.ownable.initializer(owner);
         self.token_address.write(token_address);
     }
-
+    //0-tails (starknet) // 1-heads (reclaim)
+    
     #[abi(embed_v0)]
     impl CoinFlip of super::ICoinFlip<ContractState> {
         fn flip_coin(ref self: ContractState, choice: FlipChoice, amount: u256) -> u64 {

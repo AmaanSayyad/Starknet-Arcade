@@ -1,0 +1,22 @@
+{
+  "name": "mult-snakes-and-ladders",
+  "version": "1.0.0",
+  "description": "",
+  "main": "game.js",
+  "ports": {
+    "start": 3001
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "http": "0.0.1-security",
+    "nodemon": "^3.1.9",
+    "socket.io": "^3.0.5"
+  }
+}

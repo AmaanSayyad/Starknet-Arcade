@@ -16,8 +16,11 @@ import {
   PRAGMA_VRF_FEES,
   CALLBACK_FEE_LIMIT,
   KNOWN_TOKENS,
+  COIN_FLIP_ADDRESS,
+  STRK_TOKEN_ADDRESS,
+  coin_flip_contract,
 } from "../constants";
-import { LotteryABI } from "../abi";
+import { LotteryABI, CoinFlipABI } from "../abi";
 import {
   LotteryDetails,
   LotterySection,
@@ -345,6 +348,34 @@ export function LotteryProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const flipCoin = async (choice: number, _amount: number) => {
+    try {
+      const amount = BigInt(_amount);
+      const multiCall = await account?.execute([
+        {
+          contractAddress: STRK_TOKEN_ADDRESS,
+          entrypoint: "approve",
+          calldata: CallData.compile({
+            spender: COIN_FLIP_ADDRESS,
+            amount: cairo.uint256(amount),
+          }),
+        },
+        {
+          contractAddress: COIN_FLIP_ADDRESS,
+          entrypoint: "flip_coin",
+          calldata: CallData.compile({
+            choice,
+            amount: cairo.uint256(amount),
+          }),
+        },
+      ]);
+      await provider.waitForTransaction(multiCall?.transaction_hash || "");
+    } catch (error) {
+      console.error("Error flipping the coin:", error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     if (activeSection === "active") {
       setFilteredLotteries(
@@ -404,6 +435,7 @@ export function LotteryProvider({ children }: { children: React.ReactNode }) {
     selectWinner,
     withdrawOracleFees,
     refreshLotteries: fetchLotteries,
+    flipCoin
   };
 
   return (
