@@ -1,11 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
-import { v4 as uuidv4 } from "uuid";
 import Paper from "../components/rock-paper-scissor-components/paper";
 import Scissors from "../components/rock-paper-scissor-components/scissors";
 import Rock from "../components/rock-paper-scissor-components/rock";
-import { toast } from "react-hot-toast";
 import CreateGameRoom, { GameTypes } from "../components/CreateGameRoom";
 const socket = io("http://localhost:4000");
 
@@ -75,20 +74,7 @@ export default function Home() {
     };
   }, [username]); // Added username to dependency array
 
-  const handleCreateRoom = () => {
-    const newRoomId = uuidv4().split("-")[0];
-    setRoomId(newRoomId);
-    window.history.replaceState(null, "", `?room=${newRoomId}`);
-  };
-
-  const handleJoin = () => {
-    if (!username || !roomId) return;
-    localStorage.setItem("username", username);
-    socket.emit("join", { username, roomId });
-    setJoined(true);
-  };
-
-  const handleRoomJoin = ({ username, roomId, joined }) => {
+  const handleRoomJoin = ({ username, roomId, joined }: { username: string; roomId: string; joined: boolean }) => {
     setUsername(username);
     setRoomId(roomId);
     setJoined(joined);
@@ -232,7 +218,7 @@ export default function Home() {
                                     renderChoice(playerChoices[getOpponentName()])
                                   ) : (
                                     <p className="text-yellow-400">
-                                      Waiting for opponent's choice...
+                                      Waiting for opponent&apos;s choice...
                                     </p>
                                   )}
                                   {roundResult === "lose" && (

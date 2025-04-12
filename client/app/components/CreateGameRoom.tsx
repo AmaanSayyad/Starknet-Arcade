@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // components/CreateGameRoom.jsx
 "use client";
 import { useState, useEffect } from "react";
@@ -11,13 +12,21 @@ export const GameTypes = {
   };
 
 
+interface CreateGameRoomProps {
+  onJoin?: (data: { username: string; roomId: string; joined: boolean }) => void;
+  gameType?: string;
+  socket: any;
+  buttonText?: string;
+  buttonClassName?: string;
+}
+
 const CreateGameRoom = ({ 
   onJoin, 
   gameType = GameTypes.RPS, 
   socket, 
   buttonText = "Create Game Room",
   buttonClassName = "px-6 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-lg text-white"
-}) => {
+}: CreateGameRoomProps) => {
   const [username, setUsername] = useState("");
   const [roomId, setRoomId] = useState("");
   const [joined, setJoined] = useState(false);
