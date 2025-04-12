@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import React from 'react'
 
 const Games = () => {
@@ -16,7 +17,8 @@ const Games = () => {
               'Make your move as Black or White. Earn tokens when your team wins. Classic chess with a Starknet twist!',
             bg: 'bg-gradient-to-br from-blue-400 to-blue-600',
             btn: 'Play Now',
-            rating: '4.8'
+            rating: '4.8',
+            url:"/chess",
             // You'll add your SVG here
           },
           {
@@ -26,7 +28,9 @@ const Games = () => {
               'Roll the dice, climb fast, dodge snakes! Board game mayhem meets on-chain rewards.',
             bg: 'bg-gradient-to-br from-green-400 to-blue-500',
             btn: 'Play Now',
-            rating: '4.6'
+            rating: '4.6',
+            url:"/snake-ladder",
+
             // You'll add your SVG here
           },
           {
@@ -36,7 +40,8 @@ const Games = () => {
               'Flip a token and let luck decide. Win 2x your STARK — fast, flashy, and fair!',
             bg: 'bg-gradient-to-br from-pink-400 to-purple-600',
             btn: 'Play Now',
-            rating: '4.9'
+            rating: '4.9',
+            url:"/coin-flip",
             // You'll add your SVG here
           },
           {
@@ -46,7 +51,8 @@ const Games = () => {
               'On-chain RPS battles! Pick a side and win with style. Fast hands, faster rewards.',
             bg: 'bg-gradient-to-br from-indigo-400 to-green-400',
             btn: 'Play Now',
-            rating: '4.5'
+            rating: '4.5',
+            url:"/rock-paper-scissor",
             // You'll add your SVG here
           },
           {
@@ -56,7 +62,8 @@ const Games = () => {
               'Track your Starknet journey. Brag about your degen moves. Score high, stay fly.',
             bg: 'bg-gradient-to-br from-blue-400 to-cyan-500',
             btn: 'Check Score',
-            rating: '4.7'
+            rating: '4.7',
+            url:"/score",
             // You'll add your SVG here
           },
           {
@@ -66,7 +73,8 @@ const Games = () => {
               'Turn small token dust into STARK. The cleanest way to earn something from nothing.',
             bg: 'bg-gradient-to-br from-blue-300 to-blue-500',
             btn: 'Clean Wallet',
-            rating: '4.4'
+            rating: '4.4',
+            url:"/dust-cleaner",
             // You'll add your SVG here
           },
         ].map((game, i) => (
@@ -96,8 +104,8 @@ const Games = () => {
 
             {/* CTA Button */}
             <div className="p-6">
-              <button className="w-full text-white bg-violet-600 py-3 rounded-xl hover:bg-purple-400 hover:text-black transition-all font-bold tracking-wide active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,0.8)] shadow-[4px_4px_0px_rgba(0,0,0,1)] border-2 border-black">
-                {game.btn}
+              <button  className="w-full text-white bg-violet-600 py-3 rounded-xl hover:bg-purple-400 hover:text-black transition-all font-bold tracking-wide active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,0.8)] shadow-[4px_4px_0px_rgba(0,0,0,1)] border-2 border-black">
+                <Link href={game.url}>{game.btn}</Link>
               </button>
             </div>
           </div>

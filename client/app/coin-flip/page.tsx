@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function CoinFlipGame() {
   const [isFlipping, setIsFlipping] = useState(false);
@@ -10,6 +10,9 @@ export default function CoinFlipGame() {
   const [wins, setWins] = useState(0);
   const [coinAnimation, setCoinAnimation] = useState("");
   const [coinSide, setCoinSide] = useState<"starknet" | "reclaim" | null>(null);
+  const [showModal, setShowModal] = useState(true);
+  const [modalChoice, setModalChoice] = useState<"starknet" | "reclaim" | null>(null);
+  const [betAmount, setBetAmount] = useState("");
 
   const handleFlip = (choice: "starknet" | "reclaim") => {
     if (isFlipping) return;
@@ -19,13 +22,9 @@ export default function CoinFlipGame() {
     setGameResult(null);
     setCoinSide(null);
 
-    // Random result generation
     const randomResult = Math.random() > 0.5 ? "starknet" : "reclaim";
-
-    // Animation sequence - toss up, flip, and drop
     setCoinAnimation("animate-toss");
 
-    // Simulate the complete coin flip animation sequence
     setTimeout(() => {
       setCoinAnimation("animate-flip");
 
@@ -39,20 +38,75 @@ export default function CoinFlipGame() {
           setIsFlipping(false);
           setFlips((prev) => prev + 1);
 
-          // Check if user won
           if (choice === randomResult) {
             setWins((prev) => prev + 1);
             setGameResult("win");
           } else {
             setGameResult("lose");
           }
-        }, 500); // Drop animation time
-      }, 1000); // Flip animation time
-    }, 500); // Toss animation time
+        }, 500);
+      }, 1000);
+    }, 500);
+  };
+
+  const handleStartGame = () => {
+    if (!modalChoice || !betAmount || isNaN(Number(betAmount))) return;
+    setUserChoice(modalChoice);
+    setShowModal(false);
+    handleFlip(modalChoice);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center  h-full p-4">
+    <div className="flex flex-col items-center justify-center h-full p-4 relative">
+      {/* Modal */}
+      {showModal && (
+        <div className="absolute inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center">
+          <div className="bg-gray-900 font-techno p-6 rounded-xl border border-gray-700 w-120">
+            <h2 className="text-white text-xl font-bold mb-4 text-center">Let's Begin the Game</h2>
+           
+            <div className="flex gap-4 mb-4 justify-center items-center">
+                {["starknet", "reclaim"].map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => setModalChoice(opt as "starknet" | "reclaim")}
+                  className={`w-32 h-32 px-4 py-2 flex justify-center items-center rounded-full ${
+                  modalChoice === opt
+                    ? "bg-white text-black font-bold"
+                    : "bg-gray-800 text-white"
+                  } flex items-center justify-center`}
+                >
+                  <img
+                  src={
+                    opt === "starknet"
+                    ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyryehB1_k7vVWpfloLj_2NeOxHTmOubzNHQ&s"
+                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSa-Eg_DQYr78RTTdcPHdnWEPFwgBNLMAEMoQ&s"
+                  }
+                  alt={opt}
+                  className="w-24 h-24 mr-2 rounded-full object-contain"
+                  />
+                
+                </button>
+                ))}
+            </div>
+            
+            <input
+              type="number"
+              className="w-full px-3 py-2 mt-5 rounded bg-gray-700 text-white border border-gray-600 mb-4"
+              value={betAmount}
+              onChange={(e) => setBetAmount(e.target.value)}
+              placeholder="Enter amount"
+            />
+            <button
+              onClick={handleStartGame}
+              disabled={!modalChoice || !betAmount}
+              className="w-full bg-green-600 mt-2 cursor-pointer hover:bg-green-700 text-white py-2 rounded-lg font-bold"
+            >
+              Submit & Flip
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Background grid */}
       <div className="absolute inset-0 bg-gradient-to-br from-black to-gray-900 opacity-80">
         <div
@@ -64,7 +118,8 @@ export default function CoinFlipGame() {
           }}
         ></div>
       </div>
-      
+
+      {/* Coin flip animations */}
       <style jsx>{`
         @keyframes toss {
           0% {
@@ -113,27 +168,24 @@ export default function CoinFlipGame() {
       `}</style>
 
       <div className="bg-gradient-to-br from-black via-gray-500 to-gray-900 rounded-xl shadow-lg p-6 w-full max-w-md border border-gray-700 relative z-10 mt-24">
-        <h1 className="text-2xl font-techno font-bold text-center mb-6 text-white">
-          StarkNet vs Reclaim
-        </h1>
+        <h1 className="text-2xl font-bold text-center mb-6 text-white">StarkNet vs Reclaim</h1>
 
-        {/* Logo Coin */}
+        {/* Coin */}
         <div className="flex justify-center mb-8 perspective-500">
           <div
-            className={`relative w-32 h-32 rounded-full bg-blue-800 flex items-center justify-center
-            shadow-lg ${coinAnimation}`}
+            className={`relative w-32 h-32 rounded-full bg-blue-800 flex items-center justify-center shadow-lg ${coinAnimation}`}
           >
             <div className="absolute w-24 h-24 bg-gray-900 rounded-full flex items-center justify-center">
               {coinSide === "reclaim" ? (
                 <img
                   src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSa-Eg_DQYr78RTTdcPHdnWEPFwgBNLMAEMoQ&s"
-                  alt="Reclaim Logo"
+                  alt="Reclaim"
                   className="w-20 h-20 rounded-full object-contain"
                 />
               ) : (
                 <img
                   src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyryehB1_k7vVWpfloLj_2NeOxHTmOubzNHQ&s"
-                  alt="StarkNet Logo"
+                  alt="StarkNet"
                   className="w-20 h-20 rounded-full object-contain"
                 />
               )}
@@ -142,22 +194,16 @@ export default function CoinFlipGame() {
         </div>
 
         {/* Game Status */}
-        <div className="text-center mb-6 font-techno">
+        <div className="text-center mb-6">
           {isFlipping ? (
-            <p className="text-lg font-medium text-gray-300">Flipping...</p>
+            <p className="text-lg text-gray-300">Flipping...</p>
           ) : result ? (
             <div>
-              <p className="text-lg font-medium mb-2 text-gray-300">
-                Result:{" "}
-                <span className="font-bold text-gray-300">
-                  {result.toUpperCase()}
-                </span>
+              <p className="text-lg mb-2 text-gray-300">
+                Result: <span className="font-bold">{result.toUpperCase()}</span>
               </p>
-              <p className="text-lg font-medium mb-2 text-gray-300">
-                Your choice:{" "}
-                <span className="font-bold text-gray-300">
-                  {userChoice?.toUpperCase()}
-                </span>
+              <p className="text-lg mb-2 text-gray-300">
+                Your choice: <span className="font-bold">{userChoice?.toUpperCase()}</span>
               </p>
               <p
                 className={`text-xl font-bold ${
@@ -166,40 +212,15 @@ export default function CoinFlipGame() {
               >
                 {gameResult === "win" ? "You Win! 🎉" : "You Lose! 😢"}
               </p>
+              <p className="text-sm mt-2 text-gray-400">Bet Amount: {betAmount}</p>
             </div>
           ) : (
-            <p className="text-lg font-medium text-gray-300">
-              Choose StarkNet or Reclaim
-            </p>
+            <p className="text-lg text-gray-300">Choose StarkNet or Reclaim</p>
           )}
         </div>
 
-        {/* Game Controls */}
-        <div className="flex gap-4 justify-center mb-6 w-full ">
-          {[
-            { name: "STARKNET", value: "starknet" },
-            { name: "RECLAIM", value: "reclaim" }
-          ].map((side) => (
-            <button
-              key={side.value}
-              onClick={() => handleFlip(side.value as "starknet" | "reclaim")}
-              disabled={isFlipping}
-              className={`font-sans text-xs w-full text-white py-3 px-6 sm:px-8 rounded-lg
-                border border-white bg-gray-900 transition-all duration-300 whitespace-nowrap
-                shadow-[4px_4px_0_0_#000] hover:bg-gray-800 hover:shadow-[2px_2px_0_0_#000]
-                ${
-                  isFlipping
-                    ? "opacity-50 cursor-not-allowed hover:shadow-[4px_4px_0_0_#000]"
-                    : ""
-                }`}
-            >
-              {side.name}
-            </button>
-          ))}
-        </div>
-
         {/* Stats */}
-        <div className="flex justify-between font-techno px-4 pt-4 border-t border-gray-700">
+        <div className="flex justify-between px-4 pt-4 border-t border-gray-700">
           <div className="text-center">
             <p className="text-sm text-gray-300">Total Flips</p>
             <p className="text-xl font-bold text-gray-300">{flips}</p>

@@ -45,6 +45,7 @@ export interface LotteryContextType {
   withdrawOracleFees: (lotteryAddress: string) => Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   refreshLotteries: () => Promise<any[]>;
+  flipCoin : () => Promise<void>;
 }
 
 export type Profile = {

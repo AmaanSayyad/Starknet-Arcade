@@ -1,5 +1,5 @@
 import { Contract, RpcProvider } from "starknet";
-import { FactoryABI } from "./abi";
+import { FactoryABI,CoinFlipABI } from "./abi";
 import { TokenDetails } from "./types";
 import starknet from "../public/starknet.svg";
 import eth from "../public/eth.svg";
@@ -8,6 +8,7 @@ import usdt from "../public/usdt.svg";
 
 export const LOTTERY_FACTORY_ADDRESS =
   "0x02f5814a6a3c29855972b58ae15f7ba2afa86ceb69a1f992a371e299402ca0d3";
+export const COIN_FLIP_ADDRESS ="0x032ee3f9b4263aae8fe9547b6bd3aaf45efe2806b9cf41f266028c743857edd3";
 export const ETH_TOKEN_ADDRESS =
   "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7";
 export const STRK_TOKEN_ADDRESS =
@@ -27,6 +28,12 @@ export const factory_contract = new Contract(
   LOTTERY_FACTORY_ADDRESS,
   provider
 ).typedv2(FactoryABI);
+
+export const coin_flip_contract = new Contract(
+  CoinFlipABI,
+  COIN_FLIP_ADDRESS,
+  provider
+).typedv2(CoinFlipABI);
 
 export const KNOWN_TOKENS: TokenDetails[] = [
   {
