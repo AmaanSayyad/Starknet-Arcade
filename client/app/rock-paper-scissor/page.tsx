@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
@@ -6,11 +5,16 @@ import { v4 as uuidv4 } from "uuid";
 import Paper from "../components/rock-paper-scissor-components/paper";
 import Scissors from "../components/rock-paper-scissor-components/scissors";
 import Rock from "../components/rock-paper-scissor-components/rock";
-import {toast} from "react-hot-toast";
+import { toast } from "react-hot-toast";
+import CreateGameRoom, { GameTypes } from "../components/CreateGameRoom";
 const socket = io("http://localhost:4000");
 
 interface Player {
   username: string;
+}
+
+interface Choices {
+  [key: string]: string;
 }
 
 export default function Home() {
@@ -23,7 +27,7 @@ export default function Home() {
   const [gameWinner, setGameWinner] = useState("");
   const [round, setRound] = useState(1);
   const [score, setScore] = useState<{ [key: string]: number }>({});
-  const [opponentChoice, setOpponentChoice] = useState("");
+  const [playerChoices, setPlayerChoices] = useState<Choices>({});
 
   useEffect(() => {
     const storedName = localStorage.getItem("username");
@@ -45,27 +49,21 @@ export default function Home() {
         result: string;
         round: number;
         score: any;
-        choices: { [key: string]: string };
+        choices: Choices;
       }) => {
         setRoundResult(data.result);
         setScore(data.score);
-
-        // Identify opponent
-        const opponent = Object.keys(data.choices).find(
-          (name) => name !== username
-        );
-        if (opponent) {
-          setOpponentChoice(data.choices[opponent]);
-        }
+        setPlayerChoices(data.choices);
 
         setTimeout(() => {
           setRound(data.round);
           setRoundResult("");
           setChoice("");
-          setOpponentChoice("");
+          setPlayerChoices({});
         }, 4000);
       }
     );
+    
     socket.on("gameWinner", (data: { winner: string }) => {
       setGameWinner(data.winner);
     });
@@ -75,7 +73,7 @@ export default function Home() {
       socket.off("roundResult");
       socket.off("gameWinner");
     };
-  }, []);
+  }, [username]); // Added username to dependency array
 
   const handleCreateRoom = () => {
     const newRoomId = uuidv4().split("-")[0];
@@ -90,6 +88,12 @@ export default function Home() {
     setJoined(true);
   };
 
+  const handleRoomJoin = ({ username, roomId, joined }) => {
+    setUsername(username);
+    setRoomId(roomId);
+    setJoined(joined);
+  };
+
   const makeChoice = (value: string) => {
     if (choice || gameWinner) return;
     setChoice(value);
@@ -102,92 +106,54 @@ export default function Home() {
     setGameWinner("");
     setRound(1);
     setScore({});
+    setPlayerChoices({});
+  };
+
+  // Get opponent's username
+  const getOpponentName = () => {
+    return players.find(player => player.username !== username)?.username || "";
+  };
+
+  // Render choice component based on choice string
+  const renderChoice = (choiceType: string) => {
+    switch(choiceType) {
+      case "rock": return <Rock />;
+      case "paper": return <Paper />;
+      case "scissors": return <Scissors />;
+      default: return null;
+    }
   };
 
   return (
     <>
-      <main className="flex flex-col font-techno mt-10 items-center justify-center min-h-screen bg-transparent text-white px-4">
+        <main className="flex flex-col font-techno mt-10 items-center justify-center min-h-screen bg-transparent text-white px-4">
         <h1 className="text-4xl font-extrabold mt-1">RPS Multiplayer</h1>
 
-        {!roomId && (
-          <button
-            onClick={handleCreateRoom}
-            className="mb-6 px-6 py-2 mt-8 bg-indigo-600 hover:bg-indigo-700 rounded text-lg"
-          >
-            Create Game Room
-          </button>
-        )}
-
-        {roomId && !joined && (
-          <div className="flex flex-col items-center gap-3">
-            <p className="text-sm text-gray-400">
-              Room ID: <code className="text-green-400">{roomId}</code>
-            </p>
-            <input
-              type="text"
-              className="p-2 bg-gray-800 border border-gray-700 rounded text-white"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <button
-              onClick={handleJoin}
-              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-            >
-              Join Room
-            </button>
-          </div>
-        )}
+        <CreateGameRoom 
+          gameType={GameTypes.RPS} 
+          socket={socket} 
+          onJoin={handleRoomJoin}
+          buttonText="Create RPS Game Room"
+          buttonClassName="mb-6 px-6 py-2 mt-8 bg-indigo-600 hover:bg-indigo-700 rounded text-lg text-white"
+        />
 
         {joined && (
-          <div className="mt-6 w-full h-[90vh] p-6 rounded-lg  grid grid-cols-2 overflow-hidden">
+          <div className="mt-6 w-full h-[90vh] p-6 rounded-lg grid grid-cols-2 overflow-hidden">
             <div className="flex flex-col p-6 rounded-lg shadow-lg">
               <p className="text-md mb-2 text-gray-300">
                 You: <strong className="text-blue-400">{username}</strong>
               </p>
-              <p className="mb-2 text-sm text-gray-400 mt-4">
-                Share this URL to invite your friend:
-              </p>
-              <div className="bg-gray-800 p-3 mt-4 rounded-lg mb-4 text-sm flex items-center justify-between">
-                <span className="break-all text-xs text-gray-300">
-                  {window.location.href}
-                </span>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(window.location.href);
-                    toast.success("Link copied to clipboard!");
-                  }}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
-                >
-                  {
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M16 16v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-8a2 2 0 012-2h2m8 0h4a2 2 0 012 2v4m-6-6l6 6M8 8l8 8"
-                      />
-                    </svg>
-                  }
-                </button>
-              </div>
 
               <p className="text-md mt-4 font-semibold mb-2 text-gray-200">
                 Players:
               </p>
               <ul className="mb-4 list-none pl-0 text-gray-300">
-                {players.map((p,i) => (
+                {players.map((p, i) => (
                   <li
                     key={p.username}
-                    className="py-1 px-2  rounded mb-2"
+                    className="py-1 px-2 rounded mb-2"
                   >
-                    {i+1}.{p.username}
+                    {i+1}. {p.username}
                   </li>
                 ))}
               </ul>
@@ -241,48 +207,42 @@ export default function Home() {
                       <>
                         <div className="flex flex-col items-center justify-center h-full mt-10">
                           <table className="table-auto border-collapse border border-gray-700 text-sm text-gray-300 w-full max-w-md">
-                          <thead>
-                            <tr className="bg-gray-800">
-                            <th className="border border-gray-700 px-4 py-2 text-center">
-                              You Picked
-                            </th>
-                            <th className="border border-gray-700 px-4 py-2 text-center">
-                              Opponent Picked
-                            </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                            <td className="border border-gray-700 px-4 py-2 text-center">
-                              {choice === "rock" && <Rock />}
-                              {choice === "paper" && <Paper />}
-                              {choice === "scissors" && <Scissors />}
-                              {roundResult === "win" && (
-                              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
-                                <div className="w-16 h-16 border-4 border-white rounded-full"></div>
-                              </div>
-                              )}
-                            </td>
-                            <td className="border border-gray-700 px-4 py-2 text-center">
-                              {opponentChoice ? (
-                              <>
-                                {opponentChoice === "rock" && <Rock />}
-                                {opponentChoice === "paper" && <Paper />}
-                                {opponentChoice === "scissors" && <Scissors />}
-                              </>
-                              ) : (
-                              <p className="text-yellow-400">
-                                Waiting for opponent's choice...
-                              </p>
-                              )}
-                              {roundResult === "lose" && (
-                              <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
-                                <div className="w-16 h-16 border-4 border-white rounded-full"></div>
-                              </div>
-                              )}
-                            </td>
-                            </tr>
-                          </tbody>
+                            <thead>
+                              <tr className="bg-gray-800">
+                                <th className="border border-gray-700 px-4 py-2 text-center">
+                                  You ({username})
+                                </th>
+                                <th className="border border-gray-700 px-4 py-2 text-center">
+                                  Opponent ({getOpponentName()})
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td className="border border-gray-700 px-4 py-2 text-center relative">
+                                  {renderChoice(choice)}
+                                  {roundResult === "win" && (
+                                    <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+                                      <div className="w-16 h-16 border-4 border-white rounded-full"></div>
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="border border-gray-700 px-4 py-2 text-center relative">
+                                  {playerChoices[getOpponentName()] ? (
+                                    renderChoice(playerChoices[getOpponentName()])
+                                  ) : (
+                                    <p className="text-yellow-400">
+                                      Waiting for opponent's choice...
+                                    </p>
+                                  )}
+                                  {roundResult === "lose" && (
+                                    <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+                                      <div className="w-16 h-16 border-4 border-white rounded-full"></div>
+                                    </div>
+                                  )}
+                                </td>
+                              </tr>
+                            </tbody>
                           </table>
                         </div>
                       </>
@@ -313,7 +273,11 @@ export default function Home() {
                   </div>
 
                   {roundResult && (
-                    <p className="text-yellow-400 mt-4 text-center">{roundResult}</p>
+                    <p className="text-yellow-400 mt-4 text-center text-2xl font-bold">
+                      {roundResult === "win" && "You win this round! 🎉"}
+                      {roundResult === "lose" && "You lost this round! 😔"}
+                      {roundResult === "draw" && "It's a draw! 🤝"}
+                    </p>
                   )}
                 </>
               )}
