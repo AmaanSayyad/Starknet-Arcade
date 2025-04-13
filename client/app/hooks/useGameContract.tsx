@@ -1,45 +1,75 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useCallback, useRef } from "react";
-import { useProvider } from "@starknet-react/core";
-import { Contract } from "starknet";
+import { useCallback, useEffect, useRef } from "react";
+import { Contract, CallData, cairo, BigNumberish } from "starknet";
 import { CoinFlipABI } from "../abi";
-import { COIN_FLIP_ADDRESS } from "../constants";
+import { COIN_FLIP_ADDRESS, provider, STRK_TOKEN_ADDRESS } from "../constants";
 
-const CONTRACT_ADDRESS = COIN_FLIP_ADDRESS;
+export const useGameContract = (connected: boolean, account: any) => {
+  const contractRef = useRef<Contract | null>(null);
 
-const CONTRACT_ABI = CoinFlipABI;
-
-export const useGameContract = (connected, account) => {
-  const provider = useProvider();
-  const contractRef = useRef(null);
-
-  if (!contractRef.current && account) {
-    contractRef.current = new Contract(CONTRACT_ABI, CONTRACT_ADDRESS, account);
-  }
+  useEffect(() => {
+    if (account && !contractRef.current) {
+      contractRef.current = new Contract(CoinFlipABI, COIN_FLIP_ADDRESS, account);
+    }
+  }, [account]);
 
   const executeContractCall = useCallback(
-    async (entrypoint, calldata = []) => {
-      if (!connected || !account) return false;
+    async (amount: BigNumberish, choice: number) => {
+      if (!connected || !account) {
+        console.warn("Not connected or account is missing");
+        return null;
+      }
+
       try {
-        await account.execute({
-          contractAddress: CONTRACT_ADDRESS,
-          entrypoint,
-          calldata,
-          session: true,
-        });
-        return true;
-      } catch (error) {
-        return false;
+        const multiCall = await account.execute([
+          {
+            contractAddress: STRK_TOKEN_ADDRESS,
+            entrypoint: "approve",
+            calldata: CallData.compile({
+              spender: COIN_FLIP_ADDRESS,
+              amount: cairo.uint256(amount),
+            }),
+          },
+          {
+            contractAddress: COIN_FLIP_ADDRESS,
+            entrypoint: "flip_coin",
+            calldata: CallData.compile({
+              choice,
+              amount: cairo.uint256(amount),
+            }),
+          },
+        ]);
+
+        const txHash = multiCall?.transaction_hash;
+        if (!txHash) {
+          throw new Error("Transaction hash missing");
+        }
+
+        const receipt = await provider.waitForTransaction(txHash);
+        console.log("Transaction receipt:", receipt);
+
+        const event = receipt?.events?.find(
+          (e) =>
+            e.from_address ===
+            "0x32ee3f9b4263aae8fe9547b6bd3aaf45efe2806b9cf41f266028c743857edd3"
+        );
+
+        return event?.data?.[0]?.toString() || null;
+      } catch (err) {
+        console.error("Contract call failed:", err);
+        return null;
       }
     },
-    [account, connected]
+    [connected, account]
   );
 
   const flipCoin = useCallback(
-    () => executeContractCall("flip_coin"),
+    (amount: BigNumberish, choice: number) => {
+      return executeContractCall(amount, choice);
+    },
     [executeContractCall]
   );
-  return {
-    flipCoin,
-  };
+
+  return { flipCoin };
 };

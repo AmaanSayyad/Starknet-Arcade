@@ -33,14 +33,15 @@ export default function CoinFlipGame() {
     setCurrentFlip,
     latestRequestedId,
   } = useCoinFlip();
-  const { connect, connectors } = useConnect();
-  const { disconnect } = useDisconnect();
+  const { connectors } = useConnect();
   const { address, account } = useAccount();
   const [username, setUsername] = useState<string | undefined>();
   const [connected, setConnected] = useState(false);
 
   // Initialize hooks
   const { flipCoin } = useGameContract(connected, account);
+
+  console.log({address})
 
   // Controller connection
   useEffect(() => {
@@ -53,10 +54,13 @@ export default function CoinFlipGame() {
   }, [address, connectors]);
 
   const handleFlipCoin = async () => {
+
+    console.log("inside flip");
     try {
       const choice = modalChoice === "starknet" ? 1 : 0;
+      console.log("inside flip", choice);
       if (!betAmount || isNaN(Number(betAmount))) return;
-      let id = await flipCoin(choice, betAmount);
+      let id = await flipCoin(betAmount, choice);
       console.log("Flip ID:", id);
       if (!id) return;
       await fetchFlipDetails(id);
@@ -159,9 +163,7 @@ export default function CoinFlipGame() {
               placeholder="Enter amount"
             />
             <button
-              onClick={() => {
-                handleFlipCoin();
-              }}
+              onClick={handleFlipCoin}
               disabled={!modalChoice || !betAmount}
               className="w-full bg-green-600 mt-2 hover:bg-green-700 text-white py-2 rounded-lg font-bold"
             >
