@@ -11,6 +11,7 @@ import "@fontsource/silkscreen";
 import { Toaster } from "react-hot-toast";
 import { Navbar } from "./components/Navbar";
 import { CoinFlipProvider } from "./contexts/CoinFlipContext";
+import Script from "next/script";
 export default function RootLayout({
   children,
 }: {
@@ -29,6 +30,7 @@ export default function RootLayout({
         <title>Starknet Arcade - Gamifying Starknet</title>
         <meta name="description" content="Play games on Starknet blockchain" />
         <link rel="icon" href="/favicon.ico" />
+        <link rel="stylesheet" href="/css/style.css" />
         <link
           href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
           rel="stylesheet"
@@ -43,6 +45,11 @@ export default function RootLayout({
         />
       </Head>
       <body className="min-h-screen ">
+        <Script
+          src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+          strategy="beforeInteractive"
+        />
+        <Script src="/js/scripts.js" strategy="afterInteractive" />
         <StarknetProvider>
           <CoinFlipProvider>
             <Navbar />

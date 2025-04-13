@@ -1,7 +1,6 @@
-
 "use client";
-import { useState, useEffect } from "react";
-
+import { useState, useEffect, useRef } from "react";
+import { AiOutlineSound } from "react-icons/ai";
 export default function SnakeAndLadderGame() {
   const [playerPosition, setPlayerPosition] = useState(1);
   const [computerPosition, setComputerPosition] = useState(1);
@@ -30,11 +29,32 @@ export default function SnakeAndLadderGame() {
     92: 75,
     98: 55,
   };
+  const audioRef = useRef(new Audio("sounds/roullete/ambient-sounds.mp3"));
+  const [isPlaying, setIsPlaying] = useState(true);
+
+  useEffect(() => {
+    // Play sound initially
+    audioRef.current.play();
+
+    // Cleanup on unmount
+    return () => {
+      audioRef.current.pause();
+    };
+  }, []);
+
+  const toggleSound = () => {
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
 
   const rollDice = () => {
     if (isRolling || isMoving || winner) return;
 
-    const moveSound = new Audio('/sounds/dice.mp3');
+    const moveSound = new Audio("/sounds/dice.mp3");
     moveSound.play();
     setIsRolling(true);
     setMessage("Rolling dice...");
@@ -58,44 +78,43 @@ export default function SnakeAndLadderGame() {
 
   const movePlayer = (steps: number) => {
     setIsMoving(true);
-  
+
     // 🔊 Play move sound
-    const moveSound = new Audio('/sounds/move.mp3');
+    const moveSound = new Audio("/sounds/move.mp3");
     moveSound.play();
-  
+
     const currentPosition =
       turn === "player" ? playerPosition : computerPosition;
     let newPosition = currentPosition + steps;
-  
+
     // Cannot move beyond 100
     if (newPosition > 100) {
       newPosition = currentPosition;
       setMessage(`Can't move beyond 100. You need exact number.`);
-  
+
       setTimeout(() => {
         setIsMoving(false);
         switchTurn();
       }, 1000);
       return;
     }
-  
+
     setMessage(
       `${
         turn === "player" ? "You" : "Opponent"
       } rolled a ${steps}. Moving from ${currentPosition} to ${newPosition}.`
     );
-  
+
     if (turn === "player") {
       setPlayerPosition(newPosition);
     } else {
       setComputerPosition(newPosition);
     }
-  
+
     setTimeout(() => {
       checkSnakesAndLadders(newPosition);
     }, 1000);
   };
-  
 
   const checkSnakesAndLadders = (position: number) => {
     if (snakesAndLadders[position]) {
@@ -127,7 +146,7 @@ export default function SnakeAndLadderGame() {
   const checkWinCondition = (position: number) => {
     if (position === 100) {
       setWinner(turn);
-      const moveSound = new Audio('/sounds/win.mp3');
+      const moveSound = new Audio("/sounds/win.mp3");
       moveSound.play();
       setMessage(
         `${turn === "player" ? "You" : "Opponent"} reached 100! ${
@@ -342,7 +361,12 @@ export default function SnakeAndLadderGame() {
               🔄 Play Again
             </button>
           )}
+         
         </div>
+        <div className="button button-sound cursor-pointer mt-4" onClick={toggleSound}>
+            <div className="circle-overlay"></div>
+            <div className="button-text">{isPlaying ? "PAUSE" : "SOUNDS"}</div>
+          </div>
       </div>
     </div>
   );

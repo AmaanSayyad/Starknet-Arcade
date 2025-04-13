@@ -1,23 +1,25 @@
 "use client";
 import { useEffect, useState } from "react";
 
+// Card data with image URLs
 const cards = [
-  { title: "Fortnite", color: "bg-gradient-to-b from-[#193BCE] to-[#0E1539]", rating: 34 },
-  { title: "Mario", color: "bg-gradient-to-b from-[#BD5068] to-[#9B111F]", rating: 34 },
-  { title: "Kirby", color: "bg-gradient-to-br from-[#16D4FF] via-[#00AFFF] to-[#1774FF]", rating: 34 },
-  { title: "League of Legends", color: "bg-gradient-to-b from-[#FABE4E] to-[#272A1F]", rating: 34 },
-  { title: "Counter-Strike", color: "bg-gradient-to-b from-[#43382F] to-[#FEFBBD]", rating: 34 },
+  { title: "Fortnite", rating: 3.4, image: "https://i.pinimg.com/564x/3e/6a/5e/3e6a5e432a005554da1a6511ce432107.jpg" },
+  { title: "Mario", rating: 3.4, image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRATmBxF7cA8sPrWNictm3iKQG8ZkAhr47t9A&s" },
+  { title: "Kirby", rating: 3.4, image: "https://pisces.bbystatic.com/image2/BestBuy_US/images/products/6521/6521080_sd.jpg" },
+  { title: "League of Legends", rating: 3.4, image: "https://i.pinimg.com/564x/3e/6a/5e/3e6a5e432a005554da1a6511ce432107.jpg" },
+  { title: "Counter-Strike", rating: 3.4, image: "https://m.media-amazon.com/images/M/MV5BZjNmMzk2ZDQtMWZhMi00MGNjLTg0N2QtNGRlMWJhN2EyOTE0XkEyXkFqcGc@._V1_.jpg" },
 ];
 
 interface GameCardProps {
   title: string;
   rating: number;
-  color: string;
+  image: string;
   position: string;
 }
 
-const GameCard = ({ title, rating, color, position }: GameCardProps) => {
-  const baseClasses = "rounded-3xl border border-white/20 text-white font-semibold flex flex-col relative overflow-hidden shadow-xl transition-all duration-500 ease-in-out";
+const GameCard = ({ title, rating, image, position }: GameCardProps) => {
+  const baseClasses =
+    "rounded-3xl border border-white/20 text-white font-semibold relative overflow-hidden shadow-xl transition-all duration-500 ease-in-out";
 
   let transform = "";
   let size = "w-72 h-80";
@@ -46,19 +48,25 @@ const GameCard = ({ title, rating, color, position }: GameCardProps) => {
   }
 
   return (
-    <div className={`${baseClasses} ${color} ${transform} ${size} ${z}`}>
-      <div className="p-6 flex justify-between items-start">
-        <div>
-          <h3 className="text-2xl font-bold text-white">{title}</h3>
-        </div>
-        <div className="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 flex items-center">
-          <span className="text-sm mr-1">⭐</span>
-          <span className="font-bold">{rating}</span>
-        </div>
-      </div>
-      <div className="flex-1 flex justify-center items-center px-8">
-        <div className="w-40 h-40 rounded-full bg-white/20 flex items-center justify-center">
-          <span className="text-4xl">SVG</span>
+    <div className={`${baseClasses} ${transform} ${size} ${z}`}>
+      {/* Background image */}
+      <img
+        src={image}
+        alt={title}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
+
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/50" />
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col h-full justify-between p-6">
+        <div className="flex justify-between items-start">
+          <h3 className="text-2xl font-bold font-techno">{title}</h3>
+          <div className="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 flex items-center">
+            <span className="text-sm mr-1">⭐</span>
+            <span className="font-bold">{rating}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -66,7 +74,7 @@ const GameCard = ({ title, rating, color, position }: GameCardProps) => {
 };
 
 export default function FigmaCardsStack() {
-  const [activeIndex, setActiveIndex] = useState(2); // Start from Kirby
+  const [activeIndex, setActiveIndex] = useState(2); // Start from center (Kirby)
 
   const getPosition = (index: number) => {
     const diff = (index - activeIndex + cards.length) % cards.length;
@@ -89,9 +97,9 @@ export default function FigmaCardsStack() {
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % cards.length);
-    }, 3000); // rotates every 3 seconds
+    }, 3000);
 
-    return () => clearInterval(interval); // clean up on unmount
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -102,7 +110,7 @@ export default function FigmaCardsStack() {
           return (
             <div
               key={index}
-              className={`absolute transition-all duration-500 ease-in-out`}
+              className="absolute transition-all duration-500 ease-in-out"
             >
               <GameCard {...card} position={position} />
             </div>

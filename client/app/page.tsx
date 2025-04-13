@@ -2,10 +2,11 @@
 // pages/index.js
 
 import Hero from "./components/landing/Hero";
-import Games from "./components/landing/Games";
+import ArcadeGames from "./components/ArcadeGames";
 // import Features from "./components/landing/Features";
 import Cta from "./components/landing/Cta";
 import Partners from "./components/landing/Partners";
+import CasinoGames from "./components/CasinoGames";
 // import '@fontsource/press-start-2p'; 
 export default function Home() {
   return (
@@ -30,7 +31,9 @@ export default function Home() {
         <Hero />
 
         {/* Games Section */}
-        <Games />
+        <CasinoGames/>
+        <ArcadeGames />
+
 
         {/* Features Section */}
         {/* <Features /> */}
