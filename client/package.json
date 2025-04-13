@@ -18,6 +18,8 @@
     "@starknet-react/core": "^3.7.2",
     "@cartridge/connector": "^0.7.6",
     "@cartridge/controller": "^0.7.6",
+    "@headlessui/react": "^2.0.3",
+    "@heroicons/react": "^2.1.3",
     "axios": "^1.7.9",
     "buzz": "^1.2.1",
     "dotenv": "^16.4.7",
