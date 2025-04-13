@@ -1,6 +1,10 @@
 "use client";
 import { useState } from "react";
 import { useCoinFlip } from "../contexts/CoinFlipContext";
+import { useGameContract } from "../hooks/useGameContract";
+import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
+import ControllerConnector from "@cartridge/connector/controller";
+import { useEffect } from "react";
 
 export default function CoinFlipGame() {
   const [isFlipping, setIsFlipping] = useState(false);
@@ -20,15 +24,33 @@ export default function CoinFlipGame() {
   const [betAmount, setBetAmount] = useState("");
 
   const {
-    flipCoin,
+    // flipCoin,
     getFlipDetails,
     getContractBalance,
     status,
     error,
     currentFlip,
     setCurrentFlip,
-    latestRequestedId
+    latestRequestedId,
   } = useCoinFlip();
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
+  const { address, account } = useAccount();
+  const [username, setUsername] = useState<string | undefined>();
+  const [connected, setConnected] = useState(false);
+
+  // Initialize hooks
+  const { flipCoin } = useGameContract(connected, account);
+
+  // Controller connection
+  useEffect(() => {
+    if (!address) return;
+    const controller = connectors.find((c) => c instanceof ControllerConnector);
+    if (controller) {
+      controller.username()?.then((n) => setUsername(n));
+      setConnected(true);
+    }
+  }, [address, connectors]);
 
   const handleFlipCoin = async () => {
     try {
@@ -238,7 +260,8 @@ export default function CoinFlipGame() {
           ) : result ? (
             <>
               <p className="text-lg mb-2 text-gray-300">
-                Result: <span className="font-bold">{result.toUpperCase()}</span>
+                Result:{" "}
+                <span className="font-bold">{result.toUpperCase()}</span>
               </p>
               <p className="text-lg mb-2 text-gray-300">
                 Your Choice:{" "}

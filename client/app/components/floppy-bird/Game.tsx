@@ -40,23 +40,7 @@ const Game = () => {
   const [connected, setConnected] = useState(false);
 
   // Initialize hooks
-  const { playSound, loadSounds } = useAudio();
-  const { startNewGame, incrementScore, endGame } = useGameContract(
-    connected,
-    account
-  );
-  const {
-    currentState,
-
-    showSplash,
-    cleanup,
-  } = useGameState(
-    GAME_CONFIG,
-    { play: playSound },
-    incrementScore,
-    endGame,
-    startNewGame
-  );
+  const { flipCoin } = useGameContract(connected, account);
 
   // Controller connection
   useEffect(() => {
@@ -67,16 +51,6 @@ const Game = () => {
       setConnected(true);
     }
   }, [address, connectors]);
-
-  // Initialize game
-  useEffect(() => {
-    loadSounds();
-    showSplash();
-
-    return () => {
-      cleanup();
-    };
-  }, []);
 
   // Controller connection
   const handleControllerClick = async (e: { stopPropagation: () => void }) => {
@@ -103,10 +77,7 @@ const Game = () => {
 
   // Render
   return (
-    <div
-      id="gamecontainer"
-      className={currentState === GAME_STATES.ScoreScreen ? "dead" : ""}
-    >
+    <div id="gamecontainer">
       <div id="gamescreen">
         <ControllerButton
           connected={connected}
