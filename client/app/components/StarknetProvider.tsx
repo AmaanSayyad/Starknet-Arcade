@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -20,19 +21,32 @@ import { constants } from 'starknet';
 import { ArgentMobileConnector } from 'starknetkit/argentMobile';
 import { WebWalletConnector } from 'starknetkit/webwallet';
 import { useGameContract } from '../hooks/useGameContract';
+import { COIN_FLIP_ADDRESS } from '../constants';
 
-const CONTRACT_ADDRESS = '0x03730b941e8d3ece030a4a0d5f1008f34fbde0976e86577a78648c8b35079464';
+const CONTRACT_ADDRESS = COIN_FLIP_ADDRESS;
+
+// const policies = {
+//   contracts: {
+//     [CONTRACT_ADDRESS]: {
+//       name: 'Flappy Bird Game',
+//       description: 'Allows interaction with the Flappy Bird game contract',
+//       methods: [
+//         { name: 'Start New Game', entrypoint: 'start_new_game', session: true },
+//         { name: 'Increment Score', entrypoint: 'increment_score', session: true },
+//         { name: 'End Game', entrypoint: 'end_game', session: true },
+//         { name: 'Get High Score', entrypoint: 'get_high_score', session: true },
+//       ],
+//     },
+//   },
+// };
 
 const policies = {
   contracts: {
     [CONTRACT_ADDRESS]: {
-      name: 'Flappy Bird Game',
+      name: 'Coin Flip',
       description: 'Allows interaction with the Flappy Bird game contract',
       methods: [
-        { name: 'Start New Game', entrypoint: 'start_new_game', session: true },
-        { name: 'Increment Score', entrypoint: 'increment_score', session: true },
-        { name: 'End Game', entrypoint: 'end_game', session: true },
-        { name: 'Get High Score', entrypoint: 'get_high_score', session: true },
+        { name: 'Flip Coin', entrypoint: 'flip_coin', session: true },
       ],
     },
   },
