@@ -1,6 +1,5 @@
 "use client";
 import "./globals.css";
-import StarknetProvider from "./components/StarknetProvider";
 import { useEffect } from "react";
 // import { LotteryProvider } from "./contexts/LotteryContext";
 import Head from "next/head";
@@ -11,6 +10,7 @@ import "@fontsource/silkscreen";
 import { Toaster } from "react-hot-toast";
 import { Navbar } from "./components/Navbar";
 import { CoinFlipProvider } from "./contexts/CoinFlipContext";
+import { StarknetProvider } from "./components/StarknetProvider";
 export default function RootLayout({
   children,
 }: {

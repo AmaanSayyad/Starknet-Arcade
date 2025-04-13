@@ -1,0 +1,275 @@
+#gamecontainer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background: #3a0026;
+}
+
+#gamescreen {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+#sky {
+  width: 100%;
+  height: 200px;
+  background: url('../../public/assets/floppy/background_copy2.png') repeat-x;
+  position: absolute;
+  bottom: 112px;
+  background-position: 0 bottom;
+  z-index: 1;
+}
+
+#land {
+  width: 100%;
+  height: 112px;
+  background: url('../../public/assets/floppy/land_copy3.png') repeat-x;
+  position: absolute;
+  bottom: 0;
+  z-index: 2;
+}
+
+#ceiling {
+  width: 100%;
+  height: 100px;
+  background: url('../../public/assets/floppy/ceiling_copy.png') repeat-x;
+  position: absolute;
+  top: 0;
+  z-index: 15;
+}
+
+.animated {
+  animation: landScroll 1.776s linear infinite;
+}
+
+#sky.animated {
+  animation: none;
+}
+
+@keyframes landScroll {
+  from { background-position: 0 0; }
+  to { background-position: -336px 0; }
+}
+
+.dead .animated {
+  animation-play-state: paused;
+}
+
+#player {
+  width: 34px;
+  height: 24px;
+  background: url('../../public/assets/floppy/logo.png') no-repeat;
+  position: absolute;
+  left: 60px;
+  top: 180px;
+  z-index: 100;
+}
+
+.dead #player {
+  background-position: 0 0;
+}
+
+#flyarea {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+}
+
+#bigscore {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 24px;
+  color: white;
+  text-shadow: 2px 2px 0 #000;
+}
+
+#splash {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url('../../public/assets/floppy/splash_copy.png') no-repeat center;
+  z-index: 2;
+  transition: opacity 0.3s;
+}
+
+.pipe {
+  width: 52px;
+  position: absolute;
+  z-index: 10;
+}
+
+.pipe_upper {
+  position: absolute;
+  top: 0;
+  width: 52px;
+  background-image: url('../../public/assets/floppy/pipe-down_copy.png'), url('../../public/assets/floppy/pipe_copy.png');
+  background-repeat: no-repeat, repeat-y;
+  background-position: center bottom, center;
+}
+
+.pipe_lower {
+  position: absolute;
+  width: 52px;
+  background-image: url('../../public/assets/floppy/pipe-up_copy.png'), url('../../public/assets/floppy/pipe_copy.png');
+  background-repeat: no-repeat, repeat-y;
+  background-position: center top, center;
+}
+
+#scoreboard {
+  position: absolute;
+  display: none;
+  opacity: 0;
+  top: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 236px;
+  height: 280px;
+  background-image: url('../../public/assets/floppy/scoreboard copy.png');
+  background-repeat: no-repeat;
+  z-index: 1000;
+  animation: slideUpFade 0.5s forwards;
+}
+
+#scoreboard.show {
+  display: block;
+  opacity: 1;
+}
+
+#currentscore {
+  position: absolute;
+  top: 165px;
+  left: 115px;
+  width: 104px;
+  height: 14px;
+  overflow: hidden;
+}
+
+#highscore {
+  position: absolute;
+  top: 205px;
+  left: 115px;
+  width: 104px;
+  height: 14px;
+  overflow: hidden;
+}
+
+#medal {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 1001;
+  animation: medalPop 0.5s ease-out forwards;
+}
+
+@keyframes medalPop {
+  0% {
+    transform: translateX(-50%) scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(-50%) scale(1.2);
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+#replay {
+  position: absolute;
+  display: none;
+  opacity: 0;
+  top: 265px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 115px;
+  height: 70px;
+  cursor: pointer;
+  background-image: url('../../public/assets/floppy/replay_copy.png');
+  background-repeat: no-repeat;
+  z-index: 2000;
+  animation: slideUpFade 0.5s forwards;
+}
+
+#replay.show {
+  display: block;
+  opacity: 1;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Small Number Display */
+.small-number {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.small-number .digit {
+  width: 18px;
+  height: 14px;
+  background-repeat: no-repeat;
+  margin-left: -2px;
+}
+
+.small-number .digit-0 { background-image: url('../../public/assets/floppy/font_small_0.png'); }
+.small-number .digit-1 { background-image: url('../../public/assets/floppy/font_small_1.png'); }
+.small-number .digit-2 { background-image: url('../../public/assets/floppy/font_small_2.png'); }
+.small-number .digit-3 { background-image: url('../../public/assets/floppy/font_small_3.png'); }
+.small-number .digit-4 { background-image: url('../../public/assets/floppy/font_small_4.png'); }
+.small-number .digit-5 { background-image: url('../../public/assets/floppy/font_small_5.png'); }
+.small-number .digit-6 { background-image: url('../../public/assets/floppy/font_small_6.png'); }
+.small-number .digit-7 { background-image: url('../../public/assets/floppy/font_small_7.png'); }
+.small-number .digit-8 { background-image: url('../../public/assets/floppy/font_small_8.png'); }
+.small-number .digit-9 { background-image: url('../../public/assets/floppy/font_small_9.png'); }
+
+#leaderboard-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #2c3e50;
+  color: white;
+  border: 2px solid #34495e;
+  padding: 8px 16px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.2s ease;
+  box-shadow: 2px 2px 0 #34495e;
+}
+
+#leaderboard-button:hover {
+  background-color: #34495e;
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 #34495e;
+}
+
+#leaderboard-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+} 
