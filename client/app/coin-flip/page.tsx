@@ -1,6 +1,10 @@
 "use client";
 import { useState } from "react";
 import { useCoinFlip } from "../contexts/CoinFlipContext";
+import { useGameContract } from "../hooks/useGameContract";
+import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
+import ControllerConnector from "@cartridge/connector/controller";
+import { useEffect } from "react";
 
 export default function CoinFlipGame() {
   const [isFlipping, setIsFlipping] = useState(false);
@@ -20,21 +24,43 @@ export default function CoinFlipGame() {
   const [betAmount, setBetAmount] = useState("");
 
   const {
-    flipCoin,
+    // flipCoin,
     getFlipDetails,
     getContractBalance,
     status,
     error,
     currentFlip,
     setCurrentFlip,
-    latestRequestedId
+    latestRequestedId,
   } = useCoinFlip();
+  const { connectors } = useConnect();
+  const { address, account } = useAccount();
+  const [username, setUsername] = useState<string | undefined>();
+  const [connected, setConnected] = useState(false);
+
+  // Initialize hooks
+  const { flipCoin } = useGameContract(connected, account);
+
+  console.log({address})
+
+  // Controller connection
+  useEffect(() => {
+    if (!address) return;
+    const controller = connectors.find((c) => c instanceof ControllerConnector);
+    if (controller) {
+      controller.username()?.then((n) => setUsername(n));
+      setConnected(true);
+    }
+  }, [address, connectors]);
 
   const handleFlipCoin = async () => {
+
+    console.log("inside flip");
     try {
       const choice = modalChoice === "starknet" ? 1 : 0;
+      console.log("inside flip", choice);
       if (!betAmount || isNaN(Number(betAmount))) return;
-      let id = await flipCoin(choice, betAmount);
+      let id = await flipCoin(betAmount, choice);
       console.log("Flip ID:", id);
       if (!id) return;
       await fetchFlipDetails(id);
@@ -137,9 +163,7 @@ export default function CoinFlipGame() {
               placeholder="Enter amount"
             />
             <button
-              onClick={() => {
-                handleFlipCoin();
-              }}
+              onClick={handleFlipCoin}
               disabled={!modalChoice || !betAmount}
               className="w-full bg-green-600 mt-2 hover:bg-green-700 text-white py-2 rounded-lg font-bold"
             >
@@ -238,7 +262,8 @@ export default function CoinFlipGame() {
           ) : result ? (
             <>
               <p className="text-lg mb-2 text-gray-300">
-                Result: <span className="font-bold">{result.toUpperCase()}</span>
+                Result:{" "}
+                <span className="font-bold">{result.toUpperCase()}</span>
               </p>
               <p className="text-lg mb-2 text-gray-300">
                 Your Choice:{" "}

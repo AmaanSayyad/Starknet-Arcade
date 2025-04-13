@@ -1,0 +1,124 @@
+.App {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #282c34;
+  }
+  
+
+  
+  body {
+    background: linear-gradient(135deg, #ff89bb, #7f7fff);
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', monospace;
+  }
+  
+  .game-frame {
+    width: 400px;
+    height: 600px;
+    background: radial-gradient(circle at center, #1a1a2e 60%, #0f0f1a);
+    border: 2px solid #000;
+    box-shadow:
+      inset -1px -1px 0 #fff,
+      inset 1px 1px 0 #808080,
+      2px 2px 0 #000;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .title-bar {
+    position: relative;
+    height: 28px;
+    background: linear-gradient(to right, #000080, #0000a0);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px;
+    font-size: 14px;
+    font-weight: bold;
+    border-bottom: 2px solid #000;
+    box-shadow:
+      inset -1px -1px 0 #fff,
+      inset 1px 1px 0 #808080;
+  }
+  
+  .title-bar .title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .window-buttons {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .window-button {
+    width: 16px;
+    height: 16px;
+    background: #c0c0c0;
+    border: 1px solid #000;
+    box-shadow: inset -1px -1px 0 #fff, inset 1px 1px 0 #808080;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+  }
+  
+  .frame-decor {
+    position: absolute;
+    top: 28px;
+    width: 100%;
+    height: calc(100% - 28px);
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.05) 2px,
+      transparent 2px,
+      transparent 4px
+    );
+  }
+  
+  .game-container {
+    position: absolute;
+    top: 28px;
+    width: 100%;
+    height: calc(100% - 28px);
+    overflow: hidden;
+  }
+  
+  .attribution {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 10px;
+    color: #fff;
+    text-shadow: 2px 2px 0 #000;
+    padding: 0 20px;
+    z-index: 1000;
+    white-space: pre-line;
+    line-height: 1.5;
+  }
+  
+  .attribution a {
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  .attribution a:hover {
+    text-decoration: underline;
+  }
+  
