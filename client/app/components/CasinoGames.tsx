@@ -21,6 +21,30 @@ const CasinoGames = () => {
             url:"/roulette",
             imgUrl:"https://media.istockphoto.com/id/993478608/vector/casino-roulette-wheel-3d-vector-of-gamble-game.jpg?s=612x612&w=0&k=20&c=hdeUN3sxZNkBW8Hz9lGgNVOvtjSbDmg9QZqBECkhYeo=",
             // You'll add your SVG here
+          },
+          {
+            title: 'Mines Game',
+            subtitle: '♟ Mines Game',
+            description:
+              'Make your move as Black or White. Earn tokens when your team wins. Classic chess with a Starknet twist!',
+            bg: 'bg-gradient-to-br from-blue-400 to-blue-600',
+            btn: 'Play Now',
+            rating: '4.8',
+            url:"/mines",
+            imgUrl:"https://media.istockphoto.com/id/993478608/vector/casino-roulette-wheel-3d-vector-of-gamble-game.jpg?s=612x612&w=0&k=20&c=hdeUN3sxZNkBW8Hz9lGgNVOvtjSbDmg9QZqBECkhYeo=",
+            // You'll add your SVG here
+          },
+          {
+            title: 'Plinko Game',
+            subtitle: '♟ Plinko Game',
+            description:
+              'Make your move as Black or White. Earn tokens when your team wins. Classic chess with a Starknet twist!',
+            bg: 'bg-gradient-to-br from-blue-400 to-blue-600',
+            btn: 'Play Now',
+            rating: '4.8',
+            url:"/plinko",
+            imgUrl:"https://media.istockphoto.com/id/993478608/vector/casino-roulette-wheel-3d-vector-of-gamble-game.jpg?s=612x612&w=0&k=20&c=hdeUN3sxZNkBW8Hz9lGgNVOvtjSbDmg9QZqBECkhYeo=",
+            // You'll add your SVG here
           }
         ].map((game, i) => (
           <div

@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 
 // Card data with image URLs
 const cards = [
-  { title: "Fortnite", rating: 3.4, image: "https://i.pinimg.com/564x/3e/6a/5e/3e6a5e432a005554da1a6511ce432107.jpg" },
-  { title: "Mario", rating: 3.4, image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRATmBxF7cA8sPrWNictm3iKQG8ZkAhr47t9A&s" },
-  { title: "Kirby", rating: 3.4, image: "https://pisces.bbystatic.com/image2/BestBuy_US/images/products/6521/6521080_sd.jpg" },
-  { title: "League of Legends", rating: 3.4, image: "https://i.pinimg.com/564x/3e/6a/5e/3e6a5e432a005554da1a6511ce432107.jpg" },
-  { title: "Counter-Strike", rating: 3.4, image: "https://m.media-amazon.com/images/M/MV5BZjNmMzk2ZDQtMWZhMi00MGNjLTg0N2QtNGRlMWJhN2EyOTE0XkEyXkFqcGc@._V1_.jpg" },
+  { title: "Starknet Arcade Games", rating: 3.4, image: "https://img.freepik.com/free-vector/game-streamer-concept-elements-illustrated_23-2148932487.jpg" },
+  { title: "Snake Ladder", rating: 3.4, image: "https://img.freepik.com/premium-vector/snakes-ladders-board-game-template-design-with-forest-background_600323-2431.jpg?w=740" },
+  { title: "Rock Paper Scissor", rating: 3.4, image: "https://img.freepik.com/premium-vector/hand-rock-paper-scissor-clip-art_107355-34.jpg?w=740" },
+  { title: "Mines Game", rating: 3.4, image: "https://img.freepik.com/premium-vector/vector_863384-153.jpg?w=740" },
+  { title: "Roulette", rating: 3.4, image: "https://img.freepik.com/premium-vector/casino-vector-background_87689-85.jpg?w=740" },
+  // { title: "Plinko", rating: 3.4, image: "https://img.freepik.com/free-vector/mobile-game-app-application-interface_107791-2044.jpg?ga=GA1.1.678278214.1744526028&semt=ais_hybrid&w=740" },
+ 
 ];
 
 interface GameCardProps {

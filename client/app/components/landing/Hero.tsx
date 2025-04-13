@@ -40,7 +40,7 @@ const Hero = () => {
               <span className="text-gray-400 text-xl ml-2">— Gaming Hub</span>
             </div>
 
-            <h1 className="text-6xl font-bold my-2 font-techno ">Straknet Arcade</h1>
+            <h1 className="text-6xl font-bold my-2 font-techno ">Starknet Arcade</h1>
             {/* <h2 className="text-5xl font-bold mb-0">Nintendo Switch</h2> */}
 
             {/* Game cards */}

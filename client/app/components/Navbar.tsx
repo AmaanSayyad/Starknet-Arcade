@@ -4,6 +4,7 @@ import WalletBar from "./WalletBar";
 import ControllerButton from "./floppy-bird/game/ControllerButton";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
+import Link from "next/link";
 
 export function Navbar() {
   const [searchFocused, setSearchFocused] = useState(false);
@@ -59,6 +60,10 @@ export function Navbar() {
           <div className="flex items-center space-x-2 text-gray-400 cursor-pointer hover:text-gray-300 transition-colors">
             <img src="/icons/store.svg" alt="Store" className="w-6 h-6" />
             <span className="font-semibold text-lg">Store</span>
+          </div>
+          <div className="flex items-center space-x-2 text-gray-400 cursor-pointer hover:text-gray-300 transition-colors">
+            <img src="/icons/store.svg" alt="Store" className="w-6 h-6" />
+            <span className="font-semibold text-lg"><Link href="/leaderboard">Leaderboard</Link></span>
           </div>
           <div
             className={`transition-all duration-200 ease-in-out border border-[#ffffff1a] bg-[#6f6f6f33] backdrop-blur-md px-4 py-2 rounded-full flex items-center space-x-3 ${
@@ -116,11 +121,7 @@ export function Navbar() {
           </div>
 
           <WalletBar />
-          <ControllerButton
-            connected={connected}
-            username={username}
-            handleControllerClick={handleControllerClick}
-          />
+        
         </div>
 
         {/* Mobile menu button */}
