@@ -36,8 +36,8 @@ const Hero = () => {
               <div className="bg-yellow-500 rounded-full p-2 mr-2">
                 <span className="text-black">🎮</span>
               </div>
-              <span className="text-yellow-500 text-xl font-bold">5-Month</span>
-              <span className="text-gray-400 text-xl ml-2">— Free Access</span>
+              <span className="text-yellow-500 text-xl font-bold">A fully on-chain </span>
+              <span className="text-gray-400 text-xl ml-2">— Gaming Hub</span>
             </div>
 
             <h1 className="text-6xl font-bold my-2 font-techno ">Straknet Arcade</h1>
