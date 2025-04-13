@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { Contract, cairo, CallData, byteArray } from "starknet";
 import { useAccount } from "@starknet-react/core";
-import { CoinFlipABI, ERC20Abi } from "../abi"; // Assume this is defined elsewhere
+import { toast } from "react-hot-toast";
 import {
   ETH_TOKEN_ADDRESS,
   COIN_FLIP_ADDRESS,
@@ -46,6 +46,9 @@ export function CoinFlipProvider({ children }: CoinFlipProviderProps) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
   const [currentFlip, setCurrentFlip] = useState<FlipDetails | null>(null);
+  const [latestRequestedId, setLatestRequestedId] = useState<string | null>(
+    null
+  );
 
   // Helper to handle errors in a consistent way
   const handleError = useCallback((error: unknown) => {
@@ -58,33 +61,53 @@ export function CoinFlipProvider({ children }: CoinFlipProviderProps) {
   }, []);
 
   // Flip coin function - includes approving the token transfer
-  const flipCoin = useCallback(async (choice: FlipChoice, amount: string) => {
-    try {
-      console.log(account);
-      const multiCall = await account?.execute([
-        {
-          contractAddress: STRK_TOKEN_ADDRESS,
-          entrypoint: "approve",
-          calldata: CallData.compile({
-            spender: COIN_FLIP_ADDRESS,
-            amount: cairo.uint256(amount),
-          }),
-        },
-        {
-          contractAddress: COIN_FLIP_ADDRESS,
-          entrypoint: "flip_coin",
-          calldata: CallData.compile({
-            choice,
-            amount: cairo.uint256(amount),
-          }),
-        },
-      ]);
-      await provider.waitForTransaction(multiCall?.transaction_hash || "");
-    } catch (error) {
-      console.error("Error flipping coin :", error);
-      throw error;
-    }
-  }, []);
+  const flipCoin = useCallback(
+    async (choice: FlipChoice, amount: string) => {
+      let id = toast.loading("Submitting your flip...");
+      try {
+        const _amount = BigInt(amount);
+        const multiCall = await account?.execute([
+          {
+            contractAddress: STRK_TOKEN_ADDRESS,
+            entrypoint: "approve",
+            calldata: CallData.compile({
+              spender: COIN_FLIP_ADDRESS,
+              amount: cairo.uint256(_amount),
+            }),
+          },
+          {
+            contractAddress: COIN_FLIP_ADDRESS,
+            entrypoint: "flip_coin",
+            calldata: CallData.compile({
+              choice,
+              amount: cairo.uint256(_amount),
+            }),
+          },
+        ]);
+        const res = await provider.waitForTransaction(
+          multiCall?.transaction_hash || ""
+        );
+        console.log("Transaction result:", res?.events);
+        let requestId = res?.events?.find(
+          (item) =>
+            item.from_address ===
+            "0x32ee3f9b4263aae8fe9547b6bd3aaf45efe2806b9cf41f266028c743857edd3"
+        );
+        setLatestRequestedId(+requestId?.data[0].toString());
+        toast.success("Flip successful!", {
+          id,
+        });
+        return requestId?.data[0].toString();
+      } catch (error) {
+        console.error("Error flipping coin :", error);
+        toast.error("Error flipping coin", {
+          id,
+        });
+        throw error;
+      }
+    },
+    [account]
+  );
 
   // Get flip details
   const getFlipDetails = useCallback(
@@ -160,6 +183,7 @@ export function CoinFlipProvider({ children }: CoinFlipProviderProps) {
       error,
       currentFlip,
       setCurrentFlip,
+      latestRequestedId
     }),
     [flipCoin, getFlipDetails, getContractBalance, status, error, currentFlip]
   );

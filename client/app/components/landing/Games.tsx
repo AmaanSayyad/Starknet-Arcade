@@ -19,6 +19,7 @@ const Games = () => {
             btn: 'Play Now',
             rating: '4.8',
             url:"/chess",
+            imgUrl:"https://img.freepik.com/premium-vector/leader-chess-game-business-team-white-background-vector-illustration_3482-3946.jpg?w=740",
             // You'll add your SVG here
           },
           {
@@ -30,6 +31,7 @@ const Games = () => {
             btn: 'Play Now',
             rating: '4.6',
             url:"/snake-ladder",
+            imgUrl:"https://img.freepik.com/free-vector/hand-drawn-kids-game-illustration_23-2150651870.jpg?t=st=1744526129~exp=1744529729~hmac=0db791e91bea8b7e03c667202d1e90f71047d09b5004117fb0698c3c2ceef61b&w=740",
 
             // You'll add your SVG here
           },
@@ -42,6 +44,7 @@ const Games = () => {
             btn: 'Play Now',
             rating: '4.9',
             url:"/coin-flip",
+            imgUrl:"https://img.freepik.com/premium-vector/happy-smiling-man-character-hold-bitcoin-flat-cartoon-illustration_133260-365.jpg?w=740"
             // You'll add your SVG here
           },
           {
@@ -53,6 +56,7 @@ const Games = () => {
             btn: 'Play Now',
             rating: '4.5',
             url:"/rock-paper-scissor",
+            imgUrl:"https://img.freepik.com/premium-vector/hand-game-rock-scissors-paper-rules-gestures-stock-happy-friendship-day-vectors-illustrations_664482-252.jpg?w=740",
             // You'll add your SVG here
           },
           {
@@ -64,6 +68,7 @@ const Games = () => {
             btn: 'Check Score',
             rating: '4.7',
             url:"/score",
+            imgUrl:"https://img.freepik.com/free-vector/hand-drawn-kids-game-illustration_23-2150651870.jpg?t=st=1744526129~exp=1744529729~hmac=0db791e91bea8b7e03c667202d1e90f71047d09b5004117fb0698c3c2ceef61b&w=740",
             // You'll add your SVG here
           },
           {
@@ -75,6 +80,7 @@ const Games = () => {
             btn: 'Clean Wallet',
             rating: '4.4',
             url:"/dust-cleaner",
+            imgUrl:"https://img.freepik.com/free-vector/hand-drawn-kids-game-illustration_23-2150651870.jpg?t=st=1744526129~exp=1744529729~hmac=0db791e91bea8b7e03c667202d1e90f71047d09b5004117fb0698c3c2ceef61b&w=740",
             // You'll add your SVG here
           },
         ].map((game, i) => (
@@ -97,8 +103,10 @@ const Games = () => {
             {/* Center area for SVG - placeholder for now */}
             <div className="flex-1 flex justify-center items-center px-8">
               {/* This is where you'll insert your SVG */}
-              <div className="w-40 h-40 rounded-full bg-white/20 flex items-center justify-center">
-                <span className="text-4xl">SVG</span>
+              <div className="w-40 h-40 rounded-full shadow-2xl overflow-hidden bg-white/20 flex items-center justify-center">
+                <span className="text-4xl">
+                  <img src={game.imgUrl} alt={game.title}/>
+                </span>
               </div>
             </div>
 
