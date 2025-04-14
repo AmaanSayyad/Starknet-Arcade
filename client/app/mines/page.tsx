@@ -75,7 +75,7 @@ const MineGamblingGame: React.FC = () => {
 
                     <div className={'flex flex-col font-techno'}>
                         <MineSelection selectedMines={selectedMines} setSelectedMines={setSelectedMines}/>
-                        {isGameOver && <p className='pixelify-sans text-6xl text-red-600 mt-4 '>Game Over!</p>}
+                        {isGameOver && <p className='pixelify-sans text-6xl text-red-600 mt-4 font-techno'>Game Over!</p>}
                     </div>
                 </div>
             </div>
