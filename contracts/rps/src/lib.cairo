@@ -6,7 +6,7 @@ pub trait IRockPaperScissor<TContractState> {
 }
 
 #[starknet::contract]
-mod HelloStarknet {
+mod RockPaperScissor {
     use openzeppelin_token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
     use starknet::storage::{
         Map, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
