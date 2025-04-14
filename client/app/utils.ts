@@ -45,3 +45,53 @@ export function formatTokenAmount(
 
   return `${integerPart}.${fractionalStr} ${symbol}`;
 }
+
+export const getLeaderboard = () => {
+  if (typeof window === "undefined") return [];
+  const data = localStorage.getItem("leaderboard");
+  return data ? JSON.parse(data) : [];
+};
+
+export const setLeaderboard = (data: any[]) => {
+  if (typeof window === "undefined") return;
+  localStorage.setItem("leaderboard", JSON.stringify(data));
+};
+
+export const addOrUpdatePlayer = ({
+  address,
+  gameType,
+  status,
+  earnedPoints,
+}: {
+  address: string;
+  gameType: string;
+  status: "Win" | "Loss";
+  earnedPoints: number;
+}) => {
+  const existing = getLeaderboard();
+
+  const updated = [...existing];
+  const index = updated.findIndex((player) => player.address === address);
+
+  if (index !== -1) {
+    // Update existing player
+    updated[index] = {
+      ...updated[index],
+      gameType,
+      status,
+      earnedPoints,
+      totalXP: updated[index].totalXP + earnedPoints,
+    };
+  } else {
+    // Add new player
+    updated.push({
+      address,
+      gameType,
+      status,
+      earnedPoints,
+      totalXP: earnedPoints,
+    });
+  }
+
+  setLeaderboard(updated);
+};

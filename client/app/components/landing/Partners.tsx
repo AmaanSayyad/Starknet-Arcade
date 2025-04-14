@@ -8,11 +8,7 @@ const partners = [
   {
     name: "Starknet",
     logo: "https://pbs.twimg.com/profile_images/1656626983617323010/xzIYc6hK_400x400.png",
-  },
-  {
-    name: "Reclaim",
-    logo: "https://pbs.twimg.com/profile_images/1891242686616891392/0B-S56nI_400x400.png",
-  },
+  }
 ];
 
 export default function Partners() {

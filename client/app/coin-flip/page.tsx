@@ -5,7 +5,7 @@ import { useGameContract } from "../hooks/useGameContract";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
 import { useEffect } from "react";
-
+import { addOrUpdatePlayer } from "../utils";
 export default function CoinFlipGame() {
   const [isFlipping, setIsFlipping] = useState(false);
   const [result, setResult] = useState<"starknet" | "reclaim" | null>(null);
@@ -41,8 +41,6 @@ export default function CoinFlipGame() {
   // Initialize hooks
   const { flipCoin } = useGameContract(connected, account);
 
-  console.log({address})
-
   // Controller connection
   useEffect(() => {
     if (!address) return;
@@ -54,8 +52,6 @@ export default function CoinFlipGame() {
   }, [address, connectors]);
 
   const handleFlipCoin = async () => {
-
-    console.log("inside flip");
     try {
       const choice = modalChoice === "starknet" ? 1 : 0;
       console.log("inside flip", choice);
@@ -86,6 +82,7 @@ export default function CoinFlipGame() {
 
   const handleFlip = (choice: "starknet" | "reclaim") => {
     if (isFlipping) return;
+
     setUserChoice(choice);
     setIsFlipping(true);
     setGameResult(null);
@@ -107,12 +104,23 @@ export default function CoinFlipGame() {
           setIsFlipping(false);
           setFlips((prev) => prev + 1);
 
-          if (choice === randomResult) {
+          const didWin = choice === randomResult;
+          const earnedPoints = didWin ? 100 : 0;
+
+          if (didWin) {
             setWins((prev) => prev + 1);
             setGameResult("win");
           } else {
             setGameResult("lose");
           }
+
+          // Update LocalStorage Leaderboard
+          addOrUpdatePlayer({
+            address: address, // make sure you have this variable from context or state
+            gameType: "Coin Flip",
+            status: didWin ? "Win" : "Loss",
+            earnedPoints,
+          });
         }, 500);
       }, 1000);
     }, 500);

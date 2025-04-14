@@ -1,61 +1,63 @@
 "use client";
-
-const leaderboardData = [
-  {
-    address: "0x1A2b...3C4d",
-    totalXP: 1420,
-    gameType: "Fortnite",
-    status: "Win",
-    earnedPoints: 120,
-  },
-  {
-    address: "0x5E6f...7G8h",
-    totalXP: 1340,
-    gameType: "Zelda",
-    status: "Loss",
-    earnedPoints: 80,
-  },
-  {
-    address: "0x9I0j...1K2l",
-    totalXP: 1280,
-    gameType: "Mario",
-    status: "Win",
-    earnedPoints: 95,
-  },
-  {
-    address: "0x3M4n...5O6p",
-    totalXP: 1100,
-    gameType: "League",
-    status: "Loss",
-    earnedPoints: 50,
-  },
-  {
-    address: "0x7Q8r...9S0t",
-    totalXP: 980,
-    gameType: "CSGO",
-    status: "Win",
-    earnedPoints: 105,
-  },
-  {
-    address: "0xAbCd...EfGh",
-    totalXP: 920,
-    gameType: "Apex",
-    status: "Loss",
-    earnedPoints: 60,
-  },
-  {
-    address: "0xIjKl...MnOp",
-    totalXP: 890,
-    gameType: "Valorant",
-    status: "Win",
-    earnedPoints: 100,
-  },
-];
+import { useEffect } from "react";
+import { getLeaderboard, setLeaderboard } from "../utils";
+import { useState } from "react";
 
 export default function LeaderboardTable() {
+  const [leaderboardData, setLeaderboardData] = useState([]);
+  useEffect(() => {
+    // On initial load: set default data if localStorage is empty
+    const existing = getLeaderboard();
+    if (existing.length === 0) {
+      const defaultData = [
+        {
+          address: "0x04c3aaa63...6d4d7E70888",
+          totalXP: 1420,
+          gameType: "Coin Flip",
+          status: "Win",
+          earnedPoints: 120,
+        },
+        {
+          address: "0x0793feb8c8e...8d22859b88454",
+          totalXP: 1340,
+          gameType: "Snake & Ladder",
+          status: "Loss",
+          earnedPoints: 80,
+        },
+        {
+          address: "0x01e8e9987d4...ba3f2c52f3",
+          totalXP: 1280,
+          gameType: "Rock Paper Scissor",
+          status: "Win",
+          earnedPoints: 95,
+        },
+        {
+          address: "0x3M4n...5O6p",
+          totalXP: 1100,
+          gameType: "Coin Flip",
+          status: "Loss",
+          earnedPoints: 50,
+        },
+        {
+          address: "0x7Q8r...9S0t",
+          totalXP: 980,
+          gameType: "Snake & Ladder",
+          status: "Win",
+          earnedPoints: 105,
+        },
+      ];
+
+      setLeaderboard(defaultData);
+      setLeaderboardData(defaultData);
+    } else {
+      setLeaderboardData(existing);
+    }
+  }, []);
   return (
     <section className="py-12 px-6 w-full max-w-4xl mx-auto font-techno">
-      <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-white">🏆Leaderboard</h2>
+      <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-white">
+        🏆Leaderboard
+      </h2>
 
       <div className="overflow-hidden">
         <div className="h-[70vh] overflow-y-auto scroll-smooth scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
@@ -84,7 +86,11 @@ export default function LeaderboardTable() {
                       key={player.address}
                       className={`border-b border-white/10`}
                     >
-                      <td className={`px-6 py-4 font-medium ${idx < 3 ? "text-4xl" : ""}`}>
+                      <td
+                        className={`px-6 py-4 font-medium ${
+                          idx < 3 ? "text-4xl" : ""
+                        }`}
+                      >
                         {rankIcon || idx + 1}
                       </td>
                       <td className="px-6 py-4">{player.address}</td>
@@ -100,7 +106,11 @@ export default function LeaderboardTable() {
                           {player.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4">{ player.status === "Win" ? player.earnedPoints + ' XP' : "..."}</td>
+                      <td className="px-6 py-4">
+                        {player.status === "Win"
+                          ? player.earnedPoints + " XP"
+                          : "..."}
+                      </td>
                       <td className="px-6 py-4">{player.totalXP} XP</td>
                     </tr>
                   );

@@ -12,78 +12,73 @@ const CasinoGames = () => {
         {[
           {
             title: 'Roulette Game',
-            subtitle: '♟ Roulette Game',
-            description:
-              'Make your move as Black or White. Earn tokens when your team wins. Classic chess with a Starknet twist!',
-            bg: 'bg-gradient-to-br from-blue-400 to-blue-600',
+            subtitle: '🎡 Classic Roulette',
+            description: 'Try your luck on the spinning wheel of fortune!',
             btn: 'Play Now',
-            rating: '4.8',
-            url:"/roulette",
-            imgUrl:"https://media.istockphoto.com/id/993478608/vector/casino-roulette-wheel-3d-vector-of-gamble-game.jpg?s=612x612&w=0&k=20&c=hdeUN3sxZNkBW8Hz9lGgNVOvtjSbDmg9QZqBECkhYeo=",
-            // You'll add your SVG here
+            rating: '4.9',
+            url: '/roulette',
+            imgUrl:
+              'https://img.freepik.com/premium-vector/casino-roulette-wheel-with-flying-cards-poker-chips-dice-isolated-white-background_134830-2038.jpg?w=740',
           },
           {
             title: 'Mines Game',
-            subtitle: '♟ Mines Game',
-            description:
-              'Make your move as Black or White. Earn tokens when your team wins. Classic chess with a Starknet twist!',
-            bg: 'bg-gradient-to-br from-blue-400 to-blue-600',
+            subtitle: '💣 Mines Strategy',
+            description: 'Avoid the mines and collect points as you go!',
             btn: 'Play Now',
-            rating: '4.8',
-            url:"/mines",
-            imgUrl:"https://media.istockphoto.com/id/993478608/vector/casino-roulette-wheel-3d-vector-of-gamble-game.jpg?s=612x612&w=0&k=20&c=hdeUN3sxZNkBW8Hz9lGgNVOvtjSbDmg9QZqBECkhYeo=",
-            // You'll add your SVG here
+            rating: '4.7',
+            url: '/mines',
+            imgUrl:
+              'https://img.freepik.com/premium-vector/vector_863384-153.jpg?w=740',
           },
           {
             title: 'Plinko Game',
-            subtitle: '♟ Plinko Game',
-            description:
-              'Make your move as Black or White. Earn tokens when your team wins. Classic chess with a Starknet twist!',
-            bg: 'bg-gradient-to-br from-blue-400 to-blue-600',
+            subtitle: '🎯 Plinko Drop',
+            description: 'Drop the disc and see where it lands for rewards!',
             btn: 'Play Now',
             rating: '4.8',
-            url:"/plinko",
-            imgUrl:"https://media.istockphoto.com/id/993478608/vector/casino-roulette-wheel-3d-vector-of-gamble-game.jpg?s=612x612&w=0&k=20&c=hdeUN3sxZNkBW8Hz9lGgNVOvtjSbDmg9QZqBECkhYeo=",
-            // You'll add your SVG here
-          }
+            url: '/plinko',
+            imgUrl:
+              'https://img.freepik.com/premium-psd/realistic-lottery-symbol-isolated_23-2151177241.jpg?w=740',
+          },
         ].map((game, i) => (
           <div
             key={i}
-            className={`rounded-3xl ${game.bg} font-techno text-white font-semibold flex flex-col relative overflow-hidden shadow-xl transition-all duration-300 hover:scale-105 h-96`}
+            className="relative rounded-3xl overflow-hidden shadow-xl h-[500px] group transform transition-transform duration-300 hover:scale-105"
           >
-            {/* Header with title, subtitle and rating */}
-            <div className="p-6 flex justify-between items-start">
-              <div>
-                <h3 className="text-2xl font-bold text-white">{game.title}</h3>
-                <p className="text-white/80 text-sm">{game.subtitle}</p>
-              </div>
-              <div className="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 flex items-center">
-                <span className="text-sm mr-1">⭐</span>
-                <span className="font-bold">{game.rating}</span>
-              </div>
-            </div>
+            {/* Background image */}
+            <div
+              className="absolute inset-0 bg-cover bg-center z-0 duration-300 "
+              style={{ backgroundImage: `url(${game.imgUrl})` }}
+            />
 
-            {/* Center area for SVG - placeholder for now */}
-            <div className="flex-1 flex justify-center items-center px-8">
-              {/* This is where you'll insert your SVG */}
-              <div className="w-40 h-40 rounded-full shadow-2xl overflow-hidden bg-white/20 flex items-center justify-center">
-                <span className="text-4xl">
-                  <img src={game.imgUrl} alt={game.title}/>
-                </span>
-              </div>
-            </div>
+            {/* Dark overlay */}
+            <div className="absolute inset-0 bg-black bg-opacity-10 z-10" />
 
-            {/* CTA Button */}
-            <div className="p-6">
-              <button  className="w-full text-white bg-violet-600 py-3 rounded-xl hover:bg-purple-400 hover:text-black transition-all font-bold tracking-wide active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,0.8)] shadow-[4px_4px_0px_rgba(0,0,0,1)] border-2 border-black">
-                <Link href={game.url}>{game.btn}</Link>
-              </button>
+            {/* Content */}
+            <div className="relative z-20 h-full flex flex-col justify-between p-6 text-black font-techno">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-2xl font-bold">{game.title}</h3>
+                  <p className="text-black text-sm">{game.subtitle}</p>
+                </div>
+                <div className="bg-gray-300 backdrop-blur-sm rounded-full px-3 py-1 flex items-center">
+                  <span className="text-sm mr-1">⭐</span>
+                  <span className="font-bold">{game.rating}</span>
+                </div>
+              </div>
+
+              {/* CTA Button */}
+              <Link href={game.url}>
+                <button className="w-full text-white bg-yellow-500 py-3 rounded-xl hover:bg-yellow-400 hover:text-black transition-all font-bold tracking-wide active:translate-y-[2px] active:shadow-[2px_2px_0px_rgba(0,0,0,0.8)] shadow-[4px_4px_0px_rgba(0,0,0,1)] border-2 border-white">
+                  {game.btn}
+                </button>
+              </Link>
             </div>
           </div>
         ))}
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default CasinoGames
+export default CasinoGames;
