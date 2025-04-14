@@ -33,7 +33,7 @@ const ArcadeGames = () => {
             rating: "4.6",
             url: "/snake-ladder",
             imgUrl:
-              "https://img.freepik.com/free-vector/hand-drawn-kids-game-illustration_23-2150651870.jpg?t=st=1744526129~exp=1744529729~hmac=0db791e91bea8b7e03c667202d1e90f71047d09b5004117fb0698c3c2ceef61b&w=740",
+              "https://img.freepik.com/free-vector/green-path-with-strawberry-jam_1308-71571.jpg?t=st=1744624662~exp=1744628262~hmac=38242eceaaf8cd5d8a7e0957840db8dff7178ba965e6abde0bd25ae868373285&w=740",
 
             // You'll add your SVG here
           },
@@ -47,7 +47,7 @@ const ArcadeGames = () => {
             rating: "4.9",
             url: "/coin-flip",
             imgUrl:
-              "https://img.freepik.com/premium-vector/happy-smiling-man-character-hold-bitcoin-flat-cartoon-illustration_133260-365.jpg?w=740",
+              "https://img.freepik.com/premium-vector/bitcoin-trader-man-with-suit-coin-front-face-trading-chart-background-question-marks-flying-around-crypto-currency-day-trading-technical-analysis-illustration_161121-5.jpg?w=740",
             // You'll add your SVG here
           },
           {
@@ -60,7 +60,7 @@ const ArcadeGames = () => {
             rating: "4.5",
             url: "/rock-paper-scissor",
             imgUrl:
-              "https://img.freepik.com/premium-vector/hand-game-rock-scissors-paper-rules-gestures-stock-happy-friendship-day-vectors-illustrations_664482-252.jpg?w=740",
+              "https://img.freepik.com/premium-vector/hand-rock-paper-scissor-clip-art_107355-34.jpg?w=740",
             // You'll add your SVG here
           },
           {

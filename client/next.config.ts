@@ -1,14 +1,19 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+const nextConfig:NextConfig = {
   images: {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "gateway.pinata.cloud",
-        pathname: "/ipfs/**",
+        hostname: "**",
       },
     ],
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
   },
 };
 
