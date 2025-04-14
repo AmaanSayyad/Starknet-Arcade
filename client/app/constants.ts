@@ -1,6 +1,7 @@
 import { Contract, RpcProvider } from "starknet";
 import { CoinFlipABI } from "./abi";
-
+export const RPS_CONTRACT_ADDRESS =
+  "0x0716703cdb41f2ac101fe58b67ee846da8118d2d700c6fa5e7de7dd8d2e60adb";
 export const COIN_FLIP_ADDRESS =
   "0x032ee3f9b4263aae8fe9547b6bd3aaf45efe2806b9cf41f266028c743857edd3";
 export const ETH_TOKEN_ADDRESS =

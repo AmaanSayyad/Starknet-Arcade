@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useCallback, useEffect, useRef } from "react";
-import { Contract, CallData} from "starknet";
-import { SNAKE_N_LADDERS_ABI } from "../abi";
+import { Contract, CallData, cairo, BigNumberish } from "starknet";
+import { RPS_ABI } from "../abi";
+import { toast } from "react-hot-toast";
 import {
-  SNAKE_N_LADDERS_ADDRESS,
+  RPS_CONTRACT_ADDRESS,
   provider,
   STRK_TOKEN_ADDRESS,
 } from "../constants";
 
-export const useSnakeLadderGameContract = (
+export const useRPSGameContract = (
   connected: boolean,
   account: any
 ) => {
@@ -17,42 +18,69 @@ export const useSnakeLadderGameContract = (
   useEffect(() => {
     if (account && !contractRef.current) {
       contractRef.current = new Contract(
-        SNAKE_N_LADDERS_ABI,
-        SNAKE_N_LADDERS_ADDRESS,
+        RPS_ABI,
+        RPS_CONTRACT_ADDRESS,
         account
       );
     }
   }, [account]);
 
-  const executeContractCall = useCallback(async () => {
-    if (!connected || !account) {
-      console.warn("Not connected or account is missing");
-      return null;
-    }
-
-    try {
-      const multiCall = await account.execute({
-        contractAddress: SNAKE_N_LADDERS_ADDRESS,
-        entrypoint: "enroll",
-        calldata: CallData.compile({}),
-      });
-
-      const txHash = multiCall?.transaction_hash;
-      if (!txHash) {
-        throw new Error("Transaction hash missing");
+  const executeContractCall = useCallback(
+    async (amount: BigNumberish, rounds: number) => {
+      if (!amount) {
+        toast.error("Amount must be greater than zero");
+        return null;
+      }
+      if (!rounds) {
+        toast.error("Choice must be either 0 or 1");
+        return null;
+      }
+      if (!connected || !account) {
+        console.warn("Not connected or account is missing");
+        return null;
       }
 
-      const receipt = await provider.waitForTransaction(txHash);
-      console.log("Transaction receipt:", receipt);
-    } catch (err) {
-      console.error("Contract call failed:", err);
-      return null;
-    }
-  }, [connected, account]);
+      try {
+        const multiCall = await account.execute([
+          {
+            contractAddress: STRK_TOKEN_ADDRESS,
+            entrypoint: "approve",
+            calldata: CallData.compile({
+              spender: RPS_CONTRACT_ADDRESS,
+              amount: cairo.uint256(amount),
+            }),
+          },
+          {
+            contractAddress: RPS_CONTRACT_ADDRESS,
+            entrypoint: "join",
+            calldata: CallData.compile({
+              amount: cairo.uint256(amount),
+              rounds,
+            }),
+          },
+        ]);
 
-  const enroll = useCallback(() => {
-    return executeContractCall();
-  }, [executeContractCall]);
+        const txHash = multiCall?.transaction_hash;
+        if (!txHash) {
+          throw new Error("Transaction hash missing");
+        }
 
-  return { enroll };
+        const receipt = await provider.waitForTransaction(txHash);
+        console.log("Transaction receipt:", receipt);
+      } catch (err) {
+        console.error("Contract call failed:", err);
+        return null;
+      }
+    },
+    [connected, account]
+  );
+
+  const joinRPs = useCallback(
+    (amount: BigNumberish) => {
+      return executeContractCall(amount, 5);
+    },
+    [executeContractCall]
+  );
+
+  return { joinRPs };
 };
