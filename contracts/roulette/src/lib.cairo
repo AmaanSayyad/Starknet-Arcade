@@ -21,11 +21,11 @@ const MAX_ROULETTE_NUMBER: u8 = 36;
 #[starknet::interface]
 pub trait IRouletteContract<TContractState> {
     fn spin_roulette(ref self: TContractState, bets: Array<Bet>) -> u64;
-    // fn get_spin_details(self: @TContractState, request_id: u64) -> SpinDetails;
-    // fn get_contract_balance(self: @TContractState, token: ContractAddress) -> u256;
-    // fn withdraw(ref self: TContractState, token: ContractAddress, amount: u256);
-    // fn fund_contract(ref self: TContractState, token: ContractAddress, amount: u256);
-    // fn update_pragma_vrf_contract_address(ref self: TContractState, new_address: ContractAddress);
+    fn get_spin_details(self: @TContractState, request_id: u64) -> (SpinDetails, Array<Bet>);
+    fn get_contract_balance(self: @TContractState, token: ContractAddress) -> u256;
+    fn withdraw(ref self: TContractState, token: ContractAddress, amount: u256);
+    fn fund_contract(ref self: TContractState, token: ContractAddress, amount: u256);
+    fn update_pragma_vrf_contract_address(ref self: TContractState, new_address: ContractAddress);
 }
 
 #[derive(Copy, Drop, Serde, starknet::Store)]
@@ -74,12 +74,11 @@ mod RouletteContract {
     struct Storage {
         pragma_vrf_contract_address: ContractAddress,
         min_block_number_storage: Map<u64, u64>, // Map of spin_id to min block number
-        
-        // spins: Map<u64, SpinDetails>,
-        // bet_numbers: Map<(u64, u32, u32), u8>, // Map of (request_id, bet_index, number_index) to number
-        // bet_amounts: Map<(u64, u32), u256>, // Map of (request_id, bet_index) to bet amount  
-        // bet_counts: Map<u64, u32>, // Count of bets for each request_id
-        // bet_number_counts: Map<(u64, u32), u32>, // Count of numbers for each bet
+        spins: Map<u64, SpinDetails>,
+        bet_numbers: Map<(u64, u32, u32), u8>, // Map of (request_id, bet_index, number_index) to number
+        bet_amounts: Map<(u64, u32), u256>, // Map of (request_id, bet_index) to bet amount  
+        bet_counts: Map<u64, u32>, // Count of bets for each request_id
+        bet_number_counts: Map<(u64, u32), u32>, // Count of numbers for each bet
         token_address: ContractAddress,
         house_edge_bps: u16, // House edge in basis points (e.g., 200 = 2%)
         #[substorage(v0)]
@@ -138,16 +137,16 @@ mod RouletteContract {
             let mut i: usize = 0;
             while i < bets_span.len() {
                 // Get bet reference without copying the struct
-                let bet_ref = *bets_span.at(i);
+                let bet_ref = bets_span.at(i);
                 
                 // Ensure bet amount is greater than 0
-                assert!(bet_ref.amount > 0, "Bet amount must be greater than 0");
+                assert!(*bet_ref.amount > 0, "Bet amount must be greater than 0");
                 
                 // Validate the numbers in the bet
                 self._validate_bet_numbers(bet_ref.numbers.span());
                 
                 // Add to total bet amount
-                total_bet_amount += bet_ref.amount;
+                total_bet_amount += *bet_ref.amount;
                 
                 i += 1;
             };
@@ -237,188 +236,186 @@ mod RouletteContract {
             request_id
         }
         
-        // fn get_spin_details(self: @ContractState, request_id: u64) -> SpinDetails {
-        //     self.spins.entry(request_id).read()
-        // }
+        fn get_spin_details(self: @ContractState, request_id: u64) -> (SpinDetails, Array<Bet>) {
+            (self.spins.entry(request_id).read(), self._retrieve_bets(request_id))
+        }
         
-        // fn get_contract_balance(self: @ContractState, token: ContractAddress) -> u256 {
-        //     let token = IERC20Dispatcher { contract_address: token };
-        //     token.balance_of(get_contract_address())
-        // }
+        fn get_contract_balance(self: @ContractState, token: ContractAddress) -> u256 {
+            let token = IERC20Dispatcher { contract_address: token };
+            token.balance_of(get_contract_address())
+        }
         
-        // fn withdraw(ref self: ContractState, token: ContractAddress, amount: u256) {
-        //     // Only owner can withdraw
-        //     self.ownable.assert_only_owner();
+        fn withdraw(ref self: ContractState, token: ContractAddress, amount: u256) {
+            // Only owner can withdraw
+            self.ownable.assert_only_owner();
             
-        //     let token = IERC20Dispatcher { contract_address: token };
-        //     let contract_balance = token.balance_of(get_contract_address());
-        //     assert!(contract_balance >= amount, "Not enough balance to withdraw");
+            let token = IERC20Dispatcher { contract_address: token };
+            let contract_balance = token.balance_of(get_contract_address());
+            assert!(contract_balance >= amount, "Not enough balance to withdraw");
             
-        //     let success = token.transfer(get_caller_address(), amount);
-        //     assert!(success, "Withdrawal failed");
-        // }
+            let success = token.transfer(get_caller_address(), amount);
+            assert!(success, "Withdrawal failed");
+        }
         
-        // fn fund_contract(ref self: ContractState, token: ContractAddress, amount: u256) {
-        //     let token = IERC20Dispatcher { contract_address: token };
-        //     let caller = get_caller_address();
-        //     let this = get_contract_address();
+        fn fund_contract(ref self: ContractState, token: ContractAddress, amount: u256) {
+            let token = IERC20Dispatcher { contract_address: token };
+            let caller = get_caller_address();
+            let this = get_contract_address();
             
-        //     // Check allowance
-        //     assert!(
-        //         token.allowance(caller, this) >= amount,
-        //         "Contract does not have enough allowance",
-        //     );
+            // Check allowance
+            assert!(
+                token.allowance(caller, this) >= amount,
+                "Contract does not have enough allowance",
+            );
             
-        //     // Transfer tokens
-        //     let transfer_success = token.transfer_from(caller, this, amount);
-        //     assert!(transfer_success, "Funding failed");
-        // }
+            // Transfer tokens
+            let transfer_success = token.transfer_from(caller, this, amount);
+            assert!(transfer_success, "Funding failed");
+        }
         
-        // fn update_pragma_vrf_contract_address(ref self: ContractState, new_address: ContractAddress) {
-        //     // Only owner can update the Pragma VRF contract address
-        //     self.ownable.assert_only_owner();
-        //     self.pragma_vrf_contract_address.write(new_address);
-        // }
+        fn update_pragma_vrf_contract_address(ref self: ContractState, new_address: ContractAddress) {
+            // Only owner can update the Pragma VRF contract address
+            self.ownable.assert_only_owner();
+            self.pragma_vrf_contract_address.write(new_address);
+        }
     }
     
     #[abi(embed_v0)]
     impl PragmaVRF of super::IPragmaVRF<ContractState> {
-        // fn receive_random_words(
-        //     ref self: ContractState,
-        //     requester_address: ContractAddress,
-        //     request_id: u64,
-        //     random_words: Span<felt252>,
-        //     calldata: Array<felt252>,
-        // ) {
-        //     // Verify the caller is the Pragma randomness contract
-        //     let caller_address = get_caller_address();
-        //     assert(
-        //         caller_address == self.pragma_vrf_contract_address.read(),
-        //         'caller not randomness contract',
-        //     );
+        fn receive_random_words(
+            ref self: ContractState,
+            requester_address: ContractAddress,
+            request_id: u64,
+            random_words: Span<felt252>,
+            calldata: Array<felt252>,
+        ) {
+            // Verify the caller is the Pragma randomness contract
+            let caller_address = get_caller_address();
+            assert(
+                caller_address == self.pragma_vrf_contract_address.read(),
+                'caller not randomness contract',
+            );
             
-        //     // Verify the minimum block number
-        //     let current_block_number = get_block_number();
-        //     let min_block_number = self.min_block_number_storage.entry(request_id).read();
-        //     assert(min_block_number <= current_block_number, 'block number issue');
+            // Verify the minimum block number
+            let current_block_number = get_block_number();
+            let min_block_number = self.min_block_number_storage.entry(request_id).read();
+            assert(min_block_number <= current_block_number, 'block number issue');
             
-        //     // Get the random word and reduce it to 0-36 (European roulette)
-        //     let random_word = *random_words.at(0);
-        //     let random_word_u256: u256 = random_word.into();
-        //     let winning_number: u8 = (random_word_u256 % 37).try_into().unwrap(); // 0-36
+            // Get the random word and reduce it to 0-36 (European roulette)
+            let random_word = *random_words.at(0);
+            let random_word_u256: u256 = random_word.into();
+            let winning_number: u8 = (random_word_u256 % 37).try_into().unwrap(); // 0-36
             
-        //     // Get the spin details
-        //     let mut spin = self.spins.entry(request_id).read();
+            // Get the spin details
+            let mut spin = self.spins.entry(request_id).read();
             
-        //     // Ensure the spin is in the Spinning state
-        //     assert(spin.state == RouletteState::Spinning, 'Spin not in spinning state');
+            // Ensure the spin is in the Spinning state
+            assert(spin.state == RouletteState::Spinning, 'Spin not in spinning state');
             
-        //     // Retrieve bets from storage and calculate winnings
-        //     let bets = self._retrieve_bets(request_id);
-        //     let (total_payout, _) = self._calculate_payout(bets.span(), winning_number);
+            // Retrieve bets from storage and calculate winnings
+            let bets = self._retrieve_bets(request_id);
+            let (total_payout, _) = self._calculate_payout(bets.span(), winning_number);
             
-        //     // Update spin details
-        //     spin.winning_number = winning_number;
-        //     spin.state = RouletteState::Complete;
-        //     spin.total_payout = total_payout;
-        //     self.spins.entry(request_id).write(spin);
+            // Update spin details
+            spin.winning_number = winning_number;
+            spin.state = RouletteState::Complete;
+            spin.total_payout = total_payout;
+            self.spins.entry(request_id).write(spin);
             
-        //     // Process payment if player won anything
-        //     if total_payout > 0 {
-        //         let token = IERC20Dispatcher { contract_address: self.token_address.read() };
-        //         let success = token.transfer(spin.player, total_payout);
-        //         assert!(success, "Payout failed");
-        //     }
+            // Process payment if player won anything
+            if total_payout > 0 {
+                let token = IERC20Dispatcher { contract_address: self.token_address.read() };
+                let success = token.transfer(spin.player, total_payout);
+                assert!(success, "Payout failed");
+            }
             
-        //     // Emit completion event
-        //     self.emit(
-        //         RouletteSpinCompleted { 
-        //             request_id,
-        //             player: spin.player,
-        //             winning_number,
-        //             total_payout,
-        //         }
-        //     );
-        // }
+            // Emit completion event
+            self.emit(
+                RouletteSpinCompleted { 
+                    request_id,
+                    player: spin.player,
+                    winning_number,
+                    total_payout,
+                }
+            );
+        }
     }
     
     #[generate_trait]
     impl InternalFunctions of InternalFunctionsTrait {
         // Store bets in storage-compatible format
         fn _store_bets(ref self: ContractState, request_id: u64, bets: Array<Bet>) {
-            // let bets_span = bets.span();
+            let bets_span = bets.span();
             
-            // // Store the count of bets
-            // self.bet_counts.entry(request_id).write(bets_span.len().try_into().unwrap());
+            // Store the count of bets
+            self.bet_counts.entry(request_id).write(bets_span.len().try_into().unwrap());
             
-            // // For each bet, store its amount and numbers
-            // let mut i: u32 = 0;
-            // let bets_len = bets_span.len();
+            // For each bet, store its amount and numbers
+            let mut i: u32 = 0;
+            let bets_len = bets_span.len();
             
-            // while i < bets_len.try_into().unwrap() {
-            //     // Get the bet reference without copying the struct
-            //     let bet_ref = bets_span.at(i.into());
+            while i < bets_len.try_into().unwrap() {
+                // Get the bet reference without copying the struct
+                let bet_ref = bets_span.at(i.into());
                 
-            //     // Store the bet amount
-            //     self.bet_amounts.entry((request_id, i)).write(bet_ref.amount);
+                // Store the bet amount
+                self.bet_amounts.entry((request_id, i)).write(*bet_ref.amount);
                 
-            //     // Get the numbers span
-            //     let numbers_span = bet_ref.numbers.span();
-            //     let numbers_len: u32 = numbers_span.len().try_into().unwrap();
+                // Get the numbers span
+                let numbers_span = bet_ref.numbers.span();
+                let numbers_len: u32 = numbers_span.len().try_into().unwrap();
                 
-            //     // Store the count of numbers for this bet
-            //     self.bet_number_counts.entry((request_id, i)).write(numbers_len);
+                // Store the count of numbers for this bet
+                self.bet_number_counts.entry((request_id, i)).write(numbers_len);
                 
-            //     // Store each number individually
-            //     let mut j: u32 = 0;
-            //     while j < numbers_len {
-            //         let number = *numbers_span.at(j.into());
-            //         self.bet_numbers.entry((request_id, i, j)).write(number);
-            //         j += 1;
-            //     };
+                // Store each number individually
+                let mut j: u32 = 0;
+                while j < numbers_len {
+                    let number = *numbers_span.at(j.into());
+                    self.bet_numbers.entry((request_id, i, j)).write(number);
+                    j += 1;
+                };
                 
-            //     i += 1;
-            // };
+                i += 1;
+            };
         }
         
         // Retrieve bets from storage in Array format for calculations
-        // fn _retrieve_bets(self: @ContractState, request_id: u64) -> Array<Bet> {
-        //     let mut bets = ArrayTrait::new();
-        //     let bet_count: u32 = self.bet_counts.entry(request_id).read();
+        fn _retrieve_bets(self: @ContractState, request_id: u64) -> Array<Bet> {
+            let mut bets = ArrayTrait::new();
+            let bet_count: u32 = self.bet_counts.entry(request_id).read();
             
-        //     let mut i: u32 = 0;
-        //     while i < bet_count {
-        //         // Get bet amount
-        //         let amount = self.bet_amounts.entry((request_id, i)).read();
+            let mut i: u32 = 0;
+            while i < bet_count {
+                // Get bet amount
+                let amount = self.bet_amounts.entry((request_id, i)).read();
                 
-        //         // Get number count for this bet
-        //         let number_count = self.bet_number_counts.entry((request_id, i)).read();
+                // Get number count for this bet
+                let number_count = self.bet_number_counts.entry((request_id, i)).read();
                 
-        //         // Create array for numbers
-        //         let mut numbers = ArrayTrait::new();
+                // Create array for numbers
+                let mut numbers = ArrayTrait::new();
                 
-        //         // Retrieve each number
-        //         let mut j: u32 = 0;
-        //         while j < number_count {
-        //             let number = self.bet_numbers.entry((request_id, i, j)).read();
-        //             numbers.append(number);
-        //             j += 1;
-        //         };
+                // Retrieve each number
+                let mut j: u32 = 0;
+                while j < number_count {
+                    let number = self.bet_numbers.entry((request_id, i, j)).read();
+                    numbers.append(number);
+                    j += 1;
+                };
                 
-        //         // Create Bet struct and add to array
-        //         let bet = Bet { amount, numbers };
-        //         bets.append(bet);
+                // Create Bet struct and add to array
+                let bet = Bet { amount, numbers };
+                bets.append(bet);
                 
-        //         i += 1;
-        //     };
+                i += 1;
+            };
             
-        //     bets
-        // }
+            bets
+        }
         
         // Validate that all numbers in a bet are valid (0-36)
         fn _validate_bet_numbers(self: @ContractState, numbers: Span<u8>) {
-            assert!(numbers.len() == 1 || numbers.len() == 2 || numbers.len() == 3 || numbers.len() == 4 || numbers.len() == 6 || numbers.len() == 12 || numbers.len() == 18, "Invalid number of bet numbers");
-
             let mut i: usize = 0;
             while i < numbers.len() {
                 let number = *numbers.at(i);
@@ -454,55 +451,55 @@ mod RouletteContract {
         }
         
         // Calculate the payout for all bets based on the winning number
-        // fn _calculate_payout(
-        //     self: @ContractState, bets: Span<Bet>, winning_number: u8
-        // ) -> (u256, Array<(u256, bool)>) {
-        //     let mut total_payout: u256 = 0;
-        //     let mut bet_results = ArrayTrait::new();
-        //     let house_edge_bps = self.house_edge_bps.read();
+        fn _calculate_payout(
+            self: @ContractState, bets: Span<Bet>, winning_number: u8
+        ) -> (u256, Array<(u256, bool)>) {
+            let mut total_payout: u256 = 0;
+            let mut bet_results = ArrayTrait::new();
+            let house_edge_bps = self.house_edge_bps.read();
             
-        //     let mut i: usize = 0;
-        //     while i < bets.len() {
-        //         // Access bet fields without copying
-        //         let bet_ref = bets.at(i);
-        //         let amount = bet_ref.amount;
-        //         let numbers_span = bet_ref.numbers.span();
-        //         let numbers_count = numbers_span.len();
+            let mut i: usize = 0;
+            while i < bets.len() {
+                // Access bet fields without copying
+                let bet_ref = bets.at(i);
+                let amount = bet_ref.amount;
+                let numbers_span = bet_ref.numbers.span();
+                let numbers_count = numbers_span.len();
                 
-        //         let mut won = false;
-        //         let mut bet_payout: u256 = 0;
+                let mut won = false;
+                let mut bet_payout: u256 = 0;
                 
-        //         // Check if the winning number is in the bet numbers
-        //         let mut j: usize = 0;
-        //         while j < numbers_span.len() {
-        //             if *numbers_span.at(j) == winning_number {
-        //                 won = true;
-        //                 break;
-        //             }
-        //             j += 1;
-        //         };
+                // Check if the winning number is in the bet numbers
+                let mut j: usize = 0;
+                while j < numbers_span.len() {
+                    if *numbers_span.at(j) == winning_number {
+                        won = true;
+                        break;
+                    }
+                    j += 1;
+                };
                 
-        //         if won {
-        //             // Calculate payout based on bet type
-        //             let payout_multiplier = self._get_payout_multiplier(numbers_count);
+                if won {
+                    // Calculate payout based on bet type
+                    let payout_multiplier = self._get_payout_multiplier(numbers_count);
                     
-        //             // Calculate base payout 
-        //             bet_payout = amount * payout_multiplier;
+                    // Calculate base payout 
+                    bet_payout = *amount * payout_multiplier;
                     
-        //             // Apply house edge
-        //             // payout = bet_payout * (10000 - house_edge_bps) / 10000
-        //             bet_payout = bet_payout * (10000 - house_edge_bps.into()) / 10000;
+                    // Apply house edge
+                    // payout = bet_payout * (10000 - house_edge_bps) / 10000
+                    bet_payout = bet_payout * (10000 - house_edge_bps.into()) / 10000;
                     
-        //             // Add to total payout
-        //             total_payout += bet_payout;
-        //         }
+                    // Add to total payout
+                    total_payout += bet_payout;
+                }
                 
-        //         bet_results.append((bet_payout, won));
-        //         i += 1;
-        //     };
+                bet_results.append((bet_payout, won));
+                i += 1;
+            };
             
-        //     (total_payout, bet_results)
-        // }
+            (total_payout, bet_results)
+        }
         
         // Get the payout multiplier based on the number of numbers in the bet
         fn _get_payout_multiplier(self: @ContractState, numbers_count: usize) -> u256 {
