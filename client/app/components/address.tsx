@@ -1,12 +1,11 @@
 "use client";
 
 import { useAccount } from "@starknet-react/core";
-import { MoreVertical } from "lucide-react";
 import DisconnectModal from "./disconnect-modal";
-
-import { useState } from "react";
-// import { useLottery } from "../contexts/LotteryContext";
+import { lookupAddresses } from "@cartridge/controller";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import toast from "react-hot-toast";
 
 interface AddressProps {
   isMobile?: boolean;
@@ -15,11 +14,27 @@ interface AddressProps {
 const Address: React.FC<AddressProps> = ({ isMobile = false }) => {
   const [isDisconnectModalOpen, setIsDisconnectModalOpen] = useState(false);
   const { address } = useAccount();
-  // const { profile } = useLottery();
+  const [username, setUserName] = useState("nikku");
 
   const shortenAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
+
+  const handleCopy = () => {
+    if (address) {
+      navigator.clipboard.writeText(address);
+      toast.success("Address copied!");
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      if (address) {
+        const addressMap = await lookupAddresses([address]);
+        setUserName(addressMap.get(address) || "Unknown");
+      }
+    })();
+  }, [address]);
 
   return (
     <div
@@ -47,23 +62,34 @@ const Address: React.FC<AddressProps> = ({ isMobile = false }) => {
             />
             <span
               className={`
-                  text-[#483D8B] truncate font-medium
-                  ${isMobile ? "text-base" : "text-sm sm:text-base"}
-                `}
+                text-[#483D8B] truncate font-medium
+                ${isMobile ? "text-base" : "text-sm sm:text-base"}
+              `}
             >
-              {address ? shortenAddress(address) : ""}
+              {address ? shortenAddress(address) : ""} | {username}
             </span>
+            {address && (
+              <>
+                <button
+                  onClick={handleCopy}
+                  className="p-1 hover:bg-[#D8BFD8] text-black rounded-full transition-colors"
+                  title="Copy address"
+                >
+                  ㊢
+                </button>
+
+                <button
+                  onClick={() => setIsDisconnectModalOpen(true)}
+                  className="p-1 hover:bg-red-200 text-[#D10000] font-medium text-sm rounded-full transition-colors"
+                  title="Disconnect"
+                >
+                  Disconnect
+                  {/* OR use icon instead of text:
+                  <LogOut className="w-4 h-4" /> */}
+                </button>
+              </>
+            )}
           </div>
-          <button
-            onClick={() => setIsDisconnectModalOpen(true)}
-            className="p-1 hover:bg-[#9370DB] rounded-full transition-colors ml-1"
-          >
-            <MoreVertical
-              className={`text-[#483D8B] ${
-                isMobile ? "w-5 h-5" : "w-4 h-4 sm:w-5 sm:h-5"
-              }`}
-            />
-          </button>
         </div>
       </div>
 
