@@ -6,7 +6,8 @@
     "test": "tests"
   },
   "scripts": {
-    "deploy": "ts-node scripts/deploy.ts"
+    "deploy": "ts-node scripts/deploy.ts",
+    "invoke": "ts-node scripts/invoke.ts"
   },
   "keywords": [],
   "author": "",

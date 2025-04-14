@@ -1,9 +1,9 @@
-import { Contract, Account, RpcProvider } from "starknet";
+import { Contract, Account, RpcProvider, CallData, cairo } from "starknet";
 import * as dotenv from "dotenv";
 import { getCompiledCode } from "./utils";
 dotenv.config();
 
-async function increaseCounter() {
+async function spinRoulette() {
   const provider = new RpcProvider({
     nodeUrl: process.env.RPC_ENDPOINT,
   });
@@ -31,10 +31,28 @@ async function increaseCounter() {
   try {
     // const tx = await contract.invoke("increase_counter", []);
     // console.log("Transaction submitted:", tx.transaction_hash);
-    const tx = 
+    const tx = await account.execute([
+      {
+        contractAddress: process.env.CONTRACT_ADDRESS || "",
+        entrypoint: "spin_roulette",
+        calldata: CallData.compile({
+          bets: [
+            {
+              amount: cairo.uint256(100),
+              numbers: [1, 2, 3],
+            },
+            {
+              amount: cairo.uint256(100),
+              numbers: [4, 5, 6],
+            },
+          ],
+        }),
+      },
+    ]);
+    // const tx =
   } catch (error) {
     console.error("Error invoking function:", error);
   }
 }
 
-increaseCounter();
+spinRoulette();
