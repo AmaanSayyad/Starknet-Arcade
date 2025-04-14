@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useCallback, useEffect, useRef } from "react";
-import { Contract, CallData, cairo, BigNumberish } from "starknet";
+import { Contract, CallData} from "starknet";
 import { SNAKE_N_LADDERS_ABI } from "../abi";
 import {
   SNAKE_N_LADDERS_ADDRESS,
@@ -14,7 +14,6 @@ export const useSnakeLadderGameContract = (
   account: any
 ) => {
   const contractRef = useRef<Contract | null>(null);
-
   useEffect(() => {
     if (account && !contractRef.current) {
       contractRef.current = new Contract(
