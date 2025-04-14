@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { AiOutlineSound } from "react-icons/ai";
 export default function SnakeAndLadderGame() {
   const [playerPosition, setPlayerPosition] = useState(1);
   const [computerPosition, setComputerPosition] = useState(1);
