@@ -24,6 +24,7 @@ import {
   COIN_FLIP_ADDRESS,
   STRK_TOKEN_ADDRESS,
   RPS_CONTRACT_ADDRESS,
+  SNAKE_N_LADDERS_ADDRESS,
 } from "../constants";
 
 const CONTRACT_ADDRESS = COIN_FLIP_ADDRESS;
@@ -61,6 +62,15 @@ const policies = {
       description:
         "Allows interaction with the Rock Paper Scissors game contract",
       methods: [{ name: "Join", entrypoint: "join", session: true }],
+    },
+    [SNAKE_N_LADDERS_ADDRESS]: {
+      name: "Snake Ladder game",
+      description:
+        "Allows interaction with the Rock Paper Scissors game contract",
+      methods: [
+        { name: "roll", entrypoint: "roll", session: true },
+        { name: "Enroll", entrypoint: "enroll", session: true },
+      ],
     },
   },
 };

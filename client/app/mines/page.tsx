@@ -53,11 +53,11 @@ const MineGamblingGame: React.FC = () => {
                                 onClick={() => handleClick(index)}
                             >
                                 {clicked && bombs.includes(index) && <img
-                                    src="https://static.vecteezy.com/system/resources/thumbnails/009/350/665/small_2x/explosive-bomb-black-png.png"
+                                    src="https://cryptoast.fr/wp-content/uploads/2024/05/monad-logo.png"
                                     alt="bomb"/>}
 
                                 {clicked && !bombs.includes(index) &&
-                                    <img src="https://freepngimg.com/thumb/diamond/30147-1-diamond-vector-clip-art-thumb.png"
+                                    <img src="https://pbs.twimg.com/profile_images/1656626983617323010/xzIYc6hK_400x400.png"
                                          alt="diamond"/>}
                             </div>
                         ))}

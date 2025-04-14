@@ -1,5 +1,8 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import ControllerConnector from "@cartridge/connector/controller";
+import { useAccount, useConnect } from "@starknet-react/core";
+import { useSnakeLadderGameContract } from "../hooks/useSnakeLadderGameContract";
 export default function SnakeAndLadderGame() {
   const [playerPosition, setPlayerPosition] = useState(1);
   const [computerPosition, setComputerPosition] = useState(1);
@@ -9,6 +12,29 @@ export default function SnakeAndLadderGame() {
   const [message, setMessage] = useState("Roll the dice to start!");
   const [winner, setWinner] = useState<string | null>(null);
   const [isMoving, setIsMoving] = useState(false);
+  const [connected, setConnected] = useState(false);
+  const { connectors } = useConnect();
+  const { address, account } = useAccount();
+  const [username, setUsername] = useState<string | undefined>();
+  useEffect(() => {
+    if (!address) return;
+    const controller = connectors.find((c) => c instanceof ControllerConnector);
+    if (controller) {
+      controller.username()?.then((n) => setUsername(n));
+      setConnected(true);
+    }
+  }, [address, connectors]);
+
+  const { enroll, roll } = useSnakeLadderGameContract(connected, account);
+
+
+  const enrollSnakeLadder = async ()=>{
+    try {
+      let res = await enroll(100);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   // Define snakes and ladders on the board
   const snakesAndLadders: Record<number, number> = {
@@ -360,12 +386,16 @@ export default function SnakeAndLadderGame() {
               🔄 Play Again
             </button>
           )}
-         
+
+          <button onClick={enrollSnakeLadder}>Enroll</button>
         </div>
-        <div className="button button-sound cursor-pointer mt-4" onClick={toggleSound}>
-            <div className="circle-overlay"></div>
-            <div className="button-text">{isPlaying ? "PAUSE" : "SOUNDS"}</div>
-          </div>
+        <div
+          className="button button-sound cursor-pointer mt-4"
+          onClick={toggleSound}
+        >
+          <div className="circle-overlay"></div>
+          <div className="button-text">{isPlaying ? "PAUSE" : "SOUNDS"}</div>
+        </div>
       </div>
     </div>
   );

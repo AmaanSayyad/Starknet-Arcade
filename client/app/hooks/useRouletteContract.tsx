@@ -10,7 +10,7 @@ import {
 } from "../constants";
 import toast from "react-hot-toast";
 
-export const useSnakeLadderGameContract = (
+export const useRouletteContract = (
   connected: boolean,
   account: any
 ) => {
