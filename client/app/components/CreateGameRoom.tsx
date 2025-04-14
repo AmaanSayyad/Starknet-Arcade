@@ -4,32 +4,51 @@
 import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "react-hot-toast";
+import { useRPSGameContract } from "../hooks/useRPSGameContract";
+import { useAccount, useConnect } from "@starknet-react/core";
+import ControllerConnector from "@cartridge/connector/controller";
 
 // Usage example in RPS game
 export const GameTypes = {
-    RPS: "rps",
-    SNAKE_LADDER: "snakeLadder"
-  };
-
+  RPS: "rps",
+  SNAKE_LADDER: "snakeLadder",
+};
 
 interface CreateGameRoomProps {
-  onJoin?: (data: { username: string; roomId: string; joined: boolean }) => void;
+  onJoin?: (data: {
+    username: string;
+    roomId: string;
+    joined: boolean;
+  }) => void;
   gameType?: string;
   socket: any;
   buttonText?: string;
   buttonClassName?: string;
 }
 
-const CreateGameRoom = ({ 
-  onJoin, 
-  gameType = GameTypes.RPS, 
-  socket, 
+const CreateGameRoom = ({
+  onJoin,
+  gameType = GameTypes.RPS,
+  socket,
   buttonText = "Create Game Room",
-  buttonClassName = "px-6 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-lg text-white"
+  buttonClassName = "px-6 py-2 bg-indigo-600 hover:bg-indigo-700 rounded text-lg text-white",
 }: CreateGameRoomProps) => {
   const [username, setUsername] = useState("");
+  const [stakeAmount, setStakeAmount] = useState("");
   const [roomId, setRoomId] = useState("");
+  const { account, address } = useAccount();
   const [joined, setJoined] = useState(false);
+  const [connected, setConnected] = useState(false);
+  const { joinRPs } = useRPSGameContract(connected, account);
+  const { connectors } = useConnect();
+  useEffect(() => {
+    if (!address) return;
+    const controller = connectors.find((c) => c instanceof ControllerConnector);
+    if (controller) {
+      controller.username()?.then((n) => setUsername(n));
+      setConnected(true);
+    }
+  }, [address, connectors]);
 
   useEffect(() => {
     // Get username from localStorage if available
@@ -48,23 +67,34 @@ const CreateGameRoom = ({
     window.history.replaceState(null, "", `?room=${newRoomId}`);
   };
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
     if (!username || !roomId) {
       toast.error("Username and room ID are required");
       return;
     }
 
+    if (!stakeAmount) {
+      toast.error("Stake amount is required");
+      return;
+    }
+    const amount = parseInt(stakeAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error("Invalid stake amount");
+      return;
+    }
+
     localStorage.setItem("username", username);
-    
+    localStorage.setItem("stakeAmount", stakeAmount);
     // Join the appropriate game type
     if (gameType === GameTypes.RPS) {
+      await joinRPs(amount);
       socket.emit("join", { username, roomId });
     } else if (gameType === GameTypes.SNAKE_LADDER) {
       socket.emit("joinSnakeGame", { username, roomId });
     }
-    
+
     setJoined(true);
-    
+
     // Call the parent component's join handler
     if (onJoin) {
       onJoin({ username, roomId, joined: true });
@@ -116,10 +146,7 @@ const CreateGameRoom = ({
   if (!roomId) {
     return (
       <div className="flex flex-col items-center gap-3 mb-6">
-        <button
-          onClick={handleCreateRoom}
-          className={buttonClassName}
-        >
+        <button onClick={handleCreateRoom} className={buttonClassName}>
           {buttonText}
         </button>
       </div>
@@ -139,6 +166,13 @@ const CreateGameRoom = ({
         value={username}
         onChange={(e) => setUsername(e.target.value)}
       />
+      <input
+        type="text"
+        className="p-2 bg-gray-800 border mt-2 border-gray-700 rounded text-white w-full max-w-xs"
+        placeholder="Enter your amount to bet"
+        value={stakeAmount}
+        onChange={(e) => setStakeAmount(e.target.value)}
+      />
       <button
         onClick={handleJoin}
         className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded w-full max-w-xs"
@@ -150,4 +184,3 @@ const CreateGameRoom = ({
 };
 
 export default CreateGameRoom;
-

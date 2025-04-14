@@ -20,7 +20,11 @@ import { constants } from "starknet";
 
 import { ArgentMobileConnector } from "starknetkit/argentMobile";
 import { WebWalletConnector } from "starknetkit/webwallet";
-import { COIN_FLIP_ADDRESS, STRK_TOKEN_ADDRESS } from "../constants";
+import {
+  COIN_FLIP_ADDRESS,
+  STRK_TOKEN_ADDRESS,
+  RPS_CONTRACT_ADDRESS,
+} from "../constants";
 
 const CONTRACT_ADDRESS = COIN_FLIP_ADDRESS;
 const StarkTokenAddress = STRK_TOKEN_ADDRESS;
@@ -51,6 +55,12 @@ const policies = {
       name: "STRK Token",
       description: "Allows interaction with the STRK token contract",
       methods: [{ name: "Approve", entrypoint: "approve", session: true }],
+    },
+    [RPS_CONTRACT_ADDRESS]: {
+      name: "Rock Paper Scissors",
+      description:
+        "Allows interaction with the Rock Paper Scissors game contract",
+      methods: [{ name: "Join", entrypoint: "join", session: true }],
     },
   },
 };
