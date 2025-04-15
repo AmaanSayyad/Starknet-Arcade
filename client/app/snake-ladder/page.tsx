@@ -8,19 +8,47 @@ import toast from "react-hot-toast";
 export default function SnakeAndLadderGame() {
   const [playerPosition, setPlayerPosition] = useState(1);
   const [computerPosition, setComputerPosition] = useState(1);
-  const [diceValue, setDiceValue] = useState(null);
+  const [diceValue, setDiceValue] = useState<number | null>(null);
   const [isRolling, setIsRolling] = useState(false);
   const [turn, setTurn] = useState("player"); // 'player' or 'opponent'
   const [message, setMessage] = useState("Roll the dice to start!");
-  const [winner, setWinner] = useState(null);
+  const [winner, setWinner] = useState<string | null>(null);
   const [isMoving, setIsMoving] = useState(false);
   const [connected, setConnected] = useState(false);
   const [gameCreated, setGameCreated] = useState(false);
   const [stakeAmount, setStakeAmount] = useState(10);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   const { connectors } = useConnect();
   const { address, account } = useAccount();
   const [username, setUsername] = useState();
+  
+  // Only create audio refs after component mounts (client-side only)
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Check if code is running in browser
+  const isBrowser = typeof window !== 'undefined';
+
+  useEffect(() => {
+    // Initialize audio only on client side
+    if (isBrowser) {
+      audioRef.current = new Audio("sounds/roullete/ambient-sounds.mp3");
+      
+      // Play sound initially
+      audioRef.current.play().catch(error => {
+        // Handle autoplay restrictions gracefully
+        console.log("Audio autoplay was prevented:", error);
+      });
+      
+      // Cleanup on unmount
+      return () => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current = null;
+        }
+      };
+    }
+  }, [isBrowser]);
 
   useEffect(() => {
     if (!address) return;
@@ -153,33 +181,25 @@ export default function SnakeAndLadderGame() {
     98: 55,
   };
 
-  const audioRef = useRef(new Audio("sounds/roullete/ambient-sounds.mp3"));
-  const [isPlaying, setIsPlaying] = useState(true);
-
-  useEffect(() => {
-    // Play sound initially
-    audioRef.current.play();
-    // Cleanup on unmount
-    return () => {
-      audioRef.current.pause();
-    };
-  }, []);
-
   const toggleSound = () => {
+    if (!audioRef.current) return;
+    
     if (isPlaying) {
       audioRef.current.pause();
     } else {
-      audioRef.current.play();
+      audioRef.current.play().catch(err => console.log("Play error:", err));
     }
     setIsPlaying(!isPlaying);
   };
 
-  const movePlayer = (steps) => {
+  const movePlayer = (steps: number) => {
     setIsMoving(true);
 
-    // 🔊 Play move sound
-    const moveSound = new Audio("/sounds/move.mp3");
-    moveSound.play();
+    // 🔊 Play move sound - only on client side
+    if (isBrowser) {
+      const moveSound = new Audio("/sounds/move.mp3");
+      moveSound.play().catch(err => console.log("Move sound error:", err));
+    }
 
     const currentPosition =
       turn === "player" ? playerPosition : computerPosition;
@@ -214,7 +234,7 @@ export default function SnakeAndLadderGame() {
     }, 1000);
   };
 
-  const checkSnakesAndLadders = (position) => {
+  const checkSnakesAndLadders = (position: number) => {
     if (snakesAndLadders[position]) {
       const isMoveUp = snakesAndLadders[position] > position;
 
@@ -241,11 +261,16 @@ export default function SnakeAndLadderGame() {
     }
   };
 
-  const checkWinCondition = (position) => {
+  const checkWinCondition = (position: number) => {
     if (position === 100) {
       setWinner(turn);
-      const moveSound = new Audio("/sounds/win.mp3");
-      moveSound.play();
+      
+      // Play win sound - only on client side
+      if (isBrowser) {
+        const winSound = new Audio("/sounds/win.mp3");
+        winSound.play().catch(err => console.log("Win sound error:", err));
+      }
+      
       setMessage(
         `${turn === "player" ? "You" : "Opponent"} reached 100! ${
           turn === "player" ? "You win!" : "Opponent wins!"
@@ -282,7 +307,7 @@ export default function SnakeAndLadderGame() {
   }, [turn, winner, isMoving, isRolling, gameCreated]);
 
   // Calculate position coordinates from board number
-  const getPositionCoordinates = (position) => {
+  const getPositionCoordinates = (position: number) => {
     // Adjusted for 10x10 grid
     const boardSize = 725; // Board size in pixels
     const cellSize = boardSize / 10;
@@ -392,15 +417,6 @@ export default function SnakeAndLadderGame() {
           </div>
         </div>
 
-        {/* Game Status and Debug Info */}
-        {/* <div className="bg-gray-800 p-2 rounded mb-4 text-xs text-white">
-          <p>Turn: {turn}</p>
-          <p>isRolling: {isRolling ? "true" : "false"}</p>
-          <p>isMoving: {isMoving ? "true" : "false"}</p>
-          <p>gameCreated: {gameCreated ? "true" : "false"}</p>
-          <p>shouldShowRollButton: {shouldShowRollButton ? "true" : "false"}</p>
-        </div> */}
-
         {/* Table of Positions */}
         <table className="table-auto w-full text-left mb-6 border border-gray-700 rounded-lg overflow-hidden shadow-md bg-black text-white">
           <thead className="bg-gray-900 text-white border-b border-gray-700">
@@ -489,7 +505,7 @@ export default function SnakeAndLadderGame() {
             </button>
           )}
 
-          { (
+          {(
             <button
               onClick={endGameHandle}
               className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-md transition"
