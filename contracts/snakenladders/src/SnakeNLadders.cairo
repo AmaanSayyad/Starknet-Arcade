@@ -5,6 +5,7 @@ pub trait ISnakeNLadders<TContractState> {
     fn create_game(ref self: TContractState, bet_amount: u256) -> u64;
     fn roll(ref self: TContractState) -> u64;
     fn roll_for_computer(ref self: TContractState) -> u64;
+    fn end_game(ref self: TContractState) -> u64;
     fn get_player_position(self: @TContractState, player_address: ContractAddress) -> u64;
     fn get_computer_position(self: @TContractState, player_address: ContractAddress) -> u64;
     fn get_current_turn(self: @TContractState, player_address: ContractAddress) -> bool; // true for player, false for computer
@@ -82,6 +83,8 @@ pub mod SnakeNLadders {
         PlayerWon: PlayerWon,
         ComputerWon: ComputerWon,
         FeeAddressChanged: FeeAddressChanged,
+        DiceRolled: DiceRolled,
+        GameEnded: GameEnded,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -90,6 +93,12 @@ pub mod SnakeNLadders {
         pub game_id: u64,
         pub player_address: ContractAddress,
         pub bet_amount: u256,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct GameEnded {
+        #[key]
+        pub game_id: u64,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -127,6 +136,11 @@ pub mod SnakeNLadders {
     pub struct FeeAddressChanged {
         pub old_address: ContractAddress,
         pub new_address: ContractAddress,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct DiceRolled {
+        pub roll_result: u64,
     }
 
     #[constructor]
@@ -219,6 +233,29 @@ pub mod SnakeNLadders {
             game_id
         }
 
+        fn end_game(ref self: ContractState) -> u64 {
+            let player_address = get_caller_address();
+            
+            // Get player's active game
+            let game_id = self.player_active_game.read(player_address);
+            assert(game_id != 0, 'No active game found');
+            
+            // Get game state
+            let mut game = self.games.read(game_id);
+            assert(game.winner == 0, 'Game already has a winner');
+            
+            // Emit event
+            self.emit(GameEnded { game_id });
+            
+            // Reset player's active game
+            self.player_active_game.write(player_address, 0);
+            
+            // Delete the game
+            self.games.write(game_id, Game { winner: 3, ..game });
+            
+            game_id
+        }
+
         fn roll(ref self: ContractState) -> u64 {
             self.roll_number.write(self.roll_number.read() + 1);
             let player_address = get_caller_address();
@@ -234,6 +271,7 @@ pub mod SnakeNLadders {
 
             // Roll the dice
             let roll_result = self.roll_dice();
+            self.emit(DiceRolled { roll_result });
 
             if roll_result == 6 {
                 let current_position = game.player_position;
@@ -294,6 +332,7 @@ pub mod SnakeNLadders {
 
             // Roll the dice
             let roll_result = self.roll_dice();
+            self.emit(DiceRolled { roll_result });
 
             if roll_result == 6 {
                 let current_position = game.computer_position;
