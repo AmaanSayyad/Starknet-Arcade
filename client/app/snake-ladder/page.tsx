@@ -3,6 +3,9 @@ import { useState, useEffect, useRef } from "react";
 import ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { useSnakeLadderGameContract } from "../hooks/useSnakeLadderGameContract";
+import toast from "react-hot-toast";
+
+
 export default function SnakeAndLadderGame() {
   const [playerPosition, setPlayerPosition] = useState(1);
   const [computerPosition, setComputerPosition] = useState(1);
@@ -13,9 +16,13 @@ export default function SnakeAndLadderGame() {
   const [winner, setWinner] = useState<string | null>(null);
   const [isMoving, setIsMoving] = useState(false);
   const [connected, setConnected] = useState(false);
+  const [gameCreated, setGameCreated] = useState(false);
+  const [stakeAmount, setStakeAmount] = useState(10);
+
   const { connectors } = useConnect();
   const { address, account } = useAccount();
   const [username, setUsername] = useState<string | undefined>();
+
   useEffect(() => {
     if (!address) return;
     const controller = connectors.find((c) => c instanceof ControllerConnector);
@@ -25,16 +32,118 @@ export default function SnakeAndLadderGame() {
     }
   }, [address, connectors]);
 
-  const { enroll, roll } = useSnakeLadderGameContract(connected, account);
+  const { createGame, roll, rollForComputer, endGame } =
+    useSnakeLadderGameContract(connected, account);
 
-
-  const enrollSnakeLadder = async ()=>{
+ 
+  const createNewGame = async () => {
     try {
-      let res = await enroll(100);
+      const res = await createGame(stakeAmount);
+      if (res) {
+        setGameCreated(true);
+        toast.success("Game created successfully!");
+        setMessage("Game created! Roll the dice to start!");
+      }
+ 
     } catch (error) {
       console.log(error);
+      toast.error("Failed to create game");
+      toast.error("Failed to create game");
     }
-  }
+  };
+
+  const handleRoll = async () => {
+    if (isRolling || isMoving || winner || !gameCreated) return;
+
+    try {
+      setIsRolling(true);
+      setMessage("Rolling dice...");
+
+      // Play roll animation
+      const rollInterval = setInterval(() => {
+        setDiceValue(Math.floor(Math.random() * 6) + 1);
+      }, 100);
+
+      // Call the contract's roll function
+      const result = await roll();
+
+      // Stop rolling animation
+      clearInterval(rollInterval);
+
+      if (result) {
+        // Extract the dice value from the transaction receipt
+        // In a real implementation, you would parse the events from the receipt
+        // For now, we'll assume the roll returns a number between 1-6
+        // This would need to be adjusted based on your actual contract implementation
+        const rollValue = result;
+
+        setDiceValue(Number(rollValue));
+        setIsRolling(false);
+
+        // Move player
+        movePlayer(Number(rollValue));
+      } else {
+        setIsRolling(false);
+        setMessage("Roll failed. Try again.");
+      }
+    } catch (error) {
+      console.error("Roll error:", error);
+      setIsRolling(false);
+      setMessage("Roll failed. Try again.");
+    }
+  };
+
+  const handleComputerTurn = async () => {
+    if (turn !== "opponent" || isRolling || isMoving || winner || !gameCreated)
+      return;
+
+    // Set rolling state (but don't show animation - just to prevent multiple calls)
+    setIsRolling(true);
+    setMessage("Opponent is rolling...");
+
+    try {
+      // Call the contract's rollForComputer function
+      const result = await rollForComputer();
+
+      if (result) {
+        // Extract the dice value from the transaction receipt
+        // In a real implementation, you would parse the events from the receipt
+        const rollValue = result;
+
+        setDiceValue(Number(rollValue));
+
+        // Move computer piece based on blockchain result
+        movePlayer(Number(rollValue));
+      } else {
+        setIsRolling(false);
+        setMessage("Computer roll failed. Trying again...");
+        // Auto-retry after a short delay
+        setTimeout(() => {
+          setIsRolling(false);
+          // Turn will still be "opponent", so the useEffect will trigger another try
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Computer roll error:", error);
+      setIsRolling(false);
+      setMessage("Computer roll failed. Trying again...");
+      // Auto-retry after a short delay
+      setTimeout(() => {
+        setIsRolling(false);
+      }, 2000);
+    }
+  };
+
+  const endGameHandle = async () => {
+
+
+    try {
+      // Call the contract's rollForComputer function
+      await endGame();
+    } catch (error) {
+      console.error("Computer roll error:", error);
+    }
+  };
 
   // Define snakes and ladders on the board
   const snakesAndLadders: Record<number, number> = {
@@ -54,6 +163,7 @@ export default function SnakeAndLadderGame() {
     92: 75,
     98: 55,
   };
+
   const audioRef = useRef(new Audio("sounds/roullete/ambient-sounds.mp3"));
   const [isPlaying, setIsPlaying] = useState(true);
 
@@ -73,31 +183,6 @@ export default function SnakeAndLadderGame() {
       audioRef.current.play();
     }
     setIsPlaying(!isPlaying);
-  };
-
-  const rollDice = () => {
-    if (isRolling || isMoving || winner) return;
-
-    const moveSound = new Audio("/sounds/dice.mp3");
-    moveSound.play();
-    setIsRolling(true);
-    setMessage("Rolling dice...");
-
-    // Simulate dice rolling animation
-    const rollInterval = setInterval(() => {
-      setDiceValue(Math.floor(Math.random() * 6) + 1);
-    }, 100);
-
-    // Stop rolling after 1 second
-    setTimeout(() => {
-      clearInterval(rollInterval);
-      const value = Math.floor(Math.random() * 6) + 1;
-      setDiceValue(value);
-      setIsRolling(false);
-
-      // Move player
-      movePlayer(value);
-    }, 1000);
   };
 
   const movePlayer = (steps: number) => {
@@ -190,14 +275,20 @@ export default function SnakeAndLadderGame() {
 
   // Computer turn logic
   useEffect(() => {
-    if (turn === "opponent" && !winner && !isMoving) {
+    if (
+      turn === "opponent" &&
+      !winner &&
+      !isMoving &&
+      !isRolling &&
+      gameCreated
+    ) {
       const timeout = setTimeout(() => {
-        rollDice();
+        handleComputerTurn();
       }, 1500);
 
       return () => clearTimeout(timeout);
     }
-  }, [turn, winner, isMoving]);
+  }, [turn, winner, isMoving, isRolling, gameCreated]);
 
   // Calculate position coordinates from board number
   const getPositionCoordinates = (position: number) => {
@@ -230,9 +321,12 @@ export default function SnakeAndLadderGame() {
     setDiceValue(null);
     setIsRolling(false);
     setTurn("player");
-    setMessage("Roll the dice to start!");
+    setMessage("Create a new game to start!");
+    setMessage("Create a new game to start!");
     setWinner(null);
     setIsMoving(false);
+    setGameCreated(false);
+    setGameCreated(false);
   };
 
   // Player piece position coordinates
@@ -284,14 +378,24 @@ export default function SnakeAndLadderGame() {
           {/* Dice */}
           <div
             className={`w-20 h-20 border-4 border-gray-300 rounded-xl flex items-center justify-center text-3xl font-black text-gray-700 bg-gray-100 shadow-inner ${
-              isRolling ? "animate-bounce" : ""
+              isRolling && turn === "player" ? "animate-bounce" : ""
             }`}
             onClick={
-              turn === "player" && !isMoving && !winner ? rollDice : undefined
+              turn === "player" &&
+              !isMoving &&
+              !winner &&
+              gameCreated &&
+              !isRolling
+                ? handleRoll
+                : undefined
             }
             style={{
               cursor:
-                turn === "player" && !isMoving && !winner
+                turn === "player" &&
+                !isMoving &&
+                !winner &&
+                gameCreated &&
+                !isRolling
                   ? "pointer"
                   : "default",
             }}
@@ -307,13 +411,12 @@ export default function SnakeAndLadderGame() {
         </div>
 
         {/* Table of Positions */}
-
         <table className="table-auto w-full text-left mb-6 border border-gray-700 rounded-lg overflow-hidden shadow-md bg-black text-white">
           <thead className="bg-gray-900 text-white border-b border-gray-700">
             <tr>
               <th className="px-4 py-2 border-r border-gray-700">Player</th>
               <th className="px-4 py-2 border-r border-gray-700">Position</th>
-              <th className="px-4 py-2 border-r border-gray-700">Address</th>
+    
               <th className="px-4 py-2">Stake Amount</th>
             </tr>
           </thead>
@@ -325,10 +428,9 @@ export default function SnakeAndLadderGame() {
               <td className="px-4 py-3 text-white border-r border-gray-700">
                 {playerPosition}
               </td>
-              <td className="px-4 py-3 text-xs text-gray-300 break-all border-r border-gray-700">
-                oxsqsqs
-              </td>
-              <td className="px-4 py-3 text-green-400">10 STRK</td>
+             
+              <td className="px-4 py-3 text-green-400">{stakeAmount} STRK</td>
+             
             </tr>
             <tr className="hover:bg-gray-800 transition border-b border-gray-700">
               <td className="px-4 py-3 font-medium text-red-400 border-r border-gray-700">
@@ -337,27 +439,28 @@ export default function SnakeAndLadderGame() {
               <td className="px-4 py-3 text-white border-r border-gray-700">
                 {computerPosition}
               </td>
-              <td className="px-4 py-3 text-xs text-gray-300 break-all border-r border-gray-700">
-                oxsqsqs
-              </td>
-              <td className="px-4 py-3 text-green-400">10 STRK</td>
+            
+              <td className="px-4 py-3 text-green-400">{stakeAmount} STRK</td>
+           
             </tr>
 
             {/* Gap Row */}
             <tr>
-              <td colSpan="4" className="py-2"></td>
+              <td colSpan={4} className="py-2"></td>
+              <td colSpan={4} className="py-2"></td>
             </tr>
 
             {/* Status Row */}
             <tr className="bg-gray-950">
               <td
-                colSpan="4"
+                colSpan={4}
+            
                 className="px-4 py-4 text-center border-t border-gray-700"
               >
                 <p className="text-md text-gray-400 italic mb-1">{message}</p>
                 <p className="text-md font-bold text-blue-500">
-                  {!winner
-                    ? `${turn === "player" ? "Your" : "Opponent"} turn`
+                  {!winner && gameCreated
+                    ? `${turn === "player" ? "Your" : "Opponent's"} turn`
                     : ""}
                 </p>
               </td>
@@ -365,17 +468,57 @@ export default function SnakeAndLadderGame() {
           </tbody>
         </table>
 
+        {/* Stake Amount Input (when game not created) */}
+        {!gameCreated && !winner && (
+          <div className="w-full mb-4">
+            <label className="block text-sm font-medium text-gray-400 mb-1">
+              Stake Amount (STRK)
+            </label>
+            <input
+              type="number"
+              value={stakeAmount}
+              onChange={(e) => setStakeAmount(Number(e.target.value))}
+              min="1"
+              className="w-full px-3 py-2 bg-gray-800 text-white rounded border border-gray-700 focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+        )}
+
+
         {/* Action Buttons */}
         <div className="flex gap-4">
-          {turn === "player" && !isMoving && !winner && (
+          {!gameCreated && (
             <button
-              onClick={rollDice}
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition"
-              disabled={isRolling || isMoving}
+              onClick={createNewGame}
+              className="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md transition"
+              disabled={!connected}
             >
-              🎲 Roll Dice
+              🎮 Create Game
             </button>
           )}
+
+          {gameCreated &&
+            turn === "player" &&
+            !isMoving &&
+            !winner &&
+            !isRolling && (
+              <>
+              <button
+                onClick={handleRoll}
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition"
+              >
+                🎲 Roll Dice
+              </button>
+               
+              </>
+            )}
+
+<button
+                  onClick={endGameHandle}
+                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition"
+                >
+                 End game
+                </button>
 
           {winner && (
             <button
@@ -385,9 +528,12 @@ export default function SnakeAndLadderGame() {
               🔄 Play Again
             </button>
           )}
-
-          <button onClick={enrollSnakeLadder}>Enroll</button>
+          
         </div>
+
+        {/* Sound Toggle Button */}
+
+        {/* Sound Toggle Button */}
         <div
           className="button button-sound cursor-pointer mt-4"
           onClick={toggleSound}
@@ -395,6 +541,17 @@ export default function SnakeAndLadderGame() {
           <div className="circle-overlay"></div>
           <div className="button-text">{isPlaying ? "PAUSE" : "SOUNDS"}</div>
         </div>
+
+        {/* Connection Status */}
+        <div className="mt-4 text-sm">
+          {connected ? (
+            <span className="text-green-500">✓ Wallet Connected</span>
+          ) : (
+            <span className="text-red-500">✗ Wallet Not Connected</span>
+          )}
+        </div>
+
+       
       </div>
     </div>
   );

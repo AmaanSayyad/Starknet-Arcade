@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
 import { useCallback, useEffect, useRef } from "react";
 import { Contract, CallData, cairo, BigNumberish } from "starknet";
 import { SNAKE_N_LADDERS_ABI } from "../abi";
@@ -26,42 +27,22 @@ export const useSnakeLadderGameContract = (
     }
   }, [account]);
 
-  const executeContractRollCall = useCallback(async () => {
-    if (!connected || !account) {
-      console.warn("Not connected or account is missing");
-      return null;
-    }
-    try {
-      const multiCall = await account.execute({
-        contractAddress: SNAKE_N_LADDERS_ADDRESS,
-        entrypoint: "roll",
-      });
-
-      const txHash = multiCall?.transaction_hash;
-      if (!txHash) {
-        throw new Error("Transaction hash missing");
-      }
-      const receipt = await provider.waitForTransaction(txHash);
-      console.log("Transaction receipt:", receipt);
-    } catch (err) {
-      console.error("Contract call failed:", err);
-      return null;
-    }
-  }, [connected, account]);
-
-  
-  const executeContractCall = useCallback(
+  const createGame = useCallback(
     async (amount: BigNumberish) => {
-      if (!amount) {
+      if (!amount || amount === "0") {
         toast.error("Amount must be greater than zero");
         return null;
       }
+
       if (!connected || !account) {
-        console.warn("Not connected or account is missing");
+        toast.error("Wallet not connected");
         return null;
       }
+
+      console.log({ amount });
+
       try {
-        const multiCall = await account.execute([
+        const calls = [
           {
             contractAddress: STRK_TOKEN_ADDRESS,
             entrypoint: "approve",
@@ -72,34 +53,126 @@ export const useSnakeLadderGameContract = (
           },
           {
             contractAddress: SNAKE_N_LADDERS_ADDRESS,
-            entrypoint: "enroll",
+            entrypoint: "create_game",
+            calldata: CallData.compile({
+              bet_amount: cairo.uint256(amount),
+            }),
           },
-        ]);
+        ];
 
-        const txHash = multiCall?.transaction_hash;
+        const tx = await account.execute(calls);
+        const txHash = tx?.transaction_hash;
+        console.log({ txHash });
+
         if (!txHash) {
           throw new Error("Transaction hash missing");
         }
+
         const receipt = await provider.waitForTransaction(txHash);
-        console.log("Transaction receipt:", receipt);
-      } catch (err) {
-        console.error("Contract call failed:", err);
+        console.log("Game created! Receipt:", receipt);
+        return receipt;
+      } catch (error) {
+        console.error("createGame failed:", error);
+        toast.error("Failed to create game");
         return null;
       }
     },
     [connected, account]
   );
 
-  const enroll = useCallback(
-    (amount: BigNumberish) => {
-      return executeContractCall(amount);
-    },
-    [executeContractCall]
-  );
+  const roll = useCallback(async () => {
+    if (!connected || !account) {
+      toast.error("Wallet not connected");
+      return null;
+    }
 
-  const roll = useCallback(() => {
-    return executeContractRollCall();
-  }, [executeContractRollCall]);
+    try {
+      const tx = await account.execute({
+        contractAddress: SNAKE_N_LADDERS_ADDRESS,
+        entrypoint: "roll",
+      });
 
-  return { enroll,roll };
+      const txHash = tx?.transaction_hash;
+      if (!txHash) {
+        throw new Error("Transaction hash missing");
+      }
+
+      const receipt = await provider.waitForTransaction(txHash);
+      console.log("Rolled for player. Receipt:", receipt);
+      const event = receipt?.events?.find(
+        (e) =>
+          e.from_address ===
+          "0x686f21556c4e995e61e1bf02f10155207f8921dceffe88d9bb794e4c66ee26c"
+      );
+      console.log({ event });
+      return Number(event?.data?.[0]?.toString()) || 1;
+    } catch (error) {
+      console.error("roll failed:", error);
+      toast.error("Roll failed");
+      return null;
+    }
+  }, [connected, account]);
+
+  const rollForComputer = useCallback(async () => {
+    if (!connected || !account) {
+      toast.error("Wallet not connected");
+      return null;
+    }
+
+    try {
+      const tx = await account.execute({
+        contractAddress: SNAKE_N_LADDERS_ADDRESS,
+        entrypoint: "roll_for_computer",
+      });
+
+      const txHash = tx?.transaction_hash;
+      if (!txHash) {
+        throw new Error("Transaction hash missing");
+      }
+
+      const receipt = await provider.waitForTransaction(txHash);
+      console.log("Rolled for computer. Receipt:", receipt);
+      const event = receipt?.events?.find(
+        (e) =>
+          e.from_address ===
+          "0x686f21556c4e995e61e1bf02f10155207f8921dceffe88d9bb794e4c66ee26c"
+      );
+      console.log({ event });
+      return Number(event?.data?.[0]?.toString()) || 1;
+    } catch (error) {
+      console.error("rollForComputer failed:", error);
+      toast.error("Roll for computer failed");
+      return null;
+    }
+  }, [connected, account]);
+
+  const endGame = useCallback(async () => {
+    if (!connected || !account) {
+      toast.error("Wallet not connected");
+      return null;
+    }
+
+    try {
+      const tx = await account.execute({
+        contractAddress: SNAKE_N_LADDERS_ADDRESS,
+        entrypoint: "end_game",
+      });
+
+      const txHash = tx?.transaction_hash;
+      if (!txHash) {
+        throw new Error("Transaction hash missing");
+      }
+
+      const receipt = await provider.waitForTransaction(txHash);
+      console.log("Rolled for player. Receipt:", receipt);
+
+      return receipt;
+    } catch (error) {
+      console.error("roll failed:", error);
+      toast.error("Roll failed");
+      return null;
+    }
+  }, [connected, account]);
+
+  return { createGame, roll, rollForComputer, endGame };
 };

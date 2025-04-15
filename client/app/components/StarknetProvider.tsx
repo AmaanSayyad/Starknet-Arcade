@@ -66,11 +66,16 @@ const policies = {
     },
     [SNAKE_N_LADDERS_ADDRESS]: {
       name: "Snake Ladder game",
-      description:
-        "Allows interaction with the Rock Paper Scissors game contract",
+      description: "Allows interaction with the Snake and ladder game contract",
       methods: [
-        { name: "roll", entrypoint: "roll", session: true },
-        { name: "Enroll", entrypoint: "enroll", session: true },
+        { name: "Dice Roll", entrypoint: "roll", session: true },
+        {
+          name: "Computer Dice Roll",
+          entrypoint: "roll_for_computer",
+          session: true,
+        },
+        { name: "Create Game", entrypoint: "create_game", session: true },
+        {name:"End game",entrypoint:"end_game",session:true}
       ],
     },
     [ROULETTE_ADDRESS]: {
