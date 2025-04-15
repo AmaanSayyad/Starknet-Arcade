@@ -31,7 +31,7 @@ const Address: React.FC<AddressProps> = ({ isMobile = false }) => {
     (async () => {
       if (address) {
         const addressMap = await lookupAddresses([address]);
-        setUserName(addressMap.get(address) || "Unknown");
+        setUserName(addressMap.get(address) || "nikku");
       }
     })();
   }, [address]);

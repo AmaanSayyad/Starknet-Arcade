@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import WalletBar from "./WalletBar";
-import ControllerButton from "./floppy-bird/game/ControllerButton";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
 import Link from "next/link";
@@ -112,9 +111,9 @@ export function Navbar() {
               🪙
             </div>
             <span className="text-white text-base font-semibold">
-              1290.0000
+            1380 XP
             </span>
-            <img src="/icons/plus-circle.svg" alt="Add" className="w-5 h-5" />
+            
           </div>
 
           <WalletBar />
