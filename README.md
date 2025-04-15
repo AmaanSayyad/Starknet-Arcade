@@ -1,50 +1,36 @@
-# **StarkNet Arcade**
+# 🎮 **Starknet-Arcade (Arcadino)**
 
-## **🚀 Vision & Mission**
-We are building a **fully on-chain gaming platform** on the **StarkNet ecosystem**, blending elements from **GameFi** and **GambleFi**. Our mission is to provide a **safe**, **secure**, **fair**, and **100% transparent** gaming environment for both gamers and gamblers.
+Arcadino is a fully on-chain GameFi project built on the StarkNet ecosystem.  
+100% Fair, fully on-chain, gasless, and provably transparent - powered by StarkNet VRF and session keys.
 
----
+--- 
+## Technical Architecture
 
-## **🎲 Games Offered**
-- **Coin Flip**
-- **Snakes & Ladders**
-- **Rock, Paper, Scissors**
-- **Roulette**
-- **Mineskin**
+![Screenshot 2025-04-15 174929](https://github.com/user-attachments/assets/6fcccb01-ab42-4aab-a535-7b812e3217d5)
 
 ---
 
-## **✨ Core Features**
-- **Fully On-Chain Gaming**: Every game interaction, from player moves to outcomes, is verifiable directly on StarkNet, ensuring complete transparency and fairness.
-- **Gasless Transactions**: Enhanced user experience with frictionless, fee-free gaming interactions.
-- **Session Keys**: Streamlined and secure gameplay sessions without repetitive wallet approvals.
-- **Cartridge Controller Integration**: Simplified asset and session management for seamless user experiences.
-- **Provably Fair Gameplay**: Built using Starknet VRF to ensure game outcomes are always unbiased and tamper-proof.
+https://github.com/user-attachments/assets/5223bc16-95b2-42a6-8e85-ad5f6c79aee5
 
 ---
 
-## **🔗 Technology Stack**
-- **Blockchain**: StarkNet
-- **Frontend**: React, Next.js
-- **Wallets**: Argent X, Braavos, Cartridge Controller
-- **Authentication**: Sign-in with Google, Web3 wallet integrations
-  - **VRF**: Starknet VRF
-- **Gasless Transactions**: Session keys
+https://github.com/user-attachments/assets/115c73d2-1b4e-4cd0-b280-be02bb4361d5
+
+![Screenshot 2025-04-16 041105](https://github.com/user-attachments/assets/092871be-dca1-44f4-a8fe-23567c5bfe4c)
+![Screenshot 2025-04-16 041241](https://github.com/user-attachments/assets/1346e8b5-2554-44b0-8c6d-060e5adc4696)
+![Screenshot 2025-04-16 041320](https://github.com/user-attachments/assets/3bf55c48-496a-47d6-b24b-f33993fe8b6c)
+![Screenshot 2025-04-16 041400](https://github.com/user-attachments/assets/fab744ec-e700-471f-ad12-a0c75f8b3ca0)
 
 ---
 
-## **📖 Documentation**
-For comprehensive project documentation, gameplay mechanics, and technical implementation, visit our (link coming soon).
+## 🌐 **Links**
+
+- **🐦 Twitter**: https://x.com/StarkNet_Arcade
+- **📘 LitePaper / GitBook**: https://amaans-organization.gitbook.io/starknet-arcade
+- **🚀 Live dApp**: https://starknet-arcade.vercel.app/
+- **🎯 Pitch Deck**: https://www.canva.com/design/DAGkuwtnWMU/NXdO-4ktMoUcleUFRG283w/view?utm_content=DAGkuwtnWMU&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hb1b396888b
 
 ---
 
-## **👥 Community**
-Join our growing community on social media:
-
-- **X**: 
-
----
-
-
-## **📜 License**
-Distributed under the MIT License. 
+> Join us in redefining on-chain gaming on StarkNet.  
+> Built by devs, powered by community, made for the world.
