@@ -393,13 +393,13 @@ export default function SnakeAndLadderGame() {
         </div>
 
         {/* Game Status and Debug Info */}
-        <div className="bg-gray-800 p-2 rounded mb-4 text-xs text-white">
+        {/* <div className="bg-gray-800 p-2 rounded mb-4 text-xs text-white">
           <p>Turn: {turn}</p>
           <p>isRolling: {isRolling ? "true" : "false"}</p>
           <p>isMoving: {isMoving ? "true" : "false"}</p>
           <p>gameCreated: {gameCreated ? "true" : "false"}</p>
           <p>shouldShowRollButton: {shouldShowRollButton ? "true" : "false"}</p>
-        </div>
+        </div> */}
 
         {/* Table of Positions */}
         <table className="table-auto w-full text-left mb-6 border border-gray-700 rounded-lg overflow-hidden shadow-md bg-black text-white">
