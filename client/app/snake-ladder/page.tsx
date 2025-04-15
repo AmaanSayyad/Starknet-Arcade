@@ -471,9 +471,7 @@ export default function SnakeAndLadderGame() {
         {/* Stake Amount Input (when game not created) */}
         {!gameCreated && !winner && (
           <div className="w-full mb-4">
-            <label className="block text-sm font-medium text-gray-400 mb-1">
-              Stake Amount (STRK)
-            </label>
+           
             <input
               type="number"
               value={stakeAmount}
