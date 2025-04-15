@@ -25,6 +25,7 @@ import {
   STRK_TOKEN_ADDRESS,
   RPS_CONTRACT_ADDRESS,
   SNAKE_N_LADDERS_ADDRESS,
+  ROULETTE_ADDRESS,
 } from "../constants";
 
 const CONTRACT_ADDRESS = COIN_FLIP_ADDRESS;
@@ -70,6 +71,15 @@ const policies = {
       methods: [
         { name: "roll", entrypoint: "roll", session: true },
         { name: "Enroll", entrypoint: "enroll", session: true },
+      ],
+    },
+    [ROULETTE_ADDRESS]: {
+      name: "Roullete",
+      description:
+        "Allows interaction with the Rock Paper Scissors game contract",
+      methods: [
+        { name: "Spin Roulette", entrypoint: "spin_roulette", session: true },
+        { name: "Withdraw", entrypoint: "withdraw", session: true },
       ],
     },
   },

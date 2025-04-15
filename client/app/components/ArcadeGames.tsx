@@ -64,16 +64,16 @@ const ArcadeGames = () => {
             // You'll add your SVG here
           },
           {
-            title: "Starknet Score",
-            subtitle: "⭐ Degen Stats",
+            title: "Memory Matching",
+            subtitle: "⭐ Match Degens",
             description:
               "Track your Starknet journey. Brag about your degen moves. Score high, stay fly.",
             bg: "bg-gradient-to-br from-blue-400 to-cyan-500",
-            btn: "Check Score",
+            btn: "Play Now",
             rating: "4.7",
-            url: "/score",
+            url: "/memory-matching",
             imgUrl:
-              "https://img.freepik.com/free-vector/hand-drawn-kids-game-illustration_23-2150651870.jpg?t=st=1744526129~exp=1744529729~hmac=0db791e91bea8b7e03c667202d1e90f71047d09b5004117fb0698c3c2ceef61b&w=740",
+              "https://img.freepik.com/free-vector/hand-drawn-memory-game-card_23-2150140066.jpg?t=st=1744702157~exp=1744705757~hmac=418f97b7978424b76b6ab9dd2070e29f47c93693cd564996a59f3dd400d6b3ea&w=740",
             // You'll add your SVG here
           },
           {

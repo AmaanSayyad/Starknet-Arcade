@@ -1,9 +1,36 @@
 "use client";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AiOutlineSound } from "react-icons/ai";
 import { RiResetLeftFill } from "react-icons/ri";
 import { ImSpinner4 } from "react-icons/im";
+import ControllerConnector from "@cartridge/connector/controller";
+import { useAccount, useConnect } from "@starknet-react/core";
+import { useRouletteContract } from "../hooks/useRouletteContract";
 export default function RoulettePage() {
+  const [connected, setConnected] = useState(false);
+  const { connectors } = useConnect();
+  const { address, account } = useAccount();
+  const [username, setUsername] = useState<string | undefined>();
+  useEffect(() => {
+    if (!address) return;
+    const controller = connectors.find((c) => c instanceof ControllerConnector);
+    if (controller) {
+      controller.username()?.then((n) => setUsername(n));
+      setConnected(true);
+    }
+    console.log(username);
+  }, [address, connectors]);
+
+  const { spinwheel } = useRouletteContract(connected, account);
+
+  const spinWheel = async () => {
+    try {
+      await spinwheel(200);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <>
       <div className="website-wrapper font-techno" id="website-wrapper">
@@ -24,6 +51,7 @@ export default function RoulettePage() {
               </div>
               <div className="max-bet bet-size">
                 <span className="text-color">MAX:</span> $1000.00
+  
               </div>
             </div>
           </div>
@@ -279,26 +307,29 @@ export default function RoulettePage() {
               >
                 200
               </div>
+       
             </div>
             <div className="menu-container">
-              <div className="button button-spin">
+              <div className="button button-spin"  onClickCapture={spinWheel}>
                 <div className="circle">
                   <ImSpinner4 size={50} />
                 </div>
                 <div className="circle-overlay"></div>
                 <div className="button-text">SPIN</div>
+                
               </div>
               <div className="button button-reset">
                 <div className="circle">
-                  <RiResetLeftFill size={50}/>
+                  <RiResetLeftFill size={50} />
                 </div>
                 <div className="circle-overlay"></div>
 
                 <div className="button-text">RESET</div>
               </div>
+
               <div className="button button-sound">
                 <div className="circle">
-                  <AiOutlineSound size={50}/>
+                  <AiOutlineSound size={50} />
                 </div>
                 <div className="circle-overlay"></div>
 
@@ -310,7 +341,7 @@ export default function RoulettePage() {
           <div className="money-container">
             <div className="cash-area area">
               <div className="text">
-                <span>CASH</span> $
+                Balance :  
               </div>
               <div className="cash-total"></div>
             </div>

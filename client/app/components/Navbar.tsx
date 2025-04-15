@@ -55,7 +55,7 @@ export function Navbar() {
         <div className="flex items-center space-x-10">
           <div className="flex items-center space-x-2 cursor-pointer hover:text-gray-300 transition-colors">
             <img src="/icons/gamepad.svg" alt="Games" className="w-6 h-6" />
-            <span className="font-semibold text-lg">Games</span>
+            <span className="font-semibold text-lg"><Link href="/">Games</Link></span>
           </div>
           <div className="flex items-center space-x-2 text-gray-400 cursor-pointer hover:text-gray-300 transition-colors">
             <img src="/icons/store.svg" alt="Store" className="w-6 h-6" />

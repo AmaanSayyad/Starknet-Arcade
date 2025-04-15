@@ -587,7 +587,7 @@ $(".button-spin").click(function () {
               break;
           }
         }
-      }, 5000);
+      }, 10000);
 
       return lastRollColor;
     };

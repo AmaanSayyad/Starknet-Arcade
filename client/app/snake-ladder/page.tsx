@@ -60,7 +60,6 @@ export default function SnakeAndLadderGame() {
   useEffect(() => {
     // Play sound initially
     audioRef.current.play();
-
     // Cleanup on unmount
     return () => {
       audioRef.current.pause();

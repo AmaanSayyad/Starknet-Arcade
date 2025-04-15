@@ -11,6 +11,8 @@ export const STRK_TOKEN_ADDRESS =
 
 export const SNAKE_N_LADDERS_ADDRESS =
   "0x781bd6a642cd21cf2809466405bab9faf4abb7ba6b851609d9cdb4b5ef753f7";
+
+export const ROULETTE_ADDRESS="0x049803290139f4df889213777b39389034db37e948fd22f91b4b37360c8caf92";
 export const voyagerScanBaseUrl = "https://sepolia.voyager.online";
 
 export const provider = new RpcProvider({
