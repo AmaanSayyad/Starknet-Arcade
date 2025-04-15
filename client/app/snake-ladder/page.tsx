@@ -5,23 +5,50 @@ import { useAccount, useConnect } from "@starknet-react/core";
 import { useSnakeLadderGameContract } from "../hooks/useSnakeLadderGameContract";
 import toast from "react-hot-toast";
 
-
 export default function SnakeAndLadderGame() {
   const [playerPosition, setPlayerPosition] = useState(1);
   const [computerPosition, setComputerPosition] = useState(1);
   const [diceValue, setDiceValue] = useState<number | null>(null);
   const [isRolling, setIsRolling] = useState(false);
-  const [turn, setTurn] = useState("player"); // 'player' or 'computer'
+  const [turn, setTurn] = useState("player"); // 'player' or 'opponent'
   const [message, setMessage] = useState("Roll the dice to start!");
   const [winner, setWinner] = useState<string | null>(null);
   const [isMoving, setIsMoving] = useState(false);
   const [connected, setConnected] = useState(false);
   const [gameCreated, setGameCreated] = useState(false);
   const [stakeAmount, setStakeAmount] = useState(10);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   const { connectors } = useConnect();
   const { address, account } = useAccount();
-  const [username, setUsername] = useState<string | undefined>();
+  const [username, setUsername] = useState();
+  
+  // Only create audio refs after component mounts (client-side only)
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Check if code is running in browser
+  const isBrowser = typeof window !== 'undefined';
+
+  useEffect(() => {
+    // Initialize audio only on client side
+    if (isBrowser) {
+      audioRef.current = new Audio("sounds/roullete/ambient-sounds.mp3");
+      
+      // Play sound initially
+      audioRef.current.play().catch(error => {
+        // Handle autoplay restrictions gracefully
+        console.log("Audio autoplay was prevented:", error);
+      });
+      
+      // Cleanup on unmount
+      return () => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current = null;
+        }
+      };
+    }
+  }, [isBrowser]);
 
   useEffect(() => {
     if (!address) return;
@@ -35,7 +62,6 @@ export default function SnakeAndLadderGame() {
   const { createGame, roll, rollForComputer, endGame } =
     useSnakeLadderGameContract(connected, account);
 
- 
   const createNewGame = async () => {
     try {
       const res = await createGame(stakeAmount);
@@ -43,17 +69,16 @@ export default function SnakeAndLadderGame() {
         setGameCreated(true);
         toast.success("Game created successfully!");
         setMessage("Game created! Roll the dice to start!");
+        setTurn("player"); // Ensure player starts first
       }
- 
     } catch (error) {
-      console.log(error);
-      toast.error("Failed to create game");
+      console.error("Game creation error:", error);
       toast.error("Failed to create game");
     }
   };
 
   const handleRoll = async () => {
-    if (isRolling || isMoving || winner || !gameCreated) return;
+    if (isRolling || isMoving || winner || !gameCreated || turn !== "player") return;
 
     try {
       setIsRolling(true);
@@ -71,12 +96,7 @@ export default function SnakeAndLadderGame() {
       clearInterval(rollInterval);
 
       if (result) {
-        // Extract the dice value from the transaction receipt
-        // In a real implementation, you would parse the events from the receipt
-        // For now, we'll assume the roll returns a number between 1-6
-        // This would need to be adjusted based on your actual contract implementation
         const rollValue = result;
-
         setDiceValue(Number(rollValue));
         setIsRolling(false);
 
@@ -97,7 +117,7 @@ export default function SnakeAndLadderGame() {
     if (turn !== "opponent" || isRolling || isMoving || winner || !gameCreated)
       return;
 
-    // Set rolling state (but don't show animation - just to prevent multiple calls)
+    // Set rolling state
     setIsRolling(true);
     setMessage("Opponent is rolling...");
 
@@ -106,10 +126,7 @@ export default function SnakeAndLadderGame() {
       const result = await rollForComputer();
 
       if (result) {
-        // Extract the dice value from the transaction receipt
-        // In a real implementation, you would parse the events from the receipt
         const rollValue = result;
-
         setDiceValue(Number(rollValue));
 
         // Move computer piece based on blockchain result
@@ -135,18 +152,18 @@ export default function SnakeAndLadderGame() {
   };
 
   const endGameHandle = async () => {
-
-
     try {
-      // Call the contract's rollForComputer function
       await endGame();
+      toast.success("Game ended successfully!");
+      resetGame();
     } catch (error) {
-      console.error("Computer roll error:", error);
+      console.error("End game error:", error);
+      toast.error("Failed to end game");
     }
   };
 
   // Define snakes and ladders on the board
-  const snakesAndLadders: Record<number, number> = {
+  const snakesAndLadders = {
     // Ladders (start -> end)
     4: 25,
     21: 39,
@@ -164,23 +181,13 @@ export default function SnakeAndLadderGame() {
     98: 55,
   };
 
-  const audioRef = useRef(new Audio("sounds/roullete/ambient-sounds.mp3"));
-  const [isPlaying, setIsPlaying] = useState(true);
-
-  useEffect(() => {
-    // Play sound initially
-    audioRef.current.play();
-    // Cleanup on unmount
-    return () => {
-      audioRef.current.pause();
-    };
-  }, []);
-
   const toggleSound = () => {
+    if (!audioRef.current) return;
+    
     if (isPlaying) {
       audioRef.current.pause();
     } else {
-      audioRef.current.play();
+      audioRef.current.play().catch(err => console.log("Play error:", err));
     }
     setIsPlaying(!isPlaying);
   };
@@ -188,9 +195,11 @@ export default function SnakeAndLadderGame() {
   const movePlayer = (steps: number) => {
     setIsMoving(true);
 
-    // 🔊 Play move sound
-    const moveSound = new Audio("/sounds/move.mp3");
-    moveSound.play();
+    // 🔊 Play move sound - only on client side
+    if (isBrowser) {
+      const moveSound = new Audio("/sounds/move.mp3");
+      moveSound.play().catch(err => console.log("Move sound error:", err));
+    }
 
     const currentPosition =
       turn === "player" ? playerPosition : computerPosition;
@@ -255,8 +264,13 @@ export default function SnakeAndLadderGame() {
   const checkWinCondition = (position: number) => {
     if (position === 100) {
       setWinner(turn);
-      const moveSound = new Audio("/sounds/win.mp3");
-      moveSound.play();
+      
+      // Play win sound - only on client side
+      if (isBrowser) {
+        const winSound = new Audio("/sounds/win.mp3");
+        winSound.play().catch(err => console.log("Win sound error:", err));
+      }
+      
       setMessage(
         `${turn === "player" ? "You" : "Opponent"} reached 100! ${
           turn === "player" ? "You win!" : "Opponent wins!"
@@ -270,6 +284,8 @@ export default function SnakeAndLadderGame() {
   };
 
   const switchTurn = () => {
+    // Important: Reset isRolling to ensure buttons show correctly
+    setIsRolling(false);
     setTurn(turn === "player" ? "opponent" : "player");
   };
 
@@ -322,16 +338,22 @@ export default function SnakeAndLadderGame() {
     setIsRolling(false);
     setTurn("player");
     setMessage("Create a new game to start!");
-    setMessage("Create a new game to start!");
     setWinner(null);
     setIsMoving(false);
-    setGameCreated(false);
     setGameCreated(false);
   };
 
   // Player piece position coordinates
   const playerPos = getPositionCoordinates(playerPosition);
   const computerPos = getPositionCoordinates(computerPosition);
+
+  // Debug what's happening with the Roll Dice button
+  const shouldShowRollButton = 
+    gameCreated && 
+    turn === "player" && 
+    !isMoving && 
+    !winner && 
+    !isRolling;
 
   return (
     <div className="flex font-techno items-center mt-5 justify-around p-4 container mx-auto">
@@ -380,24 +402,9 @@ export default function SnakeAndLadderGame() {
             className={`w-20 h-20 border-4 border-gray-300 rounded-xl flex items-center justify-center text-3xl font-black text-gray-700 bg-gray-100 shadow-inner ${
               isRolling && turn === "player" ? "animate-bounce" : ""
             }`}
-            onClick={
-              turn === "player" &&
-              !isMoving &&
-              !winner &&
-              gameCreated &&
-              !isRolling
-                ? handleRoll
-                : undefined
-            }
+            onClick={shouldShowRollButton ? handleRoll : undefined}
             style={{
-              cursor:
-                turn === "player" &&
-                !isMoving &&
-                !winner &&
-                gameCreated &&
-                !isRolling
-                  ? "pointer"
-                  : "default",
+              cursor: shouldShowRollButton ? "pointer" : "default",
             }}
           >
             {diceValue || "?"}
@@ -416,7 +423,6 @@ export default function SnakeAndLadderGame() {
             <tr>
               <th className="px-4 py-2 border-r border-gray-700">Player</th>
               <th className="px-4 py-2 border-r border-gray-700">Position</th>
-    
               <th className="px-4 py-2">Stake Amount</th>
             </tr>
           </thead>
@@ -428,9 +434,7 @@ export default function SnakeAndLadderGame() {
               <td className="px-4 py-3 text-white border-r border-gray-700">
                 {playerPosition}
               </td>
-             
               <td className="px-4 py-3 text-green-400">{stakeAmount} STRK</td>
-             
             </tr>
             <tr className="hover:bg-gray-800 transition border-b border-gray-700">
               <td className="px-4 py-3 font-medium text-red-400 border-r border-gray-700">
@@ -439,14 +443,11 @@ export default function SnakeAndLadderGame() {
               <td className="px-4 py-3 text-white border-r border-gray-700">
                 {computerPosition}
               </td>
-            
               <td className="px-4 py-3 text-green-400">{stakeAmount} STRK</td>
-           
             </tr>
 
             {/* Gap Row */}
             <tr>
-              <td colSpan={4} className="py-2"></td>
               <td colSpan={4} className="py-2"></td>
             </tr>
 
@@ -454,7 +455,6 @@ export default function SnakeAndLadderGame() {
             <tr className="bg-gray-950">
               <td
                 colSpan={4}
-            
                 className="px-4 py-4 text-center border-t border-gray-700"
               >
                 <p className="text-md text-gray-400 italic mb-1">{message}</p>
@@ -482,7 +482,6 @@ export default function SnakeAndLadderGame() {
           </div>
         )}
 
-
         {/* Action Buttons */}
         <div className="flex gap-4">
           {!gameCreated && (
@@ -495,28 +494,23 @@ export default function SnakeAndLadderGame() {
             </button>
           )}
 
-          {gameCreated &&
-            turn === "player" &&
-            !isMoving &&
-            !winner &&
-            !isRolling && (
-              <>
-              <button
-                onClick={handleRoll}
-                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition"
-              >
-                🎲 Roll Dice
-              </button>
-               
-              </>
-            )}
+          {shouldShowRollButton && (
+            <button
+              onClick={handleRoll}
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition"
+            >
+              🎲 Roll Dice
+            </button>
+          )}
 
-<button
-                  onClick={endGameHandle}
-                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition"
-                >
-                 End game
-                </button>
+          {(
+            <button
+              onClick={endGameHandle}
+              className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-md transition"
+            >
+              End Game
+            </button>
+          )}
 
           {winner && (
             <button
@@ -526,10 +520,7 @@ export default function SnakeAndLadderGame() {
               🔄 Play Again
             </button>
           )}
-          
         </div>
-
-        {/* Sound Toggle Button */}
 
         {/* Sound Toggle Button */}
         <div
@@ -548,8 +539,6 @@ export default function SnakeAndLadderGame() {
             <span className="text-red-500">✗ Wallet Not Connected</span>
           )}
         </div>
-
-       
       </div>
     </div>
   );
