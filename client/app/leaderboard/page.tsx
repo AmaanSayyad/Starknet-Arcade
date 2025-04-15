@@ -1,8 +1,8 @@
 "use client";
 import { useEffect } from "react";
-import { getLeaderboard, setLeaderboard } from "../utils";
+import { getLeaderboard, setLeaderboard, shortenAddress } from "../utils";
 import { useState } from "react";
-
+import {toast} from "react-hot-toast";
 export default function LeaderboardTable() {
   const [leaderboardData, setLeaderboardData] = useState([]);
   useEffect(() => {
@@ -11,42 +11,46 @@ export default function LeaderboardTable() {
     if (existing.length === 0) {
       const defaultData = [
         {
-          address: "0x04c3aaa63...6d4d7E70888",
-          totalXP: 1420,
+          address:
+            "0x071c77157a819b7e02204ef928d1fb0c896d2c18bac9488db8bc6e54a5ab51cc",
+          totalXP: 1450,
           gameType: "Coin Flip",
           status: "Win",
-          earnedPoints: 120,
+          earnedPoints: 130,
         },
         {
-          address: "0x0793feb8c8e...8d22859b88454",
-          totalXP: 1340,
+          address:
+            "0x0393119d6e999a247dcbcf5d30627d4f4a908e034b7a75632c67abd4451022ea",
+          totalXP: 1380,
           gameType: "Snake & Ladder",
           status: "Loss",
-          earnedPoints: 80,
+          earnedPoints: 75,
         },
         {
-          address: "0x01e8e9987d4...ba3f2c52f3",
-          totalXP: 1280,
+          address:
+            "0x0199817e04cac5d66e13dacd5c2a8b65fe0c53c6f8dcabb66ad463be9a35b11c",
+          totalXP: 1250,
           gameType: "Rock Paper Scissor",
           status: "Win",
-          earnedPoints: 95,
+          earnedPoints: 100,
         },
         {
-          address: "0x3M4n...5O6p",
-          totalXP: 1100,
+          address:
+            "0x0793feb8c8e0557bbbf6370c0e316091bd9553da5c05de854d78d22859b88454",
+          totalXP: 1130,
           gameType: "Coin Flip",
           status: "Loss",
-          earnedPoints: 50,
+          earnedPoints: 60,
         },
         {
-          address: "0x7Q8r...9S0t",
-          totalXP: 980,
+          address:
+            "0x02584d564c97eccdb04ae7cb0881c28f246b4c81e6ccd40fe2cd8716796e8a2b",
+          totalXP: 990,
           gameType: "Snake & Ladder",
           status: "Win",
-          earnedPoints: 105,
+          earnedPoints: 110,
         },
       ];
-
       setLeaderboard(defaultData);
       setLeaderboardData(defaultData);
     } else {
@@ -93,7 +97,22 @@ export default function LeaderboardTable() {
                       >
                         {rankIcon || idx + 1}
                       </td>
-                      <td className="px-6 py-4">{player.address}</td>
+                      <td className="px-6 py-4 flex items-center gap-2">
+                        <span>{shortenAddress(player.address)}</span>
+                        <button
+                          onClick={() =>
+                            {
+                              navigator.clipboard.writeText(player.address)
+                              toast.success("Address Copied");
+
+                            }
+                          }
+                          className="text-blue-500 hover:text-blue-700 text-sm"
+                          title="Copy Address"
+                        >
+                          📋
+                        </button>
+                      </td>
                       <td className="px-6 py-4">{player.gameType}</td>
                       <td className="px-6 py-4">
                         <span

@@ -10,14 +10,14 @@ type Card = {
   isMatched: boolean;
 };
 const initialCards: string[] = [
-  "https://pbs.twimg.com/profile_images/1881206114395787264/II0n4t6x_400x400.jpg",
-  "https://pbs.twimg.com/profile_images/1881112914524000256/txUkIUzJ_400x400.jpg",
-  "https://pbs.twimg.com/profile_images/1905879296629223425/-uhwqdFJ_400x400.jpg",
-  "https://pbs.twimg.com/profile_images/1722902684196311040/50CwdgeX_400x400.jpg",
-  "https://pbs.twimg.com/profile_images/1755864558160453632/atJEyKbU_400x400.jpg",
-  "https://pbs.twimg.com/profile_images/1909612561454039040/Xl8ZbyNY_400x400.jpg",
-  "https://pbs.twimg.com/profile_images/1841876573248499713/gpwigIH1_400x400.jpg",
-  "https://pbs.twimg.com/profile_images/1911065125206847488/f7py0PBu_400x400.jpg",
+  "https://substackcdn.com/image/fetch/w_1200,h_600,c_fill,f_jpg,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fbucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com%2Fpublic%2Fimages%2F7d9a5fa7-68d8-46ad-9056-378ce13e56ea_280x280.png",
+  "https://pbs.twimg.com/profile_images/1855150178002706432/P6liMWCZ_400x400.jpg",
+  "https://pbs.twimg.com/profile_images/1879931250955235329/zQtCRR5U_400x400.jpg",
+  "https://pbs.twimg.com/profile_images/1904592020007489536/AG870Qta_400x400.jpg",
+  "https://pbs.twimg.com/profile_images/1880776070418354176/LbH4udpm_400x400.jpg",
+  "https://pbs.twimg.com/media/GohGZdqWsAAX4pK?format=jpg&name=large",
+  "https://pbs.twimg.com/media/Gnh7elrXsAAeHfO?format=jpg&name=large",
+  "https://www.starknet-ecosystem.com/astro_3.png",
 ];
 
 const MemoryGame: React.FC = () => {
