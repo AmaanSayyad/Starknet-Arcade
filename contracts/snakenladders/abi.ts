@@ -1,4 +1,4 @@
-export const abi = [
+[
   {
     type: "impl",
     name: "ISnakeNLadders",
@@ -66,6 +66,17 @@ export const abi = [
       {
         type: "function",
         name: "roll_for_computer",
+        inputs: [],
+        outputs: [
+          {
+            type: "core::integer::u64",
+          },
+        ],
+        state_mutability: "external",
+      },
+      {
+        type: "function",
+        name: "end_game",
         inputs: [],
         outputs: [
           {
@@ -203,26 +214,6 @@ export const abi = [
         ],
         outputs: [],
         state_mutability: "external",
-      },
-      {
-        type: "function",
-        name: "get_turn_accumulation",
-        inputs: [
-          {
-            name: "player_address",
-            type: "core::starknet::contract_address::ContractAddress",
-          },
-          {
-            name: "is_player",
-            type: "core::bool",
-          },
-        ],
-        outputs: [
-          {
-            type: "core::integer::u64",
-          },
-        ],
-        state_mutability: "view",
       },
     ],
   },
@@ -368,6 +359,30 @@ export const abi = [
   },
   {
     type: "event",
+    name: "snakenladders::SnakeNLadders::SnakeNLadders::DiceRolled",
+    kind: "struct",
+    members: [
+      {
+        name: "roll_result",
+        type: "core::integer::u64",
+        kind: "data",
+      },
+    ],
+  },
+  {
+    type: "event",
+    name: "snakenladders::SnakeNLadders::SnakeNLadders::GameEnded",
+    kind: "struct",
+    members: [
+      {
+        name: "game_id",
+        type: "core::integer::u64",
+        kind: "key",
+      },
+    ],
+  },
+  {
+    type: "event",
     name: "snakenladders::SnakeNLadders::SnakeNLadders::Event",
     kind: "enum",
     variants: [
@@ -399,6 +414,16 @@ export const abi = [
       {
         name: "FeeAddressChanged",
         type: "snakenladders::SnakeNLadders::SnakeNLadders::FeeAddressChanged",
+        kind: "nested",
+      },
+      {
+        name: "DiceRolled",
+        type: "snakenladders::SnakeNLadders::SnakeNLadders::DiceRolled",
+        kind: "nested",
+      },
+      {
+        name: "GameEnded",
+        type: "snakenladders::SnakeNLadders::SnakeNLadders::GameEnded",
         kind: "nested",
       },
     ],

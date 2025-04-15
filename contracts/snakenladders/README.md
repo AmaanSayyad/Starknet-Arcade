@@ -1,3 +1,3 @@
-Deployed Address = 0x02b0a8f6a088c29632876ce332e271b40c0cc17d1c1fb70f6664a89183a3f0ed
+Deployed Address = 0x0686f21556c4e995e61e1bf02f10155207f8921dceffe88d9bb794e4c66ee26c
 
-Voyager Scan = https://sepolia.voyager.online/contract/0x02b0a8f6a088c29632876ce332e271b40c0cc17d1c1fb70f6664a89183a3f0ed#code
+Voyager Scan = https://sepolia.voyager.online/contract/0x0686f21556c4e995e61e1bf02f10155207f8921dceffe88d9bb794e4c66ee26c

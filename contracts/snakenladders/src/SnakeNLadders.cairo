@@ -5,6 +5,7 @@ pub trait ISnakeNLadders<TContractState> {
     fn create_game(ref self: TContractState, bet_amount: u256) -> u64;
     fn roll(ref self: TContractState) -> u64;
     fn roll_for_computer(ref self: TContractState) -> u64;
+    fn end_game(ref self: TContractState) -> u64;
     fn get_player_position(self: @TContractState, player_address: ContractAddress) -> u64;
     fn get_computer_position(self: @TContractState, player_address: ContractAddress) -> u64;
     fn get_current_turn(self: @TContractState, player_address: ContractAddress) -> bool; // true for player, false for computer
@@ -14,7 +15,6 @@ pub trait ISnakeNLadders<TContractState> {
     fn get_game_bet(self: @TContractState, player_address: ContractAddress) -> u256;
     fn get_fee_address(self: @TContractState) -> ContractAddress;
     fn set_fee_address(ref self: TContractState, new_address: ContractAddress);
-    fn get_turn_accumulation(self: @TContractState, player_address: ContractAddress, is_player: bool) -> u64;
 }
 
 #[derive(Drop, Hash)]
@@ -30,9 +30,7 @@ pub struct Game {
     player_position: u64,
     computer_position: u64,
     is_player_turn: bool,
-    player_accumulation: u64,
-    computer_accumulation: u64,
-    winner: u8, // 0 = none, 1 = player, 2 = computer
+    winner: u8, // 0 = none, 1 = player, 2 = computer, 3 = game ended
     bet_amount: u256,
     created_at: u64,
 }
@@ -82,6 +80,8 @@ pub mod SnakeNLadders {
         PlayerWon: PlayerWon,
         ComputerWon: ComputerWon,
         FeeAddressChanged: FeeAddressChanged,
+        DiceRolled: DiceRolled,
+        GameEnded: GameEnded,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -90,6 +90,12 @@ pub mod SnakeNLadders {
         pub game_id: u64,
         pub player_address: ContractAddress,
         pub bet_amount: u256,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct GameEnded {
+        #[key]
+        pub game_id: u64,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -127,6 +133,11 @@ pub mod SnakeNLadders {
     pub struct FeeAddressChanged {
         pub old_address: ContractAddress,
         pub new_address: ContractAddress,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct DiceRolled {
+        pub roll_result: u64,
     }
 
     #[constructor]
@@ -198,8 +209,6 @@ pub mod SnakeNLadders {
                 player_position: 0,
                 computer_position: 0,
                 is_player_turn: true,
-                player_accumulation: 0,
-                computer_accumulation: 0,
                 winner: 0,
                 bet_amount: bet_amount,
                 created_at: get_block_timestamp(),
@@ -219,6 +228,29 @@ pub mod SnakeNLadders {
             game_id
         }
 
+        fn end_game(ref self: ContractState) -> u64 {
+            let player_address = get_caller_address();
+            
+            // Get player's active game
+            let game_id = self.player_active_game.read(player_address);
+            assert(game_id != 0, 'No active game found');
+            
+            // Get game state
+            let mut game = self.games.read(game_id);
+            assert(game.winner == 0, 'Game already has a winner');
+            
+            // Emit event
+            self.emit(GameEnded { game_id });
+            
+            // Reset player's active game
+            self.player_active_game.write(player_address, 0);
+            
+            // Delete the game
+            self.games.write(game_id, Game { winner: 3, ..game });
+            
+            game_id
+        }
+
         fn roll(ref self: ContractState) -> u64 {
             self.roll_number.write(self.roll_number.read() + 1);
             let player_address = get_caller_address();
@@ -234,49 +266,36 @@ pub mod SnakeNLadders {
 
             // Roll the dice
             let roll_result = self.roll_dice();
+            self.emit(DiceRolled { roll_result });
 
-            if roll_result == 6 {
-                let current_position = game.player_position;
-                let turn_accumulation = game.player_accumulation;
-                let mut new_position = current_position + roll_result + turn_accumulation;
-                
-                if new_position > 100 {
-                    self.games.write(game_id, Game { player_accumulation: 0, is_player_turn: false, ..game });
-                    return roll_result;
-                }
+            let current_position = game.player_position;
+            let mut new_position = current_position + roll_result;
 
-                // Player gets another turn
-                self.games.write(game_id, Game { player_accumulation: turn_accumulation + roll_result, is_player_turn: true, ..game });
-                return roll_result;
-            } else {
-                // Move the player
-                let current_position = game.player_position;
-                let turn_accumulation = game.player_accumulation;
-                let mut new_position = current_position + roll_result + turn_accumulation;
-                if new_position > 100 {
-                    self.games.write(game_id, Game { player_accumulation: 0, is_player_turn: false, ..game });
-                    return roll_result;
-                }
-
-                // Check for snakes or ladders
-                if self.objects.read(new_position) != 0 {
-                    new_position = self.objects.read(new_position);
-                }
-                game = Game { player_position: new_position, player_accumulation: 0, is_player_turn: false, ..game };
-                self
-                .emit(
-                    PlayerMoved { game_id, player_address, new_position, dice_roll: roll_result },
-                );
-
-                // Check for win condition
-                if new_position == 100 {
-                    game = Game { winner: 1, ..game };
-                    self.distribute_prize(player_address, game.bet_amount);
-                    self.emit(PlayerWon { game_id, player_address, prize_amount: game.bet_amount * 2 });
-                }
-                self.games.write(game_id, game);
+            if new_position > 100 {
+                self.games.write(game_id, Game { is_player_turn: false, ..game });
                 return roll_result;
             }
+
+            // Check for snakes or ladders
+            if self.objects.read(new_position) != 0 {
+                new_position = self.objects.read(new_position);
+            }
+
+            game = Game { player_position: new_position, is_player_turn: false, ..game };
+            self
+            .emit(
+                PlayerMoved { game_id, player_address, new_position, dice_roll: roll_result },
+            );
+
+            // Check for win condition
+            if new_position == 100 {
+                game = Game { winner: 1, ..game };
+                self.distribute_prize(player_address, game.bet_amount);
+                self.emit(PlayerWon { game_id, player_address, prize_amount: game.bet_amount * 2 });
+            }
+
+            self.games.write(game_id, game);
+            return roll_result;
         }
         
         fn roll_for_computer(ref self: ContractState) -> u64 {
@@ -294,27 +313,13 @@ pub mod SnakeNLadders {
 
             // Roll the dice
             let roll_result = self.roll_dice();
+            self.emit(DiceRolled { roll_result });
 
-            if roll_result == 6 {
-                let current_position = game.computer_position;
-                let turn_accumulation = game.computer_accumulation;
-                let mut new_position = current_position + roll_result + turn_accumulation;
-                
-                if new_position > 100 {
-                    self.games.write(game_id, Game { computer_accumulation: 0, is_player_turn: true, ..game });
-                    return roll_result;
-                }
-
-                // Player gets another turn
-                self.games.write(game_id, Game { computer_accumulation: turn_accumulation + roll_result, is_player_turn: false, ..game });
-                return roll_result;
-            } else {
                 // Move the player
                 let current_position = game.computer_position;
-                let turn_accumulation = game.computer_accumulation;
-                let mut new_position = current_position + roll_result + turn_accumulation;
+                let mut new_position = current_position + roll_result;
                 if new_position > 100 {
-                    self.games.write(game_id, Game { computer_accumulation: 0, is_player_turn: true, ..game });
+                    self.games.write(game_id, Game {  is_player_turn: true, ..game });
                     return roll_result;
                 }
 
@@ -322,7 +327,7 @@ pub mod SnakeNLadders {
                 if self.objects.read(new_position) != 0 {
                     new_position = self.objects.read(new_position);
                 }
-                game = Game { computer_position: new_position, computer_accumulation: 0, is_player_turn: true, ..game };
+                game = Game { computer_position: new_position,  is_player_turn: true, ..game };
                 self
                 .emit(
                     ComputerMoved { game_id, new_position, dice_roll: roll_result },
@@ -335,7 +340,7 @@ pub mod SnakeNLadders {
                 }
                 self.games.write(game_id, game);
                 return roll_result;
-            }
+            
         }
         
         fn get_player_position(self: @ContractState, player_address: ContractAddress) -> u64 {
@@ -409,18 +414,6 @@ pub mod SnakeNLadders {
             self.fee_address.write(new_address);
             
             self.emit(FeeAddressChanged { old_address, new_address });
-        }
-        
-        fn get_turn_accumulation(self: @ContractState, player_address: ContractAddress, is_player: bool) -> u64 {
-            let game_id = self.player_active_game.read(player_address);
-            assert(game_id != 0, 'No active game found');
-            
-            let game = self.games.read(game_id);
-            if is_player {
-                game.player_accumulation
-            } else {
-                game.computer_accumulation
-            }
         }
     }
 
