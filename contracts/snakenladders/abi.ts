@@ -5,6 +5,20 @@ export const abi = [
     interface_name: "snakenladders::SnakeNLadders::ISnakeNLadders",
   },
   {
+    type: "struct",
+    name: "core::integer::u256",
+    members: [
+      {
+        name: "low",
+        type: "core::integer::u128",
+      },
+      {
+        name: "high",
+        type: "core::integer::u128",
+      },
+    ],
+  },
+  {
     type: "enum",
     name: "core::bool",
     variants: [
@@ -24,9 +38,18 @@ export const abi = [
     items: [
       {
         type: "function",
-        name: "enroll",
-        inputs: [],
-        outputs: [],
+        name: "create_game",
+        inputs: [
+          {
+            name: "bet_amount",
+            type: "core::integer::u256",
+          },
+        ],
+        outputs: [
+          {
+            type: "core::integer::u64",
+          },
+        ],
         state_mutability: "external",
       },
       {
@@ -42,29 +65,8 @@ export const abi = [
       },
       {
         type: "function",
-        name: "is_enrolled",
-        inputs: [
-          {
-            name: "player_address",
-            type: "core::starknet::contract_address::ContractAddress",
-          },
-        ],
-        outputs: [
-          {
-            type: "core::bool",
-          },
-        ],
-        state_mutability: "external",
-      },
-      {
-        type: "function",
-        name: "get_player_id",
-        inputs: [
-          {
-            name: "player_address",
-            type: "core::starknet::contract_address::ContractAddress",
-          },
-        ],
+        name: "roll_for_computer",
+        inputs: [],
         outputs: [
           {
             type: "core::integer::u64",
@@ -77,8 +79,8 @@ export const abi = [
         name: "get_player_position",
         inputs: [
           {
-            name: "player_id",
-            type: "core::integer::u64",
+            name: "player_address",
+            type: "core::starknet::contract_address::ContractAddress",
           },
         ],
         outputs: [
@@ -86,29 +88,39 @@ export const abi = [
             type: "core::integer::u64",
           },
         ],
-        state_mutability: "external",
+        state_mutability: "view",
+      },
+      {
+        type: "function",
+        name: "get_computer_position",
+        inputs: [
+          {
+            name: "player_address",
+            type: "core::starknet::contract_address::ContractAddress",
+          },
+        ],
+        outputs: [
+          {
+            type: "core::integer::u64",
+          },
+        ],
+        state_mutability: "view",
       },
       {
         type: "function",
         name: "get_current_turn",
-        inputs: [],
-        outputs: [
+        inputs: [
           {
-            type: "core::integer::u64",
+            name: "player_address",
+            type: "core::starknet::contract_address::ContractAddress",
           },
         ],
-        state_mutability: "external",
-      },
-      {
-        type: "function",
-        name: "get_participation_fee",
-        inputs: [],
         outputs: [
           {
-            type: "core::integer::u64",
+            type: "core::bool",
           },
         ],
-        state_mutability: "external",
+        state_mutability: "view",
       },
       {
         type: "function",
@@ -119,7 +131,98 @@ export const abi = [
             type: "core::array::Array::<(core::integer::u64, core::integer::u64)>",
           },
         ],
+        state_mutability: "view",
+      },
+      {
+        type: "function",
+        name: "get_winner",
+        inputs: [
+          {
+            name: "player_address",
+            type: "core::starknet::contract_address::ContractAddress",
+          },
+        ],
+        outputs: [
+          {
+            type: "core::integer::u8",
+          },
+        ],
+        state_mutability: "view",
+      },
+      {
+        type: "function",
+        name: "get_active_game_id",
+        inputs: [
+          {
+            name: "player_address",
+            type: "core::starknet::contract_address::ContractAddress",
+          },
+        ],
+        outputs: [
+          {
+            type: "core::integer::u64",
+          },
+        ],
+        state_mutability: "view",
+      },
+      {
+        type: "function",
+        name: "get_game_bet",
+        inputs: [
+          {
+            name: "player_address",
+            type: "core::starknet::contract_address::ContractAddress",
+          },
+        ],
+        outputs: [
+          {
+            type: "core::integer::u256",
+          },
+        ],
+        state_mutability: "view",
+      },
+      {
+        type: "function",
+        name: "get_fee_address",
+        inputs: [],
+        outputs: [
+          {
+            type: "core::starknet::contract_address::ContractAddress",
+          },
+        ],
+        state_mutability: "view",
+      },
+      {
+        type: "function",
+        name: "set_fee_address",
+        inputs: [
+          {
+            name: "new_address",
+            type: "core::starknet::contract_address::ContractAddress",
+          },
+        ],
+        outputs: [],
         state_mutability: "external",
+      },
+      {
+        type: "function",
+        name: "get_turn_accumulation",
+        inputs: [
+          {
+            name: "player_address",
+            type: "core::starknet::contract_address::ContractAddress",
+          },
+          {
+            name: "is_player",
+            type: "core::bool",
+          },
+        ],
+        outputs: [
+          {
+            type: "core::integer::u64",
+          },
+        ],
+        state_mutability: "view",
       },
     ],
   },
@@ -128,11 +231,11 @@ export const abi = [
     name: "constructor",
     inputs: [
       {
-        name: "participation_fee",
-        type: "core::integer::u64",
+        name: "token_address",
+        type: "core::starknet::contract_address::ContractAddress",
       },
       {
-        name: "token_address",
+        name: "fee_address",
         type: "core::starknet::contract_address::ContractAddress",
       },
       {
@@ -143,11 +246,11 @@ export const abi = [
   },
   {
     type: "event",
-    name: "snakenladders::SnakeNLadders::SnakeNLadders::PlayerEnrolled",
+    name: "snakenladders::SnakeNLadders::SnakeNLadders::GameCreated",
     kind: "struct",
     members: [
       {
-        name: "player_id",
+        name: "game_id",
         type: "core::integer::u64",
         kind: "key",
       },
@@ -156,21 +259,9 @@ export const abi = [
         type: "core::starknet::contract_address::ContractAddress",
         kind: "data",
       },
-    ],
-  },
-  {
-    type: "event",
-    name: "snakenladders::SnakeNLadders::SnakeNLadders::PlayerUnenrolled",
-    kind: "struct",
-    members: [
       {
-        name: "player_id",
-        type: "core::integer::u64",
-        kind: "key",
-      },
-      {
-        name: "player_address",
-        type: "core::starknet::contract_address::ContractAddress",
+        name: "bet_amount",
+        type: "core::integer::u256",
         kind: "data",
       },
     ],
@@ -181,7 +272,7 @@ export const abi = [
     kind: "struct",
     members: [
       {
-        name: "player_id",
+        name: "game_id",
         type: "core::integer::u64",
         kind: "key",
       },
@@ -195,6 +286,33 @@ export const abi = [
         type: "core::integer::u64",
         kind: "data",
       },
+      {
+        name: "dice_roll",
+        type: "core::integer::u64",
+        kind: "data",
+      },
+    ],
+  },
+  {
+    type: "event",
+    name: "snakenladders::SnakeNLadders::SnakeNLadders::ComputerMoved",
+    kind: "struct",
+    members: [
+      {
+        name: "game_id",
+        type: "core::integer::u64",
+        kind: "key",
+      },
+      {
+        name: "new_position",
+        type: "core::integer::u64",
+        kind: "data",
+      },
+      {
+        name: "dice_roll",
+        type: "core::integer::u64",
+        kind: "data",
+      },
     ],
   },
   {
@@ -203,12 +321,46 @@ export const abi = [
     kind: "struct",
     members: [
       {
-        name: "player_id",
+        name: "game_id",
         type: "core::integer::u64",
         kind: "key",
       },
       {
         name: "player_address",
+        type: "core::starknet::contract_address::ContractAddress",
+        kind: "data",
+      },
+      {
+        name: "prize_amount",
+        type: "core::integer::u256",
+        kind: "data",
+      },
+    ],
+  },
+  {
+    type: "event",
+    name: "snakenladders::SnakeNLadders::SnakeNLadders::ComputerWon",
+    kind: "struct",
+    members: [
+      {
+        name: "game_id",
+        type: "core::integer::u64",
+        kind: "key",
+      },
+    ],
+  },
+  {
+    type: "event",
+    name: "snakenladders::SnakeNLadders::SnakeNLadders::FeeAddressChanged",
+    kind: "struct",
+    members: [
+      {
+        name: "old_address",
+        type: "core::starknet::contract_address::ContractAddress",
+        kind: "data",
+      },
+      {
+        name: "new_address",
         type: "core::starknet::contract_address::ContractAddress",
         kind: "data",
       },
@@ -220,13 +372,8 @@ export const abi = [
     kind: "enum",
     variants: [
       {
-        name: "PlayerEnrolled",
-        type: "snakenladders::SnakeNLadders::SnakeNLadders::PlayerEnrolled",
-        kind: "nested",
-      },
-      {
-        name: "PlayerUnenrolled",
-        type: "snakenladders::SnakeNLadders::SnakeNLadders::PlayerUnenrolled",
+        name: "GameCreated",
+        type: "snakenladders::SnakeNLadders::SnakeNLadders::GameCreated",
         kind: "nested",
       },
       {
@@ -235,8 +382,23 @@ export const abi = [
         kind: "nested",
       },
       {
+        name: "ComputerMoved",
+        type: "snakenladders::SnakeNLadders::SnakeNLadders::ComputerMoved",
+        kind: "nested",
+      },
+      {
         name: "PlayerWon",
         type: "snakenladders::SnakeNLadders::SnakeNLadders::PlayerWon",
+        kind: "nested",
+      },
+      {
+        name: "ComputerWon",
+        type: "snakenladders::SnakeNLadders::SnakeNLadders::ComputerWon",
+        kind: "nested",
+      },
+      {
+        name: "FeeAddressChanged",
+        type: "snakenladders::SnakeNLadders::SnakeNLadders::FeeAddressChanged",
         kind: "nested",
       },
     ],

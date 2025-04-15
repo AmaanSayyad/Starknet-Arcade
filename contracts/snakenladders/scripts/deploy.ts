@@ -30,14 +30,21 @@ async function main() {
 
   const myCallData = new CallData(sierraCode.abi);
   const constructor = myCallData.compile("constructor", {
-    participation_fee: 100,
+    fee_address: process.env.DEPLOYER_ADDRESS || "",
     token_address:
       "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
     objects: [
-      [5, 10],
-      [30, 40],
-      [70, 30],
-      [90, 10],
+      [4, 25],
+      [21, 39],
+      [30, 7],
+      [47, 13],
+      [56, 19],
+      [59, 80],
+      [71, 89],
+      [73, 51],
+      [82, 42],
+      [92, 75],
+      [98, 55],
     ],
   });
   const deployResponse = await account0.declareAndDeploy({
