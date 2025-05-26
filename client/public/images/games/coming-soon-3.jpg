@@ -1,0 +1,20 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#1F2937"/>
+  <rect x="100" y="100" width="600" height="400" rx="20" fill="#374151"/>
+  
+  <!-- Game Controller Shape -->
+  <path d="M400 200C373.333 200 346.667 213.333 320 240C293.333 266.667 280 293.333 280 320C280 346.667 293.333 373.333 320 400C346.667 426.667 373.333 440 400 440C426.667 440 453.333 426.667 480 400C506.667 373.333 520 346.667 520 320C520 293.333 506.667 266.667 480 240C453.333 213.333 426.667 200 400 200Z" fill="#4B5563"/>
+  
+  <!-- Controller Details -->
+  <circle cx="360" cy="320" r="20" fill="#6B7280"/>
+  <circle cx="440" cy="320" r="20" fill="#6B7280"/>
+  <rect x="380" y="290" width="40" height="10" rx="5" fill="#6B7280"/>
+  <rect x="380" y="340" width="40" height="10" rx="5" fill="#6B7280"/>
+  
+  <!-- D-pad -->
+  <rect x="315" y="315" width="30" height="10" rx="2" fill="#9CA3AF"/>
+  <rect x="325" y="305" width="10" height="30" rx="2" fill="#9CA3AF"/>
+  
+  <!-- Text -->
+  <text x="400" y="500" font-family="Arial" font-size="24" fill="#E5E7EB" text-anchor="middle">GAME IMAGE</text>
+</svg> 

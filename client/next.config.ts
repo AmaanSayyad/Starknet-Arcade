@@ -15,6 +15,17 @@ const nextConfig:NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  reactStrictMode: true,
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
+  compiler: {
+    styledComponents: true,
+  },
+  devServer: {
+    https: process.env.NODE_ENV !== 'production',
+  }
 };
 
 export default nextConfig;

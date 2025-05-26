@@ -1,27 +1,32 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCoinFlip } from "../contexts/CoinFlipContext";
 import { useGameContract } from "../hooks/useGameContract";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector/controller";
-import { useEffect } from "react";
 import { addOrUpdatePlayer } from "../utils";
+import { motion, AnimatePresence } from "framer-motion";
+import PageHeader from "../components/PageHeader";
+import { Button } from "../components/ui/Button";
+
 export default function CoinFlipGame() {
   const [isFlipping, setIsFlipping] = useState(false);
-  const [result, setResult] = useState<"starknet" | "reclaim" | null>(null);
-  const [userChoice, setUserChoice] = useState<"starknet" | "reclaim" | null>(
+  const [result, setResult] = useState<"starknet" | "cartridge" | null>(null);
+  const [userChoice, setUserChoice] = useState<"starknet" | "cartridge" | null>(
     null
   );
   const [gameResult, setGameResult] = useState<"win" | "lose" | null>(null);
   const [flips, setFlips] = useState(0);
   const [wins, setWins] = useState(0);
   const [coinAnimation, setCoinAnimation] = useState("");
-  const [coinSide, setCoinSide] = useState<"starknet" | "reclaim" | null>(null);
+  const [coinSide, setCoinSide] = useState<"starknet" | "cartridge" | null>(null);
   const [showModal, setShowModal] = useState(true);
-  const [modalChoice, setModalChoice] = useState<"starknet" | "reclaim" | null>(
+  const [modalChoice, setModalChoice] = useState<"starknet" | "cartridge" | null>(
     null
   );
   const [betAmount, setBetAmount] = useState("");
+  const [betError, setBetError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     // flipCoin,
@@ -51,19 +56,45 @@ export default function CoinFlipGame() {
     }
   }, [address, connectors]);
 
+  const validateBet = () => {
+    if (!betAmount) {
+      setBetError("Please enter a bet amount");
+      return false;
+    }
+    
+    const amount = Number(betAmount);
+    if (isNaN(amount) || amount <= 0) {
+      setBetError("Please enter a valid bet amount");
+      return false;
+    }
+    
+    setBetError("");
+    return true;
+  };
+
   const handleFlipCoin = async () => {
     try {
+      if (!validateBet()) return;
+      
+      setIsLoading(true);
       const choice = modalChoice === "starknet" ? 1 : 0;
       console.log("inside flip", choice);
-      if (!betAmount || isNaN(Number(betAmount))) return;
+      
       let id = await flipCoin(betAmount, choice);
       console.log("Flip ID:", id);
-      if (!id) return;
+      if (!id) {
+        setIsLoading(false);
+        return;
+      }
+      
       await fetchFlipDetails(id);
       setShowModal(false);
       handleStartGame();
     } catch (error) {
       console.error("Error flipping coin:", error);
+      setBetError("An error occurred while processing your bet");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -80,7 +111,7 @@ export default function CoinFlipGame() {
     }
   };
 
-  const handleFlip = (choice: "starknet" | "reclaim") => {
+  const handleFlip = (choice: "starknet" | "cartridge") => {
     if (isFlipping) return;
 
     setUserChoice(choice);
@@ -88,7 +119,11 @@ export default function CoinFlipGame() {
     setGameResult(null);
     setCoinSide(null);
 
-    const randomResult = Math.random() > 0.5 ? "starknet" : "reclaim";
+    // Use result from blockchain if available, otherwise fall back to random
+    const actualResult = currentFlip?.result === 1 ? "starknet" : 
+                          currentFlip?.result === 0 ? "cartridge" : 
+                          Math.random() > 0.5 ? "starknet" : "cartridge";
+    
     setCoinAnimation("animate-toss");
 
     setTimeout(() => {
@@ -96,15 +131,15 @@ export default function CoinFlipGame() {
 
       setTimeout(() => {
         setCoinAnimation("animate-drop");
-        setCoinSide(randomResult);
+        setCoinSide(actualResult);
 
         setTimeout(() => {
           setCoinAnimation("");
-          setResult(randomResult);
+          setResult(actualResult);
           setIsFlipping(false);
           setFlips((prev) => prev + 1);
 
-          const didWin = choice === randomResult;
+          const didWin = choice === actualResult;
           const earnedPoints = didWin ? 100 : 0;
 
           if (didWin) {
@@ -127,72 +162,262 @@ export default function CoinFlipGame() {
   };
 
   const handleStartGame = () => {
-    if (!modalChoice || !betAmount || isNaN(Number(betAmount))) return;
+    if (!modalChoice) return;
     setUserChoice(modalChoice);
     handleFlip(modalChoice);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full p-4 relative">
-      {showModal && (
-        <div className="absolute inset-0 z-50 h-[100vh] bg-black bg-opacity-80 flex items-center justify-center">
-          <div className="bg-gray-900 font-techno p-6 rounded-xl border border-gray-700 w-120">
-            <h2 className="text-white text-xl font-bold mb-4 text-center">
-              Let's Begin the Game
-            </h2>
-            <div className="flex gap-4 mb-4 justify-center items-center">
-              {["starknet", "reclaim"].map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => setModalChoice(opt as "starknet" | "reclaim")}
-                  className={`w-32 h-32 px-4 py-2 flex justify-center items-center rounded-full ${
-                    modalChoice === opt
-                      ? "bg-white text-black font-bold"
-                      : "bg-gray-800 text-white"
-                  }`}
-                >
-                  <img
-                    src={
-                      opt === "starknet"
-                        ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyryehB1_k7vVWpfloLj_2NeOxHTmOubzNHQ&s"
-                        : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSa-Eg_DQYr78RTTdcPHdnWEPFwgBNLMAEMoQ&s"
-                    }
-                    alt={opt}
-                    className="w-24 h-24 rounded-full object-contain"
-                  />
-                </button>
-              ))}
-            </div>
-            <input
-              type="number"
-              className="w-full px-3 py-2 mt-5 rounded bg-gray-700 text-white border border-gray-600 mb-4"
-              value={betAmount}
-              onChange={(e) => setBetAmount(e.target.value)}
-              placeholder="Enter amount"
-            />
-            <button
-              onClick={handleFlipCoin}
-              disabled={!modalChoice || !betAmount}
-              className="w-full bg-green-600 mt-2 hover:bg-green-700 text-white py-2 rounded-lg font-bold"
-            >
-              Submit & Flip
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className="absolute h-[90vh] inset-0 bg-gradient-to-br from-black to-gray-900 opacity-80">
-        <div
-          className="w-full h-full"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
+    <div className="flex flex-col items-center min-h-screen relative">
+      {/* Page Header */}
+      <PageHeader 
+        title="StarkNet vs Cartridge"
+        subtitle="Flip the coin and test your luck! Choose between StarkNet and Cartridge to win tokens."
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Coin Flip", href: "/coin-flip" }
+        ]}
+        size="md"
+      />
+      
+      {/* Background Effects */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-black to-gray-900 opacity-80"></div>
+        <div className="absolute inset-0 grid-bg-medium opacity-20"></div>
+        <motion.div 
+          className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-purple-600/10 filter blur-[150px]"
+          animate={{ 
+            x: [0, 30, -20, 0],
+            y: [0, -30, 20, 0],
           }}
-        ></div>
+          transition={{ 
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          className="absolute bottom-1/3 right-1/3 w-80 h-80 rounded-full bg-blue-600/10 filter blur-[120px]"
+          animate={{ 
+            x: [0, -40, 30, 0],
+            y: [0, 40, -30, 0],
+          }}
+          transition={{ 
+            duration: 15,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
       </div>
 
-      {/* Animations */}
+      {/* Bet Selection Modal */}
+      <AnimatePresence>
+        {showModal && (
+          <motion.div 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div 
+              className="glass-effect-dark max-w-md w-full p-8 rounded-2xl border border-gray-700 shadow-lg"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', damping: 25 }}
+            >
+              <h2 className="text-2xl font-bold text-white font-techno mb-6 text-center">Place Your Bet</h2>
+              
+              <div className="mb-6">
+                <p className="text-gray-300 mb-4 text-center">Choose your side:</p>
+                <div className="flex gap-4 justify-center">
+                  {["starknet", "cartridge"].map((opt) => (
+                    <motion.button
+                      key={opt}
+                      onClick={() => setModalChoice(opt as "starknet" | "cartridge")}
+                      className={`relative w-32 h-32 rounded-full flex flex-col items-center justify-center overflow-hidden transition-all duration-300 ${
+                        modalChoice === opt
+                          ? "ring-4 ring-purple-500 shadow-glow"
+                          : "ring-1 ring-gray-700"
+                      }`}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-b from-gray-800 to-gray-900"></div>
+                      <img
+                        src={
+                          opt === "starknet"
+                            ? "/starknet.png"
+                            : "/cartridge.png"
+                        }
+                        alt={opt}
+                        className={`w-20 h-20 rounded-full object-contain relative z-10 ${modalChoice === opt ? 'scale-110' : 'scale-100'} transition-transform duration-300`}
+                      />
+                      <p className={`mt-2 text-sm font-medium ${modalChoice === opt ? 'text-purple-300' : 'text-gray-400'} relative z-10`}>
+                        {opt === "starknet" ? "StarkNet" : "Cartridge"}
+                      </p>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <label className="block text-gray-300 mb-2 text-sm text-center">Enter Bet Amount:</label>
+                <input
+                  type="number"
+                  className={`w-full px-4 py-3 rounded-lg bg-gray-800 text-white border text-center ${betError ? 'border-red-500' : 'border-gray-700'} focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                  value={betAmount}
+                  onChange={(e) => {
+                    setBetAmount(e.target.value);
+                    if (betError) validateBet();
+                  }}
+                  placeholder="Enter amount"
+                />
+                {betError && (
+                  <p className="text-red-500 text-xs mt-1 text-center">{betError}</p>
+                )}
+              </div>
+              
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth
+                onClick={handleFlipCoin}
+                disabled={!modalChoice || !betAmount || isLoading}
+                isLoading={isLoading}
+                icon={
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                  </svg>
+                }
+              >
+                Place Bet & Flip
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Game Content */}
+      <div className="w-full max-w-4xl mx-auto px-6 py-12">
+        <div className="glass-effect-dark rounded-2xl p-8 border border-gray-800 shadow-lg mb-8">
+          {/* Game Info */}
+          <div className="flex flex-wrap gap-6 justify-center mb-8">
+            <div className="glass-effect p-4 rounded-xl text-center w-[30%]">
+              <p className="text-gray-400 text-sm mb-1">Total Flips</p>
+              <p className="text-2xl font-bold text-white font-techno">{flips}</p>
+            </div>
+            
+            <div className="glass-effect p-4 rounded-xl text-center w-[30%]">
+              <p className="text-gray-400 text-sm mb-1">Total Wins</p>
+              <p className="text-2xl font-bold text-white font-techno">{wins}</p>
+            </div>
+            
+            <div className="glass-effect p-4 rounded-xl text-center w-[30%]">
+              <p className="text-gray-400 text-sm mb-1">Win Rate</p>
+              <p className="text-2xl font-bold text-white font-techno">
+                {flips > 0 ? `${Math.round((wins / flips) * 100)}%` : "0%"}
+              </p>
+            </div>
+          </div>
+          
+          {/* Current Bet */}
+          <div className="mb-8">
+            <div className="glass-effect p-6 rounded-xl text-center max-w-sm mx-auto">
+              <p className="text-gray-400 text-sm mb-2">Current Bet</p>
+              <p className="text-3xl font-bold text-white font-techno bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">{betAmount || "0"}</p>
+            </div>
+          </div>
+
+          {/* Coin Flip Area */}
+          <div className="flex flex-col items-center justify-center py-8">
+            {/* Coin */}
+            <div className="perspective-500 mb-10">
+              <motion.div
+                className={`relative w-40 h-40 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center shadow-lg ${coinAnimation}`}
+                animate={
+                  gameResult === "win" 
+                    ? { scale: [1, 1.2, 1], boxShadow: ["0 0 0 rgba(139, 92, 246, 0)", "0 0 30px rgba(139, 92, 246, 0.8)", "0 0 0 rgba(139, 92, 246, 0)"] } 
+                    : gameResult === "lose" 
+                    ? { scale: [1, 0.8, 1], boxShadow: ["0 0 0 rgba(239, 68, 68, 0)", "0 0 30px rgba(239, 68, 68, 0.8)", "0 0 0 rgba(239, 68, 68, 0)"] }
+                    : {}
+                }
+                transition={{ duration: 1.5 }}
+              >
+                {coinSide ? (
+                  <img
+                    src={
+                      coinSide === "starknet"
+                        ? "/starknet.png"
+                        : "/cartridge.png"
+                    }
+                    alt={coinSide}
+                    className="w-32 h-32 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="text-3xl font-bold text-white font-techno">?</div>
+                )}
+              </motion.div>
+            </div>
+
+            {/* Game Result */}
+            <AnimatePresence mode="wait">
+              {gameResult && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className={`text-2xl font-bold mb-6 font-techno ${
+                    gameResult === "win" ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {gameResult === "win" ? "You Won!" : "You Lost!"}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Flip Again Button */}
+            <Button
+              variant="secondary"
+              size="lg"
+              onClick={() => setShowModal(true)}
+              disabled={isFlipping}
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                </svg>
+              }
+            >
+              Flip Again
+            </Button>
+          </div>
+        </div>
+        
+        {/* Game Rules */}
+        <div className="glass-effect-dark rounded-2xl p-8 border border-gray-800 shadow-lg">
+          <h3 className="text-xl font-bold text-white font-techno mb-4">Game Rules</h3>
+          <div className="space-y-3 text-gray-300">
+            <p className="flex items-start">
+              <span className="text-purple-400 mr-2">1.</span>
+              Choose your side: StarkNet or Cartridge
+            </p>
+            <p className="flex items-start">
+              <span className="text-purple-400 mr-2">2.</span>
+              Enter your bet amount
+            </p>
+            <p className="flex items-start">
+              <span className="text-purple-400 mr-2">3.</span>
+              If the coin lands on your chosen side, you win double your bet
+            </p>
+            <p className="flex items-start">
+              <span className="text-purple-400 mr-2">4.</span>
+              If the coin lands on the other side, you lose your bet
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Animation Styles */}
       <style jsx>{`
         @keyframes toss {
           0% {
@@ -238,64 +463,11 @@ export default function CoinFlipGame() {
         .animate-drop {
           animation: drop 0.5s ease-in forwards;
         }
+        
+        .perspective-500 {
+          perspective: 500px;
+        }
       `}</style>
-
-      <div className="bg-gradient-to-br from-black via-gray-500 to-gray-900 rounded-xl shadow-lg p-6 w-full max-w-md border border-gray-700 relative z-10 mt-24">
-        <h1 className="text-2xl font-bold text-center mb-6 text-white">
-          StarkNet vs Reclaim
-        </h1>
-
-        <div className="flex justify-center mb-8 perspective-500">
-          <div
-            className={`relative w-32 h-32 rounded-full bg-blue-800 flex items-center justify-center shadow-lg ${coinAnimation}`}
-          >
-            <div className="absolute w-24 h-24 bg-gray-900 rounded-full flex items-center justify-center">
-              <img
-                src={
-                  coinSide === "reclaim"
-                    ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSa-Eg_DQYr78RTTdcPHdnWEPFwgBNLMAEMoQ&s"
-                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyryehB1_k7vVWpfloLj_2NeOxHTmOubzNHQ&s"
-                }
-                alt={coinSide || "coin"}
-                className="w-20 h-20 rounded-full object-contain"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Game Results */}
-        <div className="text-center mb-6">
-          {isFlipping ? (
-            <p className="text-lg text-gray-300">Flipping...</p>
-          ) : result ? (
-            <>
-              <p className="text-lg mb-2 text-gray-300">
-                Result:{" "}
-                <span className="font-bold">{result.toUpperCase()}</span>
-              </p>
-              <p className="text-lg mb-2 text-gray-300">
-                Your Choice:{" "}
-                <span className="font-bold">{userChoice?.toUpperCase()}</span>
-              </p>
-              <p
-                className={`text-xl font-bold ${
-                  gameResult === "win" ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                {gameResult === "win" ? "You Win! 🎉" : "You Lose! 😢"}
-              </p>
-            </>
-          ) : (
-            <p className="text-lg text-gray-300">Make your choice to begin!</p>
-          )}
-        </div>
-
-        {/* Stats */}
-        <div className="text-gray-400 text-center">
-          <p>Total Flips: {flips}</p>
-          <p>Wins: {wins}</p>
-        </div>
-      </div>
     </div>
   );
 }

@@ -1,0 +1,27 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#1F2937"/>
+  <rect x="100" y="100" width="600" height="400" rx="20" fill="#374151"/>
+  
+  <!-- Coin Design -->
+  <circle cx="400" cy="300" r="150" fill="#FFC107" stroke="#FFD54F" stroke-width="10"/>
+  <circle cx="400" cy="300" r="130" fill="#FFA000"/>
+  
+  <!-- Dollar Symbol -->
+  <path d="M400 200C373.333 200 356.667 216.667 350 250C343.333 283.333 350 300 370 300H430C450 300 456.667 316.667 450 350C443.333 383.333 426.667 400 400 400" stroke="white" stroke-width="20" stroke-linecap="round"/>
+  <line x1="400" y1="180" x2="400" y2="220" stroke="white" stroke-width="20" stroke-linecap="round"/>
+  <line x1="400" y1="380" x2="400" y2="420" stroke="white" stroke-width="20" stroke-linecap="round"/>
+  
+  <!-- Shine Effects -->
+  <circle cx="350" cy="250" r="15" fill="white" fill-opacity="0.6"/>
+  <circle cx="370" cy="230" r="8" fill="white" fill-opacity="0.8"/>
+  
+  <!-- Coin Flip Animation Suggestion -->
+  <path d="M250 300H180" stroke="#9CA3AF" stroke-width="5" stroke-dasharray="10 5"/>
+  <path d="M550 300H620" stroke="#9CA3AF" stroke-width="5" stroke-dasharray="10 5"/>
+  <path d="M200 280L180 300L200 320" stroke="#9CA3AF" stroke-width="5"/>
+  <path d="M600 280L620 300L600 320" stroke="#9CA3AF" stroke-width="5"/>
+  
+  <!-- Text -->
+  <text x="400" y="520" font-family="Arial" font-size="32" font-weight="bold" fill="#FFC107" text-anchor="middle">COIN FLIP</text>
+  <text x="400" y="560" font-family="Arial" font-size="20" fill="#E5E7EB" text-anchor="middle">Double your STARK tokens!</text>
+</svg> 

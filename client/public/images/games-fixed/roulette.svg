@@ -1,0 +1,41 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#1F2937"/>
+  <rect x="100" y="100" width="600" height="400" rx="20" fill="#374151"/>
+  
+  <!-- Roulette Wheel -->
+  <circle cx="400" cy="300" r="150" fill="#111827" stroke="#9CA3AF" stroke-width="10"/>
+  
+  <!-- Wheel Sections -->
+  <path d="M400 150L430 190L370 190L400 150Z" fill="#DC2626"/> <!-- Red -->
+  <path d="M400 150L430 190L460 170L400 150Z" fill="#111827"/> <!-- Black -->
+  <path d="M400 150L460 170L480 210L400 150Z" fill="#DC2626"/> <!-- Red -->
+  <path d="M400 150L480 210L490 260L400 150Z" fill="#111827"/> <!-- Black -->
+  <path d="M400 150L490 260L480 310L400 150Z" fill="#DC2626"/> <!-- Red -->
+  <path d="M400 150L480 310L450 350L400 150Z" fill="#111827"/> <!-- Black -->
+  <path d="M400 150L450 350L400 370L400 150Z" fill="#DC2626"/> <!-- Red -->
+  <path d="M400 150L400 370L350 350L400 150Z" fill="#111827"/> <!-- Black -->
+  <path d="M400 150L350 350L320 310L400 150Z" fill="#DC2626"/> <!-- Red -->
+  <path d="M400 150L320 310L310 260L400 150Z" fill="#111827"/> <!-- Black -->
+  <path d="M400 150L310 260L320 210L400 150Z" fill="#DC2626"/> <!-- Red -->
+  <path d="M400 150L320 210L350 170L400 150Z" fill="#111827"/> <!-- Black -->
+  <path d="M400 150L350 170L370 190L400 150Z" fill="#10B981"/> <!-- Green (0) -->
+  
+  <!-- Center Hub -->
+  <circle cx="400" cy="300" r="50" fill="#9CA3AF" stroke="#E5E7EB" stroke-width="5"/>
+  <circle cx="400" cy="300" r="40" fill="#6B7280"/>
+  
+  <!-- Ball -->
+  <circle cx="450" cy="200" r="12" fill="white" stroke="#E5E7EB" stroke-width="2"/>
+  <circle cx="450" cy="200" r="8" fill="#E5E7EB"/>
+  
+  <!-- Chips -->
+  <circle cx="300" cy="400" r="25" fill="#EF4444" stroke="#F87171" stroke-width="3"/> <!-- Red chip -->
+  <circle cx="350" cy="420" r="25" fill="#3B82F6" stroke="#60A5FA" stroke-width="3"/> <!-- Blue chip -->
+  <circle cx="400" cy="430" r="25" fill="#10B981" stroke="#34D399" stroke-width="3"/> <!-- Green chip -->
+  <circle cx="450" cy="420" r="25" fill="#F59E0B" stroke="#FBBF24" stroke-width="3"/> <!-- Yellow chip -->
+  <circle cx="500" cy="400" r="25" fill="#8B5CF6" stroke="#A78BFA" stroke-width="3"/> <!-- Purple chip -->
+  
+  <!-- Text -->
+  <text x="400" y="520" font-family="Arial" font-size="32" font-weight="bold" fill="#E5E7EB" text-anchor="middle">ROULETTE</text>
+  <text x="400" y="560" font-family="Arial" font-size="20" fill="#9CA3AF" text-anchor="middle">Place your bets and spin!</text>
+</svg> 

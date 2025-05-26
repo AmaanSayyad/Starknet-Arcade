@@ -1,83 +1,174 @@
-import React from 'react'
+"use client";
+import React from 'react';
+import { motion } from 'framer-motion';
+
+const featuresData = [
+  {
+    id: 1,
+    title: "Provably Fair",
+    description: "All game outcomes are verified on-chain with transparent randomness you can trust",
+    icon: "🔍",
+    gradient: "from-blue-600 to-blue-400",
+    delay: 0.1
+  },
+  {
+    id: 2,
+    title: "Zero Gas Fees",
+    description: "Play without worrying about transaction costs thanks to our gasless implementation",
+    icon: "💸",
+    gradient: "from-green-600 to-green-400",
+    delay: 0.2
+  },
+  {
+    id: 3,
+    title: "Instant Withdrawals",
+    description: "Claim your winnings immediately with no delays or waiting periods",
+    icon: "⚡",
+    gradient: "from-yellow-600 to-yellow-400",
+    delay: 0.3
+  },
+  {
+    id: 4,
+    title: "On-chain Security",
+    description: "Your funds and game data are secured by StarkNet's battle-tested infrastructure",
+    icon: "🔐",
+    gradient: "from-purple-600 to-purple-400",
+    delay: 0.4
+  }
+];
 
 const Features = () => {
   return (
-    <section
-      className="py-20 px-6 w-full mx-auto font-['Press_Start_2P,_sans-serif'] text-white"
-     
-    >
-      <h2 className="text-3xl md:text-4xl font-bold mb-16 font-techno text-center text-white ">
-        Why Play on Starknet Arcade?
-      </h2>
+    <section className="py-24 px-6 relative overflow-hidden">
+      {/* Section header */}
+      <div className="text-center mb-16">
+        <motion.h2 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6 }}
+          className="text-4xl md:text-5xl font-bold mb-4 text-white font-techno"
+        >
+          Why Choose Starknet Arcade?
+        </motion.h2>
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="text-xl text-gray-300 max-w-3xl mx-auto"
+        >
+          Experience the next generation of blockchain gaming with cutting-edge technology
+        </motion.p>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-        {[
-          {
-            color: 'bg-gray-800',
-            title: 'Fast & Low Fees',
-            desc: `Enjoy lightning-fast transactions with minimal gas fees on Starknet's Layer 2.`,
-            icon: (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            ),
-          },
-          {
-            color: 'bg-gray-700',
-            title: 'Secure Gaming',
-            desc: `All games are provably fair and verified on-chain using ZK tech.`,
-            icon: (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              />
-            ),
-          },
-          {
-            color: 'bg-gray-600',
-            title: 'Win Tokens',
-            desc: `Earn STARK tokens by completing challenges and climbing the leaderboard.`,
-            icon: (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            ),
-          },
-        ].map((feature, idx) => (
-          <div
-            key={idx}
-            className={`text-center p-6 border-4 border-black bg-gradient-to-br from-blue-900 to-violet-800 shadow-[6px_6px_0_rgba(0,0,0,1)] transition-transform hover:translate-y-1 hover:shadow-[2px_2px_0_rgba(0,0,0,1)]`}
+      {/* Features grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+        {featuresData.map((feature) => (
+          <motion.div
+            key={feature.id}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.5, delay: feature.delay }}
+            className="bg-gray-900 bg-opacity-60 backdrop-blur-lg rounded-2xl p-8 border border-gray-800 hover:border-gray-700 transition-all hover:transform hover:scale-105"
           >
-            <div
-              className={`w-16 h-16 ${feature.color} border-2 border-black rounded-full flex items-center justify-center mx-auto mb-6`}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-8 w-8 text-yellow-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                {feature.icon}
-              </svg>
+            {/* Feature icon */}
+            <div className={`w-16 h-16 rounded-2xl mb-6 flex items-center justify-center bg-gradient-to-br ${feature.gradient}`}>
+              <span className="text-2xl">{feature.icon}</span>
             </div>
-            <h3 className="text-lg mb-4 text-red-300 font-mono">{feature.title}</h3>
-            <p className="text-sm text-gray-300 leading-relaxed font-mono">
-              {feature.desc}
-            </p>
-          </div>
+            
+            {/* Feature content */}
+            <h3 className="text-2xl font-bold mb-3 text-white font-techno">{feature.title}</h3>
+            <p className="text-gray-300">{feature.description}</p>
+            
+            {/* Animated particles */}
+            <div className="relative h-20 mt-4">
+              <motion.div
+                className="absolute w-2 h-2 rounded-full bg-white/20"
+                initial={{ x: "10%", y: "10%", opacity: 0 }}
+                animate={{ 
+                  x: "90%", 
+                  y: "60%",
+                  opacity: [0, 0.8, 0],
+                  scale: [0, 1, 0]
+                }}
+                transition={{ 
+                  duration: 4,
+                  repeat: Infinity,
+                  delay: feature.id * 0.5
+                }}
+              />
+              <motion.div
+                className="absolute w-2 h-2 rounded-full bg-white/20"
+                initial={{ x: "90%", y: "10%", opacity: 0 }}
+                animate={{ 
+                  x: "10%", 
+                  y: "90%",
+                  opacity: [0, 0.8, 0],
+                  scale: [0, 1, 0]
+                }}
+                transition={{ 
+                  duration: 4,
+                  repeat: Infinity,
+                  delay: feature.id * 0.5 + 1
+                }}
+              />
+            </div>
+          </motion.div>
         ))}
       </div>
-    </section>
-  )
-}
 
-export default Features
+      {/* Technology showcase */}
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
+        className="mt-20 bg-gradient-to-r from-blue-900/30 to-purple-900/30 backdrop-blur-sm rounded-2xl p-8 max-w-6xl mx-auto border border-blue-800/30"
+      >
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="md:w-1/2 mb-8 md:mb-0">
+            <h3 className="text-2xl md:text-3xl font-bold mb-4 font-techno text-white">Powered by StarkNet VRF</h3>
+            <p className="text-gray-300 mb-6">
+              Our games utilize StarkNet's Verifiable Random Function (VRF) to ensure complete fairness and transparency. Every outcome is cryptographically provable.
+            </p>
+            <div className="flex items-center space-x-2">
+              <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse"></div>
+              <span className="text-green-400">Live and operational</span>
+            </div>
+          </div>
+          <div className="md:w-1/2 flex justify-center">
+            <div className="relative w-full max-w-xs">
+              <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-3xl"></div>
+              <motion.div 
+                className="relative bg-gradient-to-r from-blue-600 to-purple-600 p-1 rounded-2xl"
+                animate={{ 
+                  boxShadow: ["0 0 10px rgba(79, 70, 229, 0.5)", "0 0 20px rgba(79, 70, 229, 0.7)", "0 0 10px rgba(79, 70, 229, 0.5)"]
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
+          >
+                <div className="bg-gray-900 rounded-xl p-4">
+                  <pre className="text-xs text-gray-300 overflow-auto">
+                    <code>
+                      {`{
+  "game_id": "0x42f7...",
+  "player": "0x891a...",
+  "seed": "0x7de9...",
+  "outcome": "19",
+  "timestamp": 1678324585,
+  "signature": "0x3a2c..."
+}`}
+                    </code>
+                  </pre>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+      </div>
+      </motion.div>
+    </section>
+  );
+};
+
+export default Features;

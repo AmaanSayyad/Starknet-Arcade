@@ -3,23 +3,76 @@ import React, { useEffect, useRef, useState } from "react";
 import { AiOutlineSound } from "react-icons/ai";
 import { RiResetLeftFill } from "react-icons/ri";
 import { ImSpinner4 } from "react-icons/im";
-import ControllerConnector from "@cartridge/connector/controller";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { useRouletteContract } from "../hooks/useRouletteContract";
+
+// Use dynamic import for the controller
+let ControllerConnector: any;
+if (typeof window !== 'undefined') {
+  import('@cartridge/connector/controller').then(module => {
+    ControllerConnector = module.default;
+  });
+}
+
 export default function RoulettePage() {
   const [connected, setConnected] = useState(false);
   const { connectors } = useConnect();
   const { address, account } = useAccount();
   const [username, setUsername] = useState<string | undefined>();
+  const [controllerReady, setControllerReady] = useState(false);
+  
+  // Track when ControllerConnector is loaded
   useEffect(() => {
-    if (!address) return;
-    const controller = connectors.find((c) => c instanceof ControllerConnector);
-    if (controller) {
-      controller.username()?.then((n) => setUsername(n));
-      setConnected(true);
+    if (ControllerConnector) {
+      setControllerReady(true);
+    } else if (typeof window !== 'undefined') {
+      import('@cartridge/connector/controller').then(module => {
+        ControllerConnector = module.default;
+        setControllerReady(true);
+      }).catch(error => {
+        console.error("Error loading controller:", error);
+      });
     }
-    console.log(username);
-  }, [address, connectors]);
+  }, []);
+  
+  // Controller connection - with safety checks
+  useEffect(() => {
+    if (!address || !controllerReady) return;
+    
+    try {
+      const controller = connectors.find((c) => 
+        c.constructor.name === 'ControllerConnector' || 
+        (ControllerConnector && c instanceof ControllerConnector)
+      );
+      
+    if (controller) {
+      setConnected(true);
+        
+        // Check if username method exists and is callable
+        if (controller.username && typeof controller.username === 'function') {
+          try {
+            // Safely call username()
+            Promise.resolve().then(() => {
+              controller.username()
+                .then((name: string | undefined) => {
+                  if (name) setUsername(name);
+                })
+                .catch((error: any) => {
+                  // Ignore "Not ready to connect" errors
+                  if (!error.message?.includes('Not ready to connect')) {
+                    console.error("Username error:", error);
+                  }
+                });
+            });
+          } catch (e) {
+            // Ignore errors here
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error in controller setup:", error);
+    }
+  }, [address, connectors, controllerReady]);
 
   const { spinwheel } = useRouletteContract(connected, account);
 

@@ -181,25 +181,38 @@ export const StarknetProvider: React.FC<{ children: React.ReactNode }> = ({
     includeRecommended: "always",
   });
 
-  const [controllerConnector, setControllerConnector] =
-    useState<Connector | null>(null);
+  const [controllerConnector, setControllerConnector] = useState<Connector | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const init = async () => {
+      try {
+        setLoading(true);
       const { default: ControllerConnector } = await import(
         "@cartridge/connector/controller"
       );
 
+        let chainId;
+        if (CURRENT_CHAIN_ID === "SN_SEPOLIA") {
+          chainId = constants.StarknetChainId.SN_SEPOLIA;
+        } else if (CURRENT_CHAIN_ID === "SN_MAIN") {
+          chainId = constants.StarknetChainId.SN_MAIN;
+        } else {
+          chainId = constants.StarknetChainId.SN_SEPOLIA;
+        }
+
       const controller = new ControllerConnector({
         chains: [{ rpcUrl: SEPOLIA_RPC_URL }, { rpcUrl: MAINNET_RPC_URL }],
-        defaultChainId:
-          CURRENT_CHAIN_ID === "SN_SEPOLIA"
-            ? constants.StarknetChainId.SN_SEPOLIA
-            : constants.StarknetChainId.SN_MAIN,
+          defaultChainId: chainId,
         policies,
       });
 
       setControllerConnector(controller);
+      } catch (error) {
+        console.error("Failed to initialize controller:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     init();
@@ -212,12 +225,20 @@ export const StarknetProvider: React.FC<{ children: React.ReactNode }> = ({
     }) as unknown as Connector,
     ArgentMobileConnector.init({
       options: {
-        dappName: "Lottery Starknet",
-        url: "https://lottery-dapp-starknet.vercel.app/",
+        dappName: "Starknet Arcade",
+        url: typeof window !== 'undefined' ? window.location.origin : "https://starknet-arcade.vercel.app/",
       },
     }) as unknown as Connector,
     ...(controllerConnector ? [controllerConnector] : []),
   ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
 
   return (
     <StarknetConfig

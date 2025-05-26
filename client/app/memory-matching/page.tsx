@@ -1,365 +1,282 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { IoClose } from "react-icons/io5";
-import { toast } from "react-hot-toast";
+import { motion } from "framer-motion";
+import PageHeader from "../components/PageHeader";
 
 type Card = {
   id: number;
-  imageUrl: string;
+  value: string;
   isFlipped: boolean;
   isMatched: boolean;
 };
-const initialCards: string[] = [
-  "https://substackcdn.com/image/fetch/w_1200,h_600,c_fill,f_jpg,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fbucketeer-e05bbc84-baa3-437e-9518-adb32be77984.s3.amazonaws.com%2Fpublic%2Fimages%2F7d9a5fa7-68d8-46ad-9056-378ce13e56ea_280x280.png",
-  "https://pbs.twimg.com/profile_images/1855150178002706432/P6liMWCZ_400x400.jpg",
-  "https://pbs.twimg.com/profile_images/1879931250955235329/zQtCRR5U_400x400.jpg",
-  "https://pbs.twimg.com/profile_images/1904592020007489536/AG870Qta_400x400.jpg",
-  "https://pbs.twimg.com/profile_images/1880776070418354176/LbH4udpm_400x400.jpg",
-  "https://pbs.twimg.com/media/GohGZdqWsAAX4pK?format=jpg&name=large",
-  "https://pbs.twimg.com/media/Gnh7elrXsAAeHfO?format=jpg&name=large",
-  "https://www.starknet-ecosystem.com/astro_3.png",
+
+const initialCardImages = [
+  "/images/games/memory-card-1.svg",
+  "/images/games/memory-card-2.svg",
+  "/images/games/memory-card-3.svg",
+  "/images/games/memory-card-4.svg",
+  "/images/games/memory-card-5.svg",
+  "/images/games/memory-card-6.svg",
+  "/images/games/memory-card-7.svg",
+  "/images/games/memory-card-8.svg",
 ];
 
-const MemoryGame: React.FC = () => {
+export default function MemoryMatchingGame() {
   const [cards, setCards] = useState<Card[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
-  const [matchedCount, setMatchedCount] = useState(0);
-  const [totalMoves, setTotalMoves] = useState(100);
-  const [gameOver, setGameOver] = useState(false);
-  const [initialModalOpen, setInitialModalOpen] = useState(false);
-  const [playModalOpen, setPlayModalOpen] = useState(false);
+  const [matchedPairs, setMatchedPairs] = useState(0);
+  const [moves, setMoves] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
-  const [playAgainModalOpen, setPlayAgainModalOpen] = useState(false);
+  const [gameCompleted, setGameCompleted] = useState(false);
+  const [timer, setTimer] = useState(0);
 
-  const closeInitialModal = () => setInitialModalOpen(false);
-  const closeGameOverModal = () => setGameOver(false);
-  const closePlayAgainModal = () => setPlayAgainModalOpen(false);
-  const closePlayModal = () => setPlayModalOpen(false);
-
-  /**
-   * Shuffle and initialize the card states
-   */
+  // Initialize the game
   useEffect(() => {
-    resetCards();
+    initializeGame();
   }, []);
 
-  const resetCards = () => {
-    const duplicatedCards = [...initialCards, ...initialCards].map(
-      (value, index) => ({
-        id: index,
-        value,
-        isFlipped: false,
-        isMatched: false,
-      })
-    );
-    const shuffledCards = duplicatedCards.sort(() => Math.random() - 0.5);
-    setCards(shuffledCards);
-  };
+  // Timer
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (gameStarted && !gameCompleted) {
+      interval = setInterval(() => {
+        setTimer(prevTimer => prevTimer + 1);
+      }, 1000);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [gameStarted, gameCompleted]);
 
-  /**
-   * Check for matches whenever two cards are flipped
-   */
+  // Check for game completion
+  useEffect(() => {
+    if (matchedPairs === initialCardImages.length && gameStarted) {
+      setGameCompleted(true);
+      setGameStarted(false);
+    }
+  }, [matchedPairs, gameStarted]);
+
+  // Check for matches when two cards are flipped
   useEffect(() => {
     if (flippedCards.length === 2) {
       const [firstId, secondId] = flippedCards;
-      const firstCard = cards.find((card) => card.id === firstId);
-      const secondCard = cards.find((card) => card.id === secondId);
-
+      const firstCard = cards.find(card => card.id === firstId);
+      const secondCard = cards.find(card => card.id === secondId);
+      
+      // Increment moves
+      setMoves(prevMoves => prevMoves + 1);
+      
       if (firstCard?.value === secondCard?.value) {
-        // Mark matched
-        setCards((prev) =>
-          prev.map((card) =>
-            card.value === firstCard?.value
+        // Match found
+        setCards(prevCards =>
+          prevCards.map(card =>
+            card.id === firstId || card.id === secondId
               ? { ...card, isMatched: true }
               : card
           )
         );
-        setMatchedCount((prev) => prev + 1);
+        setMatchedPairs(prev => prev + 1);
+        setFlippedCards([]);
       } else {
-        // Flip them back if not matched
+        // No match - flip cards back after delay
         setTimeout(() => {
-          setCards((prev) =>
-            prev.map((card) =>
+          setCards(prevCards =>
+            prevCards.map(card =>
               card.id === firstId || card.id === secondId
                 ? { ...card, isFlipped: false }
                 : card
             )
           );
+          setFlippedCards([]);
         }, 1000);
       }
-
-      // Use up one move
-      setTotalMoves((prev) => prev - 1);
-      setFlippedCards([]);
     }
   }, [flippedCards, cards]);
 
-  /**
-   * If we run out of moves and haven't matched everything, game over
-   */
-  useEffect(() => {
-    if (totalMoves === 0 && matchedCount < initialCards.length && gameStarted) {
-      setGameOver(true);
-    }
-  }, [totalMoves, matchedCount, gameStarted]);
+  const initializeGame = () => {
+    // Create paired cards
+    const cardPairs = [...initialCardImages, ...initialCardImages]
+      .map((value, index) => ({
+        id: index,
+        value,
+        isFlipped: false,
+        isMatched: false
+      }))
+      .sort(() => Math.random() - 0.5); // Shuffle
+    
+    setCards(cardPairs);
+    setFlippedCards([]);
+    setMatchedPairs(0);
+    setMoves(0);
+    setTimer(0);
+    setGameCompleted(false);
+  };
 
-  /**
-   * Flip a card if allowed
-   */
   const handleCardClick = (id: number) => {
-    if (totalMoves === 0 || flippedCards.length === 2) return;
-
-    const clickedCard = cards.find((card) => card.id === id);
-    if (clickedCard && !clickedCard.isFlipped && !clickedCard.isMatched) {
-      setCards((prev) =>
-        prev.map((card) =>
-          card.id === id ? { ...card, isFlipped: true } : card
-        )
-      );
-      setFlippedCards((prev) => [...prev, id]);
+    // Start game on first card click
+    if (!gameStarted) {
+      setGameStarted(true);
     }
+    
+    // Ignore clicks if already flipped or matched
+    const clickedCard = cards.find(card => card.id === id);
+    if (
+      !clickedCard ||
+      clickedCard.isFlipped ||
+      clickedCard.isMatched ||
+      flippedCards.length >= 2
+    ) {
+      return;
+    }
+    
+    // Flip the card
+    setCards(prevCards =>
+      prevCards.map(card =>
+        card.id === id ? { ...card, isFlipped: true } : card
+      )
+    );
+    
+    // Add to flipped cards
+    setFlippedCards(prev => [...prev, id]);
   };
 
-  /**
-   * Reset the entire game (with 10 moves).
-   * Usually called after we've confirmed user is paying again.
-   */
   const resetGame = () => {
-    resetCards();
-    setFlippedCards([]);
-    setMatchedCount(0);
-    setTotalMoves(10);
-    setGameOver(false);
-    setGameStarted(true); // Mark as started again
+    initializeGame();
   };
 
-  /**
-   * Reset the game if user chooses "No" in the Game Over modal,
-   * but do NOT set totalMoves to 10 => remains 0
-   */
-  const resetGameNoMoves = () => {
-    resetCards();
-    setFlippedCards([]);
-    setMatchedCount(0);
-    setTotalMoves(0); // keep at 0
-    setGameOver(false);
-    setGameStarted(false);
-  };
-
-  /**
-   * Deposit & stake
-   */
-  const handleSelectAmount = async (amount: number) => {
-    try {
-      setInitialModalOpen(false);
-    } catch (error: any) {
-      console.error("Error in handleSelectAmount:", error);
-    }
-  };
-
-  /**
-   * Called when the user confirms they want to pay 40 to play
-   */
-  const handleConfirmPlay = () => {
-    try {
-    } catch (error) {
-      console.error("Error in handleConfirmPlay:", error);
-      toast.error("An error occurred while confirming play.");
-    }
-  };
-
-  /**
-   * The user clicked "Play" or "Play Again" outside of the game-over scenario
-   */
-  const handlePlayAgain = () => {
-    try {
-    } catch (error) {
-      console.error("Error in handlePlayAgain:", error);
-      toast.error("An error occurred while handling play again.");
-    }
-  };
-
-  const handleCancelPlay = () => {
-    setPlayModalOpen(false);
-  };
-
-  /**
-   * If user says "Yes" in Game Over modal => Pay 40, resetGame()
-   */
-  const handleGameOverPlayAgain = () => {
-    setGameOver(false);
-  };
-
-  /**
-   * If user says "No" in Game Over => just reset deck (0 moves)
-   */
-  const handleGameOverNo = () => {
-    resetGameNoMoves();
-    // Close the modal
-    setGameOver(false);
+  // Format time display (mm:ss)
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen font-techno text-white p-6">
-      <h1 className="text-white mb-4 text-center text-4xl font-bold">
-        Memory Matching
-      </h1>
-      {/* Cards Grid */}
-      <div className="grid grid-cols-4 gap-6 mt-4">
-        {cards.map((card) => (
-          <div
-            key={card.id}
-            className={`w-32 h-32 bg-blue-700 rounded-lg flex items-center justify-center text-3xl cursor-pointer shadow-lg transform transition-transform duration-300 overflow-hidden ${
-              card.isFlipped || card.isMatched
-                ? "bg-gray-700 text-white scale-105"
-                : "hover:bg-blue-600"
-            }`}
-            onClick={() => handleCardClick(card.id)}
+    <div className="min-h-screen">
+      {/* Page Header */}
+      <PageHeader
+        title="Memory Matching"
+        subtitle="Match pairs of cards to test your memory. Find all matches to win rewards!"
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Games", href: "/games" },
+          { label: "Memory Matching", href: "/memory-matching" }
+        ]}
+      />
+      
+      <div className="max-w-4xl mx-auto px-4 py-10">
+        {/* Game Stats */}
+        <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-xl p-6 mb-8 flex justify-between items-center">
+          <div className="flex space-x-8">
+            <div>
+              <h3 className="text-gray-400 text-sm">Moves</h3>
+              <p className="text-white text-xl font-bold">{moves}</p>
+            </div>
+            <div>
+              <h3 className="text-gray-400 text-sm">Pairs Found</h3>
+              <p className="text-white text-xl font-bold">{matchedPairs} / {initialCardImages.length}</p>
+            </div>
+            <div>
+              <h3 className="text-gray-400 text-sm">Time</h3>
+              <p className="text-white text-xl font-bold">{formatTime(timer)}</p>
+            </div>
+          </div>
+          
+          <button
+            onClick={resetGame}
+            className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
           >
-            {card.isFlipped || card.isMatched ? (
-              <img
-                src={card.value}
-                alt="card image"
-                className="w-full h-full object-cover rounded-lg"
-              />
-            ) : (
-              <img
-                src="https://pbs.twimg.com/profile_images/1722902684196311040/50CwdgeX_400x400.jpg" // Make sure this file exists in your `public/images/` folder
-                alt="card back"
-                className="w-full h-full object-cover rounded-lg"
-              />
-            )}
+            Reset Game
+          </button>
+        </div>
+        
+        {/* Game Board */}
+        <div className="grid grid-cols-4 gap-4 md:gap-6">
+          {cards.map(card => (
+            <motion.div
+              key={card.id}
+              className={`relative aspect-square rounded-xl cursor-pointer ${
+                card.isFlipped || card.isMatched
+                  ? "shadow-purple-500/20 shadow-lg"
+                  : "shadow-md"
+              }`}
+              whileHover={{ scale: card.isFlipped || card.isMatched ? 1 : 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleCardClick(card.id)}
+            >
+              {/* Card Front (when flipped) */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl flex items-center justify-center p-4"
+                initial={{ rotateY: 180 }}
+                animate={{
+                  rotateY: card.isFlipped || card.isMatched ? 0 : 180,
+                  opacity: card.isFlipped || card.isMatched ? 1 : 0
+                }}
+                transition={{ duration: 0.6 }}
+              >
+                <img
+                  src={card.value}
+                  alt="Card"
+                  className="w-full h-full object-contain"
+                />
+              </motion.div>
+              
+              {/* Card Back */}
+              <motion.div
+                className="absolute inset-0 bg-gray-800 border border-gray-700 rounded-xl flex items-center justify-center"
+                initial={{ rotateY: 0 }}
+                animate={{
+                  rotateY: card.isFlipped || card.isMatched ? 180 : 0,
+                  opacity: card.isFlipped || card.isMatched ? 0 : 1
+                }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="w-12 h-12 text-purple-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z" />
+                    <path d="M11 11h2v6h-2zm0-4h2v2h-2z" />
+                  </svg>
+                </div>
+              </motion.div>
+            </motion.div>
+          ))}
+        </div>
+        
+        {/* Game Complete Modal */}
+        {gameCompleted && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
+            <motion.div
+              className="bg-gray-900 border border-purple-500/30 rounded-xl p-8 max-w-md mx-4 text-center"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            >
+              <h2 className="text-3xl font-bold text-white mb-4">🎉 Congratulations! 🎉</h2>
+              <p className="text-gray-300 mb-6">
+                You've completed the Memory Matching game!
+              </p>
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-gray-800 p-4 rounded-lg">
+                  <h3 className="text-gray-400 text-sm">Moves</h3>
+                  <p className="text-white text-xl font-bold">{moves}</p>
+                </div>
+                <div className="bg-gray-800 p-4 rounded-lg">
+                  <h3 className="text-gray-400 text-sm">Time</h3>
+                  <p className="text-white text-xl font-bold">{formatTime(timer)}</p>
+                </div>
+              </div>
+              <button
+                onClick={resetGame}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+              >
+                Play Again
+              </button>
+            </motion.div>
           </div>
-        ))}
+        )}
       </div>
-
-      {/* If user matched all pairs, show "You Won!" */}
-      {matchedCount === initialCards.length && (
-        <p className="text-2xl mt-4">🎉 You Won! 🎉</p>
-      )}
-
-      {/* 1. Initial Modal for deposit & stake */}
-      {initialModalOpen && !gameOver && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="relative w-[85%] max-w-sm rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
-            <IoClose onClick={closeInitialModal} className="cursor-pointer" />
-            <h2 className="mb-4 text-center text-2xl font-semibold text-blue-500">
-              Choose Deposit & Stake Amount
-            </h2>
-            <p className="mb-4 text-center text-gray-700 dark:text-gray-300">
-              Select an amount to deposit and stake:
-            </p>
-            <div className="flex flex-col gap-2">
-              <button
-                className={
-                  "group/button rounded-lg bg-[#222222] text-black mt-6"
-                }
-              >
-                <span
-                  className={
-                    "block -translate-x-1 uppercase whitespace-nowrap -translate-y-1 rounded-lg border-2 border-[#222222] bg-green-400 px-4 py-1 text-sm font-medium tracking-tight transition-all group-hover/button:-translate-y-2 group-active/button:translate-x-0 group-active/button:translate-y-0"
-                  }
-                >
-                  Reset Game
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 3. Play Confirmation Modal */}
-      {playModalOpen && !gameStarted && !gameOver && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="relative w-full max-w-sm rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
-            <IoClose onClick={closePlayModal} className="cursor-pointer" />
-            <h2 className="mb-4 text-center text-2xl font-semibold text-blue-500">
-              Ready to Play?
-            </h2>
-            <p className="mb-4 text-center text-gray-700 dark:text-gray-300">
-              You need to pay <span className="font-bold">40 WIN</span> from
-              your deposit to start.
-            </p>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={handleConfirmPlay}
-                className="btn bg-green-500 hover:bg-green-600 focus:ring-green-300 rounded-lg px-4 py-2"
-              >
-                Confirm
-              </button>
-              <button
-                onClick={handleCancelPlay}
-                className="btn bg-gray-500 hover:bg-gray-600 focus:ring-gray-300 rounded-lg px-4 py-2"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 4. Game Over Modal */}
-      {gameOver && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="relative w-full max-w-sm rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
-            <IoClose onClick={closeGameOverModal} className="cursor-pointer" />
-            <h2 className="text-red-500 mb-4 text-center text-2xl font-semibold">
-              Game Over
-            </h2>
-            <p className="mb-4 text-center text-gray-700 dark:text-gray-300">
-              You ran out of moves! Do you want to play again?
-            </p>
-            <div className="flex justify-center gap-4">
-              {/* "YES" => Check deposit, subtract 40, resetGame() */}
-              <button
-                onClick={handleGameOverPlayAgain}
-                className="bg-green-500 hover:bg-green-600 focus:ring-green-300 rounded-lg px-4 py-2"
-              >
-                Yes
-              </button>
-              {/* "NO" => Reset game with 0 moves */}
-              <button
-                onClick={handleGameOverNo}
-                className="bg-gray-500 hover:bg-gray-600 focus:ring-gray-300 rounded-lg px-4 py-2"
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 5. "Play Again?" Modal (if user chooses to start a new game but isn't game-over) */}
-      {playAgainModalOpen && !gameOver && !gameStarted && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="relative w-[85%] max-w-sm rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
-            <IoClose onClick={closePlayAgainModal} className="cursor-pointer" />
-            <h2 className="mb-4 text-center text-2xl font-semibold text-blue-500">
-              Play Again?
-            </h2>
-            <p className="mb-4 text-center text-gray-700 dark:text-gray-300">
-              You have enough funds to start a new game. Would you like to
-              continue?
-            </p>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={handlePlayAgain}
-                className="btn bg-green-500 hover:bg-green-600 focus:ring-green-300 rounded-lg px-4 py-2"
-              >
-                Confirm
-              </button>
-              <button
-                onClick={() => setPlayAgainModalOpen(false)}
-                className="btn bg-gray-500 hover:bg-gray-600 focus:ring-gray-300 rounded-lg px-4 py-2"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
-};
-
-export default MemoryGame;
+}
