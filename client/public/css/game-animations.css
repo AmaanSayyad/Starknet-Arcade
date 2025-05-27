@@ -1,0 +1,48 @@
+@keyframes twinkle {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.character-container {
+  animation: float 2s infinite ease-in-out;
+}
+
+.collectible {
+  animation: twinkle 2s infinite ease-in-out;
+}
+
+.platform {
+  background: linear-gradient(90deg, rgb(124, 58, 237), rgb(59, 130, 246));
+  border-radius: 4px;
+  box-shadow: 0 0 15px rgba(124, 58, 237, 0.3);
+} 

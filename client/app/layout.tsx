@@ -1,5 +1,6 @@
 "use client";
 import "./globals.css";
+import "../public/css/game-animations.css";
 import { useEffect, useState } from "react";
 // import { LotteryProvider } from "./contexts/LotteryContext";
 import Head from "next/head";

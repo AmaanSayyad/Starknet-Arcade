@@ -67,7 +67,7 @@ export default function MemoryMatchingGame() {
       
       // Increment moves
       setMoves(prevMoves => prevMoves + 1);
-
+      
       if (firstCard?.value === secondCard?.value) {
         // Match found
         setCards(prevCards =>
@@ -173,11 +173,11 @@ export default function MemoryMatchingGame() {
             <div>
               <h3 className="text-gray-400 text-sm">Moves</h3>
               <p className="text-white text-xl font-bold">{moves}</p>
-          </div>
+            </div>
             <div>
               <h3 className="text-gray-400 text-sm">Pairs Found</h3>
               <p className="text-white text-xl font-bold">{matchedPairs} / {initialCardImages.length}</p>
-      </div>
+            </div>
             <div>
               <h3 className="text-gray-400 text-sm">Time</h3>
               <p className="text-white text-xl font-bold">{formatTime(timer)}</p>
@@ -238,12 +238,12 @@ export default function MemoryMatchingGame() {
                     <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z" />
                     <path d="M11 11h2v6h-2zm0-4h2v2h-2z" />
                   </svg>
-            </div>
+                </div>
               </motion.div>
             </motion.div>
           ))}
         </div>
-
+        
         {/* Game Complete Modal */}
         {gameCompleted && (
           <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
@@ -256,17 +256,17 @@ export default function MemoryMatchingGame() {
               <h2 className="text-3xl font-bold text-white mb-4">🎉 Congratulations! 🎉</h2>
               <p className="text-gray-300 mb-6">
                 You've completed the Memory Matching game!
-            </p>
+              </p>
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-gray-800 p-4 rounded-lg">
                   <h3 className="text-gray-400 text-sm">Moves</h3>
                   <p className="text-white text-xl font-bold">{moves}</p>
-            </div>
+                </div>
                 <div className="bg-gray-800 p-4 rounded-lg">
                   <h3 className="text-gray-400 text-sm">Time</h3>
                   <p className="text-white text-xl font-bold">{formatTime(timer)}</p>
-          </div>
-        </div>
+                </div>
+              </div>
               <button
                 onClick={resetGame}
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
@@ -276,7 +276,7 @@ export default function MemoryMatchingGame() {
             </motion.div>
           </div>
         )}
-        </div>
+      </div>
     </div>
   );
 }

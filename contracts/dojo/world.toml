@@ -1,0 +1,16 @@
+[world]
+name = "StarknetArcade"
+
+[components]
+# Define the components used in the Dojo world
+Position = ["x: u32", "y: u32"]
+Player = ["id: felt252", "score: u32", "high_score: u32"]
+Platform = ["x: u32", "y: u32", "width: u32"]
+Collectible = ["x: u32", "y: u32", "value: u32", "collected: bool"]
+
+[systems]
+platformer = ["initialize_game", "register_player", "move_player", "jump"]
+
+# RPC Configuration for deployment
+[rpc]
+url = "https://api.cartridge.gg/x/starknet/sepolia" 

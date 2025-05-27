@@ -10,6 +10,7 @@ import ComingSoonGames from "./components/ComingSoonGames";
 import AllGames from "./components/AllGames";
 import GameStatsSection from "./components/GameStatsSection";
 import TournamentSection from "./components/TournamentSection";
+import DojoGames from "./components/DojoGames";
 
 export default function GamesPage() {
   const [activeCategory, setActiveCategory] = useState("all");
@@ -81,6 +82,8 @@ export default function GamesPage() {
         {/* Trending Games */}
         <TrendingGames />
 
+        
+
         {/* Tournament Section */}
         <TournamentSection />
 
@@ -94,6 +97,9 @@ export default function GamesPage() {
 
         {/* Coming Soon Games */}
         <ComingSoonGames />
+
+        {/* Dojo Games */}
+        <DojoGames />
 
         {/* Game Stats */}
         <GameStatsSection />
