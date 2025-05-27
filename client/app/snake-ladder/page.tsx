@@ -32,7 +32,7 @@ export default function SnakeAndLadderGame() {
   useEffect(() => {
     // Initialize audio only on client side
     if (isBrowser) {
-      audioRef.current = new Audio("sounds/roullete/ambient-sounds.mp3");
+      audioRef.current = new Audio("/sounds/roullete/ambient-sounds.mp3");
       
       // Play sound initially
       audioRef.current.play().catch(error => {
@@ -84,6 +84,12 @@ export default function SnakeAndLadderGame() {
       setIsRolling(true);
       setMessage("Rolling dice...");
 
+      // Play dice sound
+      if (isBrowser) {
+        const diceSound = new Audio("/sounds/dice.mp3");
+        diceSound.play().catch(err => console.log("Dice sound error:", err));
+      }
+
       // Play roll animation
       const rollInterval = setInterval(() => {
         setDiceValue(Math.floor(Math.random() * 6) + 1);
@@ -122,8 +128,22 @@ export default function SnakeAndLadderGame() {
     setMessage("Opponent is rolling...");
 
     try {
+      // Play dice sound
+      if (isBrowser) {
+        const diceSound = new Audio("/sounds/dice.mp3");
+        diceSound.play().catch(err => console.log("Dice sound error:", err));
+      }
+      
+      // Roll animation for computer
+      const rollInterval = setInterval(() => {
+        setDiceValue(Math.floor(Math.random() * 6) + 1);
+      }, 100);
+
       // Call the contract's rollForComputer function
       const result = await rollForComputer();
+      
+      // Stop rolling animation
+      clearInterval(rollInterval);
 
       if (result) {
         const rollValue = result;
@@ -271,11 +291,18 @@ export default function SnakeAndLadderGame() {
         winSound.play().catch(err => console.log("Win sound error:", err));
       }
       
-      setMessage(
-        `${turn === "player" ? "You" : "Opponent"} reached 100! ${
-          turn === "player" ? "You win!" : "Opponent wins!"
-        }`
-      );
+      const winMessage = `${turn === "player" ? "You" : "Opponent"} reached 100! ${
+        turn === "player" ? "You win!" : "Opponent wins!"
+      }`;
+      
+      setMessage(winMessage);
+      
+      // Show toast notification
+      toast.success(winMessage, {
+        icon: "🏆",
+        duration: 5000
+      });
+      
       setIsMoving(false);
     } else {
       setIsMoving(false);
