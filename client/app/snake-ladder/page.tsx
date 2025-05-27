@@ -292,7 +292,7 @@ export default function SnakeAndLadderGame() {
       }
       
       const winMessage = `${turn === "player" ? "You" : "Opponent"} reached 100! ${
-        turn === "player" ? "You win!" : "Opponent wins!"
+          turn === "player" ? "You win!" : "Opponent wins!"
       }`;
       
       setMessage(winMessage);
