@@ -1,8 +1,4 @@
 {
-  "buildCommand": "cd client && npm run build",
-  "outputDirectory": "client/.next",
-  "framework": "nextjs",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/$1" }
-  ]
+  "rootDirectory": "client/client",
+  "installCommand": "npm install --legacy-peer-deps"
 } 
