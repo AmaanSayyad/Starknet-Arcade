@@ -44,11 +44,45 @@ export const useRoulette = (connected: boolean, account: any) => {
     }
   }, [account]);
 
-  // Helper function to safely convert hex to number
+  // FIXED: Enhanced hex parsing with detailed logging
   const safeHexToNumber = (hexValue: any): number => {
+    console.log("Parsing hex value:", hexValue, "Type:", typeof hexValue);
+    
     if (!hexValue || hexValue === "0x" || hexValue === "0x0") return 0;
+    
     try {
-      return parseInt(hexValue.toString(), 16);
+      let numStr = hexValue.toString();
+      
+      // Handle BigInt conversion
+      if (typeof hexValue === 'bigint') {
+        const num = Number(hexValue);
+        console.log("BigInt converted to number:", num);
+        if (num < 0 || num > 36) {
+          console.warn(`Invalid roulette number from BigInt: ${num}, setting to 0`);
+          return 0;
+        }
+        return num;
+      }
+      
+      // Handle hex string
+      if (typeof numStr === 'string' && numStr.startsWith('0x')) {
+        const num = parseInt(numStr, 16);
+        console.log("Hex string converted to number:", numStr, "->", num);
+        if (num < 0 || num > 36) {
+          console.warn(`Invalid roulette number from hex: ${num}, setting to 0`);
+          return 0;
+        }
+        return num;
+      }
+      
+      // Handle direct number
+      const num = Number(hexValue);
+      console.log("Direct number conversion:", num);
+      if (num < 0 || num > 36) {
+        console.warn(`Invalid roulette number: ${num}, setting to 0`);
+        return 0;
+      }
+      return num;
     } catch (error) {
       console.error("Error converting hex to number:", hexValue, error);
       return 0;
@@ -57,8 +91,19 @@ export const useRoulette = (connected: boolean, account: any) => {
 
   // Helper function to safely convert hex to BigInt
   const safeHexToBigInt = (hexValue: any): bigint => {
+    console.log("Parsing hex to BigInt:", hexValue, "Type:", typeof hexValue);
+    
     if (!hexValue || hexValue === "0x" || hexValue === "0x0") return BigInt(0);
+    
     try {
+      if (typeof hexValue === 'bigint') {
+        return hexValue;
+      }
+      
+      if (typeof hexValue === 'string' && hexValue.startsWith('0x')) {
+        return BigInt(hexValue);
+      }
+      
       return BigInt(hexValue.toString());
     } catch (error) {
       console.error("Error converting hex to BigInt:", hexValue, error);
@@ -210,7 +255,7 @@ export const useRoulette = (connected: boolean, account: any) => {
     [connected, account]
   );
 
-  // Spin wheel - FIXED
+  // FIXED: Spin wheel with comprehensive result parsing
   const spinWheel = useCallback(
     async (): Promise<number | null> => {
       if (!connected || !account || !contractRef.current) {
@@ -236,21 +281,65 @@ export const useRoulette = (connected: boolean, account: any) => {
         toast.success("Spinning wheel...");
         await provider.waitForTransaction(txHash);
         
-        // FIXED: Get game result with proper parsing
+        // FIXED: Enhanced game result parsing with multiple format support
         const gameResultRaw = await contractRef.current.get_game_result(account.address);
-        console.log("Raw game result:", gameResultRaw);
+        console.log("Raw game result from contract:", gameResultRaw);
+        console.log("Game result type:", typeof gameResultRaw);
+        console.log("Game result constructor:", gameResultRaw?.constructor?.name);
         
-        // Parse the result properly - contract returns array of hex strings
         let result: number = 0;
         let winAmount: bigint = BigInt(0);
         
+        // FIXED: Handle multiple response formats
         if (Array.isArray(gameResultRaw)) {
-          result = safeHexToNumber(gameResultRaw[0]);
-          winAmount = safeHexToBigInt(gameResultRaw[1]);
+          // Response is an array [winning_number, total_payout]
+          console.log("Parsing as array format");
+          if (gameResultRaw.length >= 2) {
+            result = safeHexToNumber(gameResultRaw[0]);
+            winAmount = safeHexToBigInt(gameResultRaw[1]);
+          } else {
+            throw new Error("Array response too short");
+          }
         } else if (gameResultRaw && typeof gameResultRaw === 'object') {
-          // If it's an object with properties
-          result = safeHexToNumber(gameResultRaw[0] || gameResultRaw.result || gameResultRaw.winning_number);
-          winAmount = safeHexToBigInt(gameResultRaw[1] || gameResultRaw.winAmount || gameResultRaw.total_payout);
+          // Response is an object
+          console.log("Parsing as object format");
+          console.log("Object keys:", Object.keys(gameResultRaw));
+          
+          // Try different possible property names
+          if ('0' in gameResultRaw && '1' in gameResultRaw) {
+            // Tuple format with numeric keys
+            result = safeHexToNumber(gameResultRaw['0']);
+            winAmount = safeHexToBigInt(gameResultRaw['1']);
+          } else if ('winning_number' in gameResultRaw && 'total_payout' in gameResultRaw) {
+            // Named tuple format
+            result = safeHexToNumber(gameResultRaw.winning_number);
+            winAmount = safeHexToBigInt(gameResultRaw.total_payout);
+          } else if ('result' in gameResultRaw && 'winAmount' in gameResultRaw) {
+            // Alternative naming
+            result = safeHexToNumber(gameResultRaw.result);
+            winAmount = safeHexToBigInt(gameResultRaw.winAmount);
+          } else {
+            // Try to get first two values from object
+            const values = Object.values(gameResultRaw);
+            if (values.length >= 2) {
+              result = safeHexToNumber(values[0]);
+              winAmount = safeHexToBigInt(values[1]);
+            } else {
+              console.error("Cannot parse object format:", gameResultRaw);
+              throw new Error("Cannot parse object response format");
+            }
+          }
+        } else {
+          console.error("Unknown response format:", gameResultRaw);
+          throw new Error("Unknown response format from contract");
+        }
+        
+        console.log("Parsed result:", result, "Win amount:", winAmount.toString());
+        
+        // SECURITY: Final validation
+        if (result < 0 || result > 36) {
+          console.error("Invalid result from contract:", result);
+          throw new Error(`Invalid result from contract: ${result}`);
         }
         
         setGameState(prev => ({ 
@@ -275,7 +364,7 @@ export const useRoulette = (connected: boolean, account: any) => {
     [connected, account]
   );
 
-  // End game - FIXED
+  // End game
   const endGame = useCallback(
     async (): Promise<boolean> => {
       if (!connected || !account || !contractRef.current) {
@@ -409,7 +498,7 @@ export const useRoulette = (connected: boolean, account: any) => {
     [connected, account]
   );
 
-  // Get user balance - FIXED
+  // Get user balance
   const getUserBalance = useCallback(
     async (): Promise<BigNumberish> => {
       if (!connected || !account || !contractRef.current) return 0;
@@ -427,7 +516,7 @@ export const useRoulette = (connected: boolean, account: any) => {
     [connected, account]
   );
 
-  // Get house balance - FIXED
+  // Get house balance
   const getHouseBalance = useCallback(
     async (): Promise<BigNumberish> => {
       if (!connected || !account || !contractRef.current) return 0;
@@ -445,7 +534,7 @@ export const useRoulette = (connected: boolean, account: any) => {
     [connected, account]
   );
 
-  // Get game status - FIXED
+  // Get game status
   const getGameStatus = useCallback(
     async (): Promise<number> => {
       if (!connected || !account || !contractRef.current) return 0;
@@ -475,7 +564,7 @@ export const useRoulette = (connected: boolean, account: any) => {
     [connected, account]
   );
 
-  // Get current bets - FIXED
+  // Get current bets
   const getCurrentBets = useCallback(
     async (): Promise<Bet[]> => {
       if (!connected || !account || !contractRef.current) return [];

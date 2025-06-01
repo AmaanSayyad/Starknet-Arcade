@@ -196,7 +196,7 @@ export default function RoulettePage() {
     }
   };
 
-  // Handle spin wheel - FIXED
+  // FIXED: Handle spin wheel with enhanced error handling and result processing
   const handleSpin = async () => {
     if (currentBets.length === 0) {
       toast.error("Please place at least one bet before spinning");
@@ -207,11 +207,32 @@ export default function RoulettePage() {
       setIsSpinning(true);
       setGameResult(null);
       
+      console.log("Starting spin...");
       const result = await spinWheel();
+      console.log("Spin completed with result:", result);
+      
       if (result !== null) {
-        // Check if user won
+        // SECURITY: Validate that result is in correct range
+        if (result < 0 || result > 36) {
+          console.error("Invalid result received:", result);
+          toast.error("Invalid result received from contract");
+          setIsSpinning(false);
+          return;
+        }
+
+        console.log("Processing spin result:", result);
+        
+        // Check if user won based on their bets
         const isWin = currentBets.some(bet => {
           if (bet.type === 0) { // Straight
+            return bet.numbers.includes(result);
+          } else if (bet.type === 1) { // Split
+            return bet.numbers.includes(result);
+          } else if (bet.type === 2) { // Street
+            return bet.numbers.includes(result);
+          } else if (bet.type === 3) { // Corner
+            return bet.numbers.includes(result);
+          } else if (bet.type === 4) { // Six Line
             return bet.numbers.includes(result);
           } else if (bet.type === 5) { // Column
             if (result === 0) return false;
@@ -238,7 +259,7 @@ export default function RoulettePage() {
             const betLow = bet.numbers[0] === 0;
             return isLow === betLow;
           }
-          return bet.numbers.includes(result);
+          return false;
         });
 
         const winAmount = gameState.winAmount.toString();
@@ -263,15 +284,17 @@ export default function RoulettePage() {
           setIsSpinning(false);
         }, 3000);
       } else {
+        console.error("Spin returned null result");
         setIsSpinning(false);
       }
     } catch (error) {
       console.error("Spin error:", error);
+      toast.error("Spin failed - please try again");
       setIsSpinning(false);
     }
   };
 
-  // Handle end game - FIXED
+  // Handle end game
   const handleEndGame = async () => {
     try {
       const success = await endGame();
@@ -478,13 +501,13 @@ export default function RoulettePage() {
               </button>
             </div>
 
-            {/* Game Result */}
+            {/* FIXED: Game Result Display with proper validation */}
             {gameResult && (
               <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: gameResult.isWin ? '#4CAF50' : '#f44336', borderRadius: '5px' }}>
                 <h4>Game Result</h4>
-                <p>Number: {gameResult.number}</p>
-                <p>Result: {gameResult.isWin ? 'WIN' : 'LOSE'}</p>
-                {gameResult.isWin && <p>Won: {gameResult.winAmount} tokens</p>}
+                <p><strong>Number: {gameResult.number}</strong> {gameResult.number < 0 || gameResult.number > 36 ? '⚠️ INVALID' : ''}</p>
+                <p>Result: <strong>{gameResult.isWin ? 'WIN' : 'LOSE'}</strong></p>
+                {gameResult.isWin && <p>Won: <strong>{gameResult.winAmount} tokens</strong></p>}
               </div>
             )}
 
@@ -496,11 +519,15 @@ export default function RoulettePage() {
               <p>User Balance: {gameState.userBalance.toString()}</p>
               <p>House Balance: {gameState.houseBalance.toString()}</p>
               <p>Current Bets: {currentBets.length}</p>
-              {Number(gameState.result) > 0 && <p>Last Result: {gameState.result.toString()}</p>}
+              {Number(gameState.result) > 0 && (
+                <p>Last Result: {gameState.result.toString()} 
+                  {(gameState.result < 0 || gameState.result > 36) && <span style={{color: 'red'}}> ⚠️ INVALID</span>}
+                </p>
+              )}
               {Number(gameState.winAmount) > 0 && <p>Win Amount: {gameState.winAmount.toString()}</p>}
             </div>
 
-            {/* End Game - FIXED BUTTON */}
+            {/* End Game */}
             <div style={{ marginBottom: '15px' }}>
               <button 
                 onClick={handleEndGame}
