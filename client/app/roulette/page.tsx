@@ -12,6 +12,8 @@ let ControllerConnector: any;
 if (typeof window !== 'undefined') {
   import('@cartridge/connector/controller').then(module => {
     ControllerConnector = module.default;
+  }).catch(error => {
+    console.error("Error loading controller:", error);
   });
 }
 
@@ -41,11 +43,16 @@ export default function RoulettePage() {
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [betType, setBetType] = useState<number>(0);
   const [betAmount, setBetAmount] = useState<string>("1000");
-  const [fundAmount, setFundAmount] = useState<string>("10000");
+  const [initialDeposit, setInitialDeposit] = useState<string>("10000");
   const [withdrawAmount, setWithdrawAmount] = useState<string>("1000");
-  const [selectedChip, setSelectedChip] = useState<number>(1000);
-  const [totalBetAmount, setTotalBetAmount] = useState<number>(0);
+  const [contractFundAmount, setContractFundAmount] = useState<string>("100000");
+  const [houseWithdrawAmount, setHouseWithdrawAmount] = useState<string>("5000");
   const [isSpinning, setIsSpinning] = useState(false);
+  const [gameResult, setGameResult] = useState<{
+    number: number;
+    isWin: boolean;
+    winAmount: string;
+  } | null>(null);
   
   // Track when ControllerConnector is loaded
   useEffect(() => {
@@ -78,17 +85,15 @@ export default function RoulettePage() {
         const controllerWithUsername = controller as any;
         if (controllerWithUsername.username && typeof controllerWithUsername.username === 'function') {
           try {
-            Promise.resolve().then(() => {
-              controllerWithUsername.username()
-                .then((name: string | undefined) => {
-                  if (name) setUsername(name);
-                })
-                .catch((error: any) => {
-                  if (!error.message?.includes('Not ready to connect')) {
-                    console.error("Username error:", error);
-                  }
-                });
-            });
+            controllerWithUsername.username()
+              .then((name: string | undefined) => {
+                if (name) setUsername(name);
+              })
+              .catch((error: any) => {
+                if (!error.message?.includes('Not ready to connect')) {
+                  console.error("Username error:", error);
+                }
+              });
           } catch (e) {
             // Ignore errors here
           }
@@ -103,7 +108,7 @@ export default function RoulettePage() {
     gameState,
     currentBets,
     loading,
-    fundAccount,
+    fundContract,
     createGame,
     placeBet,
     spinWheel,
@@ -113,26 +118,42 @@ export default function RoulettePage() {
     getUserBalance,
     getHouseBalance,
     getGameStatus,
+    getCurrentBets,
   } = useRoulette(connected, account);
 
-  // Handle fund account
-  const handleFund = async () => {
+  // Load initial data - Fixed to handle promises properly
+  useEffect(() => {
+    if (connected && account) {
+      Promise.all([
+        getUserBalance(),
+        getHouseBalance(),
+        getGameStatus(),
+        getCurrentBets(),
+      ]).catch(error => {
+        console.error("Error loading initial data:", error);
+      });
+    }
+  }, [connected, account]);
+
+  // Handle fund contract (owner only)
+  const handleFundContract = async () => {
     try {
-      const success = await fundAccount(BigInt(fundAmount));
+      const success = await fundContract(BigInt(contractFundAmount));
       if (success) {
-        await getUserBalance();
+        await getHouseBalance();
       }
     } catch (error) {
-      console.error("Funding error:", error);
+      console.error("Contract funding error:", error);
     }
   };
 
-  // Handle create game
+  // Handle create game with initial deposit
   const handleCreateGame = async () => {
     try {
-      const success = await createGame(BigInt(betAmount));
+      const success = await createGame(BigInt(initialDeposit));
       if (success) {
         await getGameStatus();
+        await getUserBalance();
       }
     } catch (error) {
       console.error("Game creation error:", error);
@@ -164,17 +185,18 @@ export default function RoulettePage() {
     }
 
     try {
-      const success = await placeBet(betType, numbers, BigInt(selectedChip));
+      const success = await placeBet(betType, numbers, BigInt(betAmount));
       if (success) {
-        setTotalBetAmount(prev => prev + selectedChip);
         setSelectedNumbers([]);
+        await getCurrentBets();
+        await getUserBalance();
       }
     } catch (error) {
       console.error("Bet placement error:", error);
     }
   };
 
-  // Handle spin wheel
+  // Handle spin wheel - FIXED
   const handleSpin = async () => {
     if (currentBets.length === 0) {
       toast.error("Please place at least one bet before spinning");
@@ -183,13 +205,58 @@ export default function RoulettePage() {
 
     try {
       setIsSpinning(true);
+      setGameResult(null);
+      
       const result = await spinWheel();
       if (result !== null) {
+        // Check if user won
+        const isWin = currentBets.some(bet => {
+          if (bet.type === 0) { // Straight
+            return bet.numbers.includes(result);
+          } else if (bet.type === 5) { // Column
+            if (result === 0) return false;
+            const column = (result - 1) % 3 + 1;
+            return bet.numbers.includes(column);
+          } else if (bet.type === 6) { // Dozen
+            if (result === 0) return false;
+            const dozen = Math.floor((result - 1) / 12) + 1;
+            return bet.numbers.includes(dozen);
+          } else if (bet.type === 7) { // Red/Black
+            if (result === 0) return false;
+            const redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+            const isRed = redNumbers.includes(result);
+            const betRed = bet.numbers[0] === 1;
+            return isRed === betRed;
+          } else if (bet.type === 8) { // Odd/Even
+            if (result === 0) return false;
+            const isOdd = result % 2 === 1;
+            const betOdd = bet.numbers[0] === 1;
+            return isOdd === betOdd;
+          } else if (bet.type === 9) { // Low/High
+            if (result === 0) return false;
+            const isLow = result <= 18;
+            const betLow = bet.numbers[0] === 0;
+            return isLow === betLow;
+          }
+          return bet.numbers.includes(result);
+        });
+
+        const winAmount = gameState.winAmount.toString();
+        
+        setGameResult({
+          number: result,
+          isWin,
+          winAmount,
+        });
+
+        // Update game status after spinning
+        await getGameStatus();
+        await getUserBalance();
+
         // Show result with animation delay
         setTimeout(() => {
-          const isWin = currentBets.some(bet => bet.numbers.includes(result));
           if (isWin) {
-            toast.success(`🎉 You won! Number ${result}`);
+            toast.success(`🎉 You won! Number ${result} - Won ${winAmount} tokens`);
           } else {
             toast.error(`😞 You lost! Number ${result}`);
           }
@@ -204,14 +271,15 @@ export default function RoulettePage() {
     }
   };
 
-  // Handle end game
+  // Handle end game - FIXED
   const handleEndGame = async () => {
     try {
       const success = await endGame();
       if (success) {
         setSelectedNumbers([]);
-        setTotalBetAmount(0);
+        setGameResult(null);
         await getUserBalance();
+        await getGameStatus();
       }
     } catch (error) {
       console.error("End game error:", error);
@@ -233,7 +301,7 @@ export default function RoulettePage() {
   // Handle withdraw house funds
   const handleWithdrawHouse = async () => {
     try {
-      const success = await withdrawHouseFunds(BigInt(withdrawAmount));
+      const success = await withdrawHouseFunds(BigInt(houseWithdrawAmount));
       if (success) {
         await getHouseBalance();
       }
@@ -254,17 +322,15 @@ export default function RoulettePage() {
   // Reset bets
   const resetBets = () => {
     setSelectedNumbers([]);
-    setTotalBetAmount(0);
   };
 
   // Get game status text
   const getGameStatusText = () => {
     switch (gameState.status) {
-      case 0: return "No Active Game";
-      case 1: return "Betting Phase";
-      case 2: return "Spinning";
-      case 3: return "Game Completed";
-      default: return "Unknown";
+      case 0: return "Betting Phase";
+      case 1: return "Spinning";
+      case 2: return "Game Completed";
+      default: return "No Active Game";
     }
   };
 
@@ -291,10 +357,10 @@ export default function RoulettePage() {
             <div className="game-name">STARKNET ROULETTE</div>
             <div className="min-max-bet">
               <div className="min-bet bet-size">
-                <span className="text-color">MIN:</span> $5.00
+                <span className="text-color">MIN:</span> 1000
               </div>
               <div className="max-bet bet-size">
-                <span className="text-color">MAX:</span> $1000.00
+                <span className="text-color">MAX:</span> 100000
               </div>
             </div>
           </div>
@@ -308,32 +374,48 @@ export default function RoulettePage() {
             padding: '20px', 
             borderRadius: '10px',
             color: 'white',
-            minWidth: '300px'
+            minWidth: '350px',
+            maxHeight: '600px',
+            overflowY: 'auto'
           }}>
             <h3>Game Controls</h3>
             
-            {/* Fund Account */}
+            {/* Connection Status */}
+            <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: connected ? '#4CAF50' : '#f44336', borderRadius: '5px' }}>
+              <p>Status: {connected ? 'Connected' : 'Disconnected'}</p>
+              {username && <p>User: {username}</p>}
+              {address && <p>Address: {address.slice(0, 6)}...{address.slice(-4)}</p>}
+            </div>
+
+            {/* Fund Contract (Owner Only) */}
             <div style={{ marginBottom: '15px' }}>
-              <h4>1. Fund Account</h4>
+              <h4>1. Fund Contract (Owner Only)</h4>
               <input
                 type="number"
-                value={fundAmount}
-                onChange={(e) => setFundAmount(e.target.value)}
+                value={contractFundAmount}
+                onChange={(e) => setContractFundAmount(e.target.value)}
                 style={{ width: '150px', marginRight: '10px', padding: '5px', color: 'black' }}
                 placeholder="Amount"
               />
               <button 
-                onClick={handleFund}
+                onClick={handleFundContract}
                 disabled={loading}
-                style={{ padding: '5px 10px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '3px' }}
+                style={{ padding: '5px 10px', backgroundColor: '#FF5722', color: 'white', border: 'none', borderRadius: '3px' }}
               >
-                {loading ? 'Funding...' : 'Fund Account'}
+                {loading ? 'Funding...' : 'Fund Contract'}
               </button>
             </div>
 
             {/* Create Game */}
             <div style={{ marginBottom: '15px' }}>
-              <h4>2. Create Game</h4>
+              <h4>2. Create Game (Initial Deposit)</h4>
+              <input
+                type="number"
+                value={initialDeposit}
+                onChange={(e) => setInitialDeposit(e.target.value)}
+                style={{ width: '150px', marginRight: '10px', padding: '5px', color: 'black' }}
+                placeholder="Initial deposit"
+              />
               <button 
                 onClick={handleCreateGame}
                 disabled={loading || Number(gameState.gameId) > 0}
@@ -353,24 +435,58 @@ export default function RoulettePage() {
               >
                 {BET_TYPES.map((type) => (
                   <option key={type.id} value={type.id}>
-                    {type.name} ({type.multiplier}x)
+                    {type.name} ({type.multiplier}x) - {type.description}
                   </option>
                 ))}
               </select>
             </div>
 
+            {/* Bet Amount */}
+            <div style={{ marginBottom: '15px' }}>
+              <h4>4. Bet Amount</h4>
+              <input
+                type="number"
+                value={betAmount}
+                onChange={(e) => setBetAmount(e.target.value)}
+                style={{ width: '150px', marginRight: '10px', padding: '5px', color: 'black' }}
+                placeholder="Bet amount"
+              />
+            </div>
+
             {/* Place Bet */}
             <div style={{ marginBottom: '15px' }}>
-              <h4>4. Place Bet</h4>
+              <h4>5. Place Bet</h4>
               <p>Selected Numbers: {selectedNumbers.join(', ') || 'None'}</p>
               <button 
                 onClick={handlePlaceBet}
-                disabled={loading || gameState.status !== 1}
+                disabled={loading || gameState.status === 2 || gameState.gameId === 0}
                 style={{ padding: '5px 10px', backgroundColor: '#FF9800', color: 'white', border: 'none', borderRadius: '3px' }}
               >
-                {loading ? 'Placing...' : `Place Bet ($${selectedChip})`}
+                {loading ? 'Placing...' : `Place Bet (${betAmount})`}
               </button>
             </div>
+
+            {/* Spin Wheel */}
+            <div style={{ marginBottom: '15px' }}>
+              <h4>6. Spin Wheel</h4>
+              <button 
+                onClick={handleSpin}
+                disabled={loading || currentBets.length === 0 || isSpinning || gameState.status === 2}
+                style={{ padding: '5px 10px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '3px' }}
+              >
+                {isSpinning ? 'Spinning...' : 'Spin Wheel'}
+              </button>
+            </div>
+
+            {/* Game Result */}
+            {gameResult && (
+              <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: gameResult.isWin ? '#4CAF50' : '#f44336', borderRadius: '5px' }}>
+                <h4>Game Result</h4>
+                <p>Number: {gameResult.number}</p>
+                <p>Result: {gameResult.isWin ? 'WIN' : 'LOSE'}</p>
+                {gameResult.isWin && <p>Won: {gameResult.winAmount} tokens</p>}
+              </div>
+            )}
 
             {/* Game Status */}
             <div style={{ marginBottom: '15px' }}>
@@ -378,24 +494,36 @@ export default function RoulettePage() {
               <p>Status: {getGameStatusText()}</p>
               <p>Game ID: {gameState.gameId.toString()}</p>
               <p>User Balance: {gameState.userBalance.toString()}</p>
-              <p>Total Bet: ${totalBetAmount}</p>
+              <p>House Balance: {gameState.houseBalance.toString()}</p>
+              <p>Current Bets: {currentBets.length}</p>
               {Number(gameState.result) > 0 && <p>Last Result: {gameState.result.toString()}</p>}
+              {Number(gameState.winAmount) > 0 && <p>Win Amount: {gameState.winAmount.toString()}</p>}
             </div>
 
-            {/* End Game */}
+            {/* End Game - FIXED BUTTON */}
             <div style={{ marginBottom: '15px' }}>
               <button 
                 onClick={handleEndGame}
-                disabled={loading || gameState.status !== 3}
-                style={{ padding: '5px 10px', backgroundColor: '#9C27B0', color: 'white', border: 'none', borderRadius: '3px' }}
+                disabled={loading || gameState.gameId === 0}
+                style={{ 
+                  padding: '5px 10px', 
+                  backgroundColor: gameState.status === 2 ? '#9C27B0' : '#666666', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '3px',
+                  opacity: gameState.status === 2 ? 1 : 0.6
+                }}
               >
                 {loading ? 'Ending...' : 'End Game'}
               </button>
+              <p style={{ fontSize: '12px', marginTop: '5px' }}>
+                {gameState.status !== 2 ? 'Complete the game first' : 'Ready to end game'}
+              </p>
             </div>
 
             {/* Withdrawals */}
             <div>
-              <h4>Withdrawals</h4>
+              <h4>User Withdrawals</h4>
               <input
                 type="number"
                 value={withdrawAmount}
@@ -406,10 +534,19 @@ export default function RoulettePage() {
               <button 
                 onClick={handleWithdrawUser}
                 disabled={loading}
-                style={{ padding: '5px 10px', backgroundColor: '#795548', color: 'white', border: 'none', borderRadius: '3px', marginRight: '5px' }}
+                style={{ padding: '5px 10px', backgroundColor: '#795548', color: 'white', border: 'none', borderRadius: '3px', marginBottom: '10px' }}
               >
                 Withdraw User
               </button>
+              
+              <h4>House Withdrawals (Owner Only)</h4>
+              <input
+                type="number"
+                value={houseWithdrawAmount}
+                onChange={(e) => setHouseWithdrawAmount(e.target.value)}
+                style={{ width: '100px', marginRight: '10px', padding: '5px', color: 'black' }}
+                placeholder="Amount"
+              />
               <button 
                 onClick={handleWithdrawHouse}
                 disabled={loading}
@@ -454,37 +591,25 @@ export default function RoulettePage() {
               ))}
               
               {/* 2 to 1 bets */}
-              <div className="number bet2to1-1 part" onClick={() => setBetType(5)}>2 to 1</div>
-              <div className="number bet2to1-2 part" onClick={() => setBetType(5)}>2 to 1</div>
-              <div className="number bet2to1-3 part" onClick={() => setBetType(5)}>2 to 1</div>
+              <div className="number bet2to1-1 part" onClick={() => { setBetType(5); setSelectedNumbers([1]); }}>2 to 1</div>
+              <div className="number bet2to1-2 part" onClick={() => { setBetType(5); setSelectedNumbers([2]); }}>2 to 1</div>
+              <div className="number bet2to1-3 part" onClick={() => { setBetType(5); setSelectedNumbers([3]); }}>2 to 1</div>
             </div>
 
             <div className="bottom-area">
-              <div className="bottom-column bottom-column1 column-1st12 part" onClick={() => setBetType(6)}>1st 12</div>
-              <div className="bottom-column bottom-column2 column-2nd12 part" onClick={() => setBetType(6)}>2nd 12</div>
-              <div className="bottom-column bottom-column3 column-3rd12 part" onClick={() => setBetType(6)}>3rd 12</div>
-              <div className="bottom-column bottom-column4 column-1to18 part" onClick={() => setBetType(9)}>1 to 18</div>
-              <div className="bottom-column bottom-column5 column-even part" onClick={() => setBetType(8)}>EVEN</div>
-              <div className="bottom-column bottom-column6 column-red part" onClick={() => setBetType(7)}>RED</div>
-              <div className="bottom-column bottom-column7 column-black part" onClick={() => setBetType(7)}>BLACK</div>
-              <div className="bottom-column bottom-column8 column-odd part" onClick={() => setBetType(8)}>ODD</div>
-              <div className="bottom-column bottom-column9 column-19to36 part" onClick={() => setBetType(9)}>19 to 36</div>
+              <div className="bottom-column bottom-column1 column-1st12 part" onClick={() => { setBetType(6); setSelectedNumbers([1]); }}>1st 12</div>
+              <div className="bottom-column bottom-column2 column-2nd12 part" onClick={() => { setBetType(6); setSelectedNumbers([2]); }}>2nd 12</div>
+              <div className="bottom-column bottom-column3 column-3rd12 part" onClick={() => { setBetType(6); setSelectedNumbers([3]); }}>3rd 12</div>
+              <div className="bottom-column bottom-column4 column-1to18 part" onClick={() => { setBetType(9); setSelectedNumbers([0]); }}>1 to 18</div>
+              <div className="bottom-column bottom-column5 column-even part" onClick={() => { setBetType(8); setSelectedNumbers([0]); }}>EVEN</div>
+              <div className="bottom-column bottom-column6 column-red part" onClick={() => { setBetType(7); setSelectedNumbers([1]); }}>RED</div>
+              <div className="bottom-column bottom-column7 column-black part" onClick={() => { setBetType(7); setSelectedNumbers([0]); }}>BLACK</div>
+              <div className="bottom-column bottom-column8 column-odd part" onClick={() => { setBetType(8); setSelectedNumbers([1]); }}>ODD</div>
+              <div className="bottom-column bottom-column9 column-19to36 part" onClick={() => { setBetType(9); setSelectedNumbers([1]); }}>19 to 36</div>
             </div>
           </div>
 
           <div className="selections-container">
-            <div className="betting-chips-container">
-              {[5, 10, 20, 50, 100, 200].map((chipValue) => (
-                <div
-                  key={chipValue}
-                  className={`betting-chip betting-chip-menu betting-chip-menu${chipValue} betting-chip${chipValue} ${selectedChip === chipValue ? 'selected' : ''}`}
-                  onClick={() => setSelectedChip(chipValue)}
-                >
-                  {chipValue}
-                </div>
-              ))}
-            </div>
-
             <div className="menu-container">
               <div className="button button-spin" onClick={handleSpin}>
                 <div className="circle">
@@ -515,30 +640,44 @@ export default function RoulettePage() {
           <div className="money-container">
             <div className="cash-area area">
               <div className="text">Balance:</div>
-              <div className="cash-total">${gameState.userBalance.toString()}</div>
+              <div className="cash-total">{gameState.userBalance.toString()}</div>
             </div>
             <div className="bet-area area">
-              <div className="text"><span>BET</span> $</div>
-              <div className="bet-total">{totalBetAmount.toFixed(2)}</div>
+              <div className="text"><span>BETS</span></div>
+              <div className="bet-total">{currentBets.length}</div>
             </div>
           </div>
 
           {/* Alert Messages */}
-          {gameState.status === 1 && currentBets.length === 0 && (
+          {gameState.gameId === 0 && (
+            <div className="alert-message-container alert-bets">
+              <div className="alert-message">PLEASE CREATE A GAME FIRST</div>
+            </div>
+          )}
+
+          {gameState.status === 0 && currentBets.length === 0 && gameState.gameId > 0 && (
             <div className="alert-message-container alert-bets">
               <div className="alert-message">PLEASE PLACE YOUR BETS</div>
             </div>
           )}
 
-          {gameState.status === 2 && (
+          {gameState.status === 1 && (
             <div className="alert-message-container alert-spin-result">
               <div className="results">
-                <div className="roll-number text">{gameState.result.toString()}</div>
+                <div className="roll-number text">SPINNING...</div>
+              </div>
+            </div>
+          )}
+
+          {gameState.status === 2 && gameResult && (
+            <div className="alert-message-container alert-spin-result">
+              <div className="results">
+                <div className="roll-number text">{gameResult.number}</div>
                 <div className="win-lose text">
-                  {currentBets.some(bet => bet.numbers.includes(Number(gameState.result))) ? 'WIN' : 'LOSE'}
+                  {gameResult.isWin ? 'WIN' : 'LOSE'}
                 </div>
-                {Number(gameState.winAmount) > 0 && (
-                  <div className="win-amount text">{gameState.winAmount.toString()}</div>
+                {gameResult.isWin && (
+                  <div className="win-amount text">{gameResult.winAmount}</div>
                 )}
               </div>
             </div>
@@ -566,16 +705,13 @@ export default function RoulettePage() {
           transform: scale(1.1);
           box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
-        .betting-chip {
+        .part {
           cursor: pointer;
           transition: all 0.2s ease;
         }
-        .betting-chip:hover {
-          transform: scale(1.1);
-        }
-        .betting-chip.selected {
-          border: 3px solid #FFD700;
-          box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        .part:hover {
+          transform: scale(1.05);
+          box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
       `}</style>
     </>
