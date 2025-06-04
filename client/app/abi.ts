@@ -1402,412 +1402,717 @@ export const RPS_ABI: Abi = [
 
 export const ROULETTE_ABI : Abi =[
   {
-    type: "impl",
-    name: "Roulette",
-    interface_name: "roulette::IRouletteContract",
+    "type": "impl",
+    "name": "IRouletteGame",
+    "interface_name": "roullete::roullete2::IRouletteGame"
   },
   {
-    type: "struct",
-    name: "core::integer::u256",
-    members: [
+    "type": "struct",
+    "name": "core::integer::u256",
+    "members": [
       {
-        name: "low",
-        type: "core::integer::u128",
+        "name": "low",
+        "type": "core::integer::u128"
       },
       {
-        name: "high",
-        type: "core::integer::u128",
-      },
-    ],
+        "name": "high",
+        "type": "core::integer::u128"
+      }
+    ]
   },
   {
-    type: "struct",
-    name: "roulette::Bet",
-    members: [
+    "type": "struct",
+    "name": "roullete::roullete2::IndividualBet",
+    "members": [
       {
-        name: "amount",
-        type: "core::integer::u256",
+        "name": "bet_type",
+        "type": "core::integer::u8"
       },
       {
-        name: "numbers",
-        type: "core::array::Array::<core::integer::u8>",
+        "name": "numbers",
+        "type": "core::array::Array::<core::integer::u64>"
       },
-    ],
+      {
+        "name": "amount",
+        "type": "core::integer::u256"
+      }
+    ]
   },
   {
-    type: "enum",
-    name: "roulette::RouletteState",
-    variants: [
+    "type": "struct",
+    "name": "core::array::Span::<core::integer::u64>",
+    "members": [
       {
-        name: "Idle",
-        type: "()",
-      },
-      {
-        name: "Spinning",
-        type: "()",
-      },
-      {
-        name: "Complete",
-        type: "()",
-      },
-    ],
+        "name": "snapshot",
+        "type": "@core::array::Array::<core::integer::u64>"
+      }
+    ]
   },
   {
-    type: "struct",
-    name: "roulette::SpinDetails",
-    members: [
+    "type": "struct",
+    "name": "roullete::roullete2::Bet",
+    "members": [
       {
-        name: "player",
-        type: "core::starknet::contract_address::ContractAddress",
+        "name": "bet_type",
+        "type": "core::integer::u8"
       },
       {
-        name: "total_bet_amount",
-        type: "core::integer::u256",
+        "name": "numbers",
+        "type": "core::array::Span::<core::integer::u64>"
       },
       {
-        name: "winning_number",
-        type: "core::integer::u8",
-      },
-      {
-        name: "state",
-        type: "roulette::RouletteState",
-      },
-      {
-        name: "request_id",
-        type: "core::integer::u64",
-      },
-      {
-        name: "total_payout",
-        type: "core::integer::u256",
-      },
-    ],
+        "name": "amount",
+        "type": "core::integer::u256"
+      }
+    ]
   },
   {
-    type: "interface",
-    name: "roulette::IRouletteContract",
-    items: [
+    "type": "interface",
+    "name": "roullete::roullete2::IRouletteGame",
+    "items": [
       {
-        type: "function",
-        name: "spin_roulette",
-        inputs: [
+        "type": "function",
+        "name": "place_multiple_bets",
+        "inputs": [
           {
-            name: "bets",
-            type: "core::array::Array::<roulette::Bet>",
-          },
+            "name": "bets",
+            "type": "core::array::Array::<roullete::roullete2::IndividualBet>"
+          }
         ],
-        outputs: [
+        "outputs": [
           {
-            type: "core::integer::u64",
-          },
+            "type": "core::array::Array::<core::integer::u64>"
+          }
         ],
-        state_mutability: "external",
+        "state_mutability": "external"
       },
       {
-        type: "function",
-        name: "get_spin_details",
-        inputs: [
+        "type": "function",
+        "name": "place_single_bet",
+        "inputs": [
           {
-            name: "request_id",
-            type: "core::integer::u64",
+            "name": "bet_type",
+            "type": "core::integer::u8"
           },
+          {
+            "name": "numbers",
+            "type": "core::array::Array::<core::integer::u64>"
+          },
+          {
+            "name": "amount",
+            "type": "core::integer::u256"
+          }
         ],
-        outputs: [
+        "outputs": [
           {
-            type: "(roulette::SpinDetails, core::array::Array::<roulette::Bet>)",
-          },
+            "type": "core::integer::u64"
+          }
         ],
-        state_mutability: "view",
+        "state_mutability": "external"
       },
       {
-        type: "function",
-        name: "get_contract_balance",
-        inputs: [
+        "type": "function",
+        "name": "spin_wheel",
+        "inputs": [],
+        "outputs": [
           {
-            name: "token",
-            type: "core::starknet::contract_address::ContractAddress",
-          },
+            "type": "core::integer::u64"
+          }
         ],
-        outputs: [
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "get_user_balance",
+        "inputs": [
           {
-            type: "core::integer::u256",
-          },
+            "name": "user",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
         ],
-        state_mutability: "view",
-      },
-      {
-        type: "function",
-        name: "withdraw",
-        inputs: [
+        "outputs": [
           {
-            name: "token",
-            type: "core::starknet::contract_address::ContractAddress",
-          },
-          {
-            name: "amount",
-            type: "core::integer::u256",
-          },
+            "type": "core::integer::u256"
+          }
         ],
-        outputs: [],
-        state_mutability: "external",
+        "state_mutability": "view"
       },
       {
-        type: "function",
-        name: "fund_contract",
-        inputs: [
+        "type": "function",
+        "name": "get_house_balance",
+        "inputs": [],
+        "outputs": [
           {
-            name: "token",
-            type: "core::starknet::contract_address::ContractAddress",
-          },
-          {
-            name: "amount",
-            type: "core::integer::u256",
-          },
+            "type": "core::integer::u256"
+          }
         ],
-        outputs: [],
-        state_mutability: "external",
+        "state_mutability": "view"
       },
       {
-        type: "function",
-        name: "update_pragma_vrf_contract_address",
-        inputs: [
+        "type": "function",
+        "name": "get_last_result",
+        "inputs": [
           {
-            name: "new_address",
-            type: "core::starknet::contract_address::ContractAddress",
-          },
+            "name": "player",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
         ],
-        outputs: [],
-        state_mutability: "external",
-      },
-    ],
-  },
-  {
-    type: "impl",
-    name: "PragmaVRF",
-    interface_name: "roulette::IPragmaVRF",
-  },
-  {
-    type: "struct",
-    name: "core::array::Span::<core::felt252>",
-    members: [
-      {
-        name: "snapshot",
-        type: "@core::array::Array::<core::felt252>",
-      },
-    ],
-  },
-  {
-    type: "interface",
-    name: "roulette::IPragmaVRF",
-    items: [
-      {
-        type: "function",
-        name: "receive_random_words",
-        inputs: [
+        "outputs": [
           {
-            name: "requester_address",
-            type: "core::starknet::contract_address::ContractAddress",
-          },
-          {
-            name: "request_id",
-            type: "core::integer::u64",
-          },
-          {
-            name: "random_words",
-            type: "core::array::Span::<core::felt252>",
-          },
-          {
-            name: "calldata",
-            type: "core::array::Array::<core::felt252>",
-          },
+            "type": "(core::integer::u64, core::integer::u256)"
+          }
         ],
-        outputs: [],
-        state_mutability: "external",
+        "state_mutability": "view"
       },
-    ],
-  },
-  {
-    type: "impl",
-    name: "OwnableImpl",
-    interface_name: "openzeppelin_access::ownable::interface::IOwnable",
-  },
-  {
-    type: "interface",
-    name: "openzeppelin_access::ownable::interface::IOwnable",
-    items: [
       {
-        type: "function",
-        name: "owner",
-        inputs: [],
-        outputs: [
+        "type": "function",
+        "name": "get_pending_bets",
+        "inputs": [
           {
-            type: "core::starknet::contract_address::ContractAddress",
-          },
+            "name": "player",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
         ],
-        state_mutability: "view",
-      },
-      {
-        type: "function",
-        name: "transfer_ownership",
-        inputs: [
+        "outputs": [
           {
-            name: "new_owner",
-            type: "core::starknet::contract_address::ContractAddress",
-          },
+            "type": "core::array::Array::<roullete::roullete2::Bet>"
+          }
         ],
-        outputs: [],
-        state_mutability: "external",
+        "state_mutability": "view"
       },
       {
-        type: "function",
-        name: "renounce_ownership",
-        inputs: [],
-        outputs: [],
-        state_mutability: "external",
+        "type": "function",
+        "name": "get_max_payout",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u256"
+          }
+        ],
+        "state_mutability": "view"
       },
-    ],
+      {
+        "type": "function",
+        "name": "get_bet_type_info",
+        "inputs": [
+          {
+            "name": "bet_type",
+            "type": "core::integer::u8"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "(core::felt252, core::integer::u256, core::felt252)"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "deposit_house_funds",
+        "inputs": [
+          {
+            "name": "amount",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "withdraw_house_funds",
+        "inputs": [
+          {
+            "name": "amount",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "set_bet_limits",
+        "inputs": [
+          {
+            "name": "min_bet",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "max_bet",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "set_max_payout_percentage",
+        "inputs": [
+          {
+            "name": "percentage",
+            "type": "core::integer::u16"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "withdraw_user_winnings",
+        "inputs": [
+          {
+            "name": "amount",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "pause_contract",
+        "inputs": [],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "unpause_contract",
+        "inputs": [],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "cleanup_old_bets",
+        "inputs": [
+          {
+            "name": "player",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      }
+    ]
   },
   {
-    type: "constructor",
-    name: "constructor",
-    inputs: [
-      {
-        name: "pragma_vrf_contract_address",
-        type: "core::starknet::contract_address::ContractAddress",
-      },
-      {
-        name: "owner",
-        type: "core::starknet::contract_address::ContractAddress",
-      },
-      {
-        name: "token_address",
-        type: "core::starknet::contract_address::ContractAddress",
-      },
-      {
-        name: "house_edge_bps",
-        type: "core::integer::u16",
-      },
-    ],
+    "type": "impl",
+    "name": "OwnableImpl",
+    "interface_name": "openzeppelin_access::ownable::interface::IOwnable"
   },
   {
-    type: "event",
-    name: "roulette::RouletteContract::RouletteSpinStarted",
-    kind: "struct",
-    members: [
+    "type": "interface",
+    "name": "openzeppelin_access::ownable::interface::IOwnable",
+    "items": [
       {
-        name: "request_id",
-        type: "core::integer::u64",
-        kind: "data",
+        "type": "function",
+        "name": "owner",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "state_mutability": "view"
       },
       {
-        name: "player",
-        type: "core::starknet::contract_address::ContractAddress",
-        kind: "data",
+        "type": "function",
+        "name": "transfer_ownership",
+        "inputs": [
+          {
+            "name": "new_owner",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
       },
       {
-        name: "total_bet_amount",
-        type: "core::integer::u256",
-        kind: "data",
-      },
-    ],
+        "type": "function",
+        "name": "renounce_ownership",
+        "inputs": [],
+        "outputs": [],
+        "state_mutability": "external"
+      }
+    ]
   },
   {
-    type: "event",
-    name: "roulette::RouletteContract::RouletteSpinCompleted",
-    kind: "struct",
-    members: [
+    "type": "constructor",
+    "name": "constructor",
+    "inputs": [
       {
-        name: "request_id",
-        type: "core::integer::u64",
-        kind: "data",
+        "name": "token_address",
+        "type": "core::starknet::contract_address::ContractAddress"
       },
       {
-        name: "player",
-        type: "core::starknet::contract_address::ContractAddress",
-        kind: "data",
+        "name": "owner",
+        "type": "core::starknet::contract_address::ContractAddress"
       },
       {
-        name: "winning_number",
-        type: "core::integer::u8",
-        kind: "data",
+        "name": "min_bet_amount",
+        "type": "core::integer::u256"
       },
       {
-        name: "total_payout",
-        type: "core::integer::u256",
-        kind: "data",
-      },
-    ],
+        "name": "max_bet_amount",
+        "type": "core::integer::u256"
+      }
+    ]
   },
   {
-    type: "event",
-    name: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
-    kind: "struct",
-    members: [
+    "type": "event",
+    "name": "roullete::roullete2::RouletteGameFinal::MultipleBetsPlaced",
+    "kind": "struct",
+    "members": [
       {
-        name: "previous_owner",
-        type: "core::starknet::contract_address::ContractAddress",
-        kind: "key",
+        "name": "player",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
       },
       {
-        name: "new_owner",
-        type: "core::starknet::contract_address::ContractAddress",
-        kind: "key",
+        "name": "bet_count",
+        "type": "core::integer::u32",
+        "kind": "data"
       },
-    ],
+      {
+        "name": "total_amount",
+        "type": "core::integer::u256",
+        "kind": "data"
+      },
+      {
+        "name": "bet_details",
+        "type": "core::array::Array::<(core::integer::u8, core::integer::u256)>",
+        "kind": "data"
+      }
+    ]
   },
   {
-    type: "event",
-    name: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
-    kind: "struct",
-    members: [
+    "type": "event",
+    "name": "roullete::roullete2::RouletteGameFinal::SingleBetPlaced",
+    "kind": "struct",
+    "members": [
       {
-        name: "previous_owner",
-        type: "core::starknet::contract_address::ContractAddress",
-        kind: "key",
+        "name": "player",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
       },
       {
-        name: "new_owner",
-        type: "core::starknet::contract_address::ContractAddress",
-        kind: "key",
+        "name": "bet_type",
+        "type": "core::integer::u8",
+        "kind": "data"
       },
-    ],
+      {
+        "name": "bet_amount",
+        "type": "core::integer::u256",
+        "kind": "data"
+      },
+      {
+        "name": "bet_numbers",
+        "type": "core::array::Array::<core::integer::u64>",
+        "kind": "data"
+      }
+    ]
   },
   {
-    type: "event",
-    name: "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
-    kind: "enum",
-    variants: [
+    "type": "event",
+    "name": "roullete::roullete2::RouletteGameFinal::WheelSpun",
+    "kind": "struct",
+    "members": [
       {
-        name: "OwnershipTransferred",
-        type: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
-        kind: "nested",
+        "name": "player",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
       },
       {
-        name: "OwnershipTransferStarted",
-        type: "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
-        kind: "nested",
+        "name": "winning_number",
+        "type": "core::integer::u64",
+        "kind": "data"
       },
-    ],
+      {
+        "name": "total_payout",
+        "type": "core::integer::u256",
+        "kind": "data"
+      },
+      {
+        "name": "entropy_hash",
+        "type": "core::felt252",
+        "kind": "data"
+      }
+    ]
   },
   {
-    type: "event",
-    name: "roulette::RouletteContract::Event",
-    kind: "enum",
-    variants: [
+    "type": "event",
+    "name": "roullete::roullete2::RouletteGameFinal::PlayerWon",
+    "kind": "struct",
+    "members": [
       {
-        name: "RouletteSpinStarted",
-        type: "roulette::RouletteContract::RouletteSpinStarted",
-        kind: "nested",
+        "name": "player",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
       },
       {
-        name: "RouletteSpinCompleted",
-        type: "roulette::RouletteContract::RouletteSpinCompleted",
-        kind: "nested",
-      },
-      {
-        name: "OwnableEvent",
-        type: "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
-        kind: "flat",
-      },
-    ],
+        "name": "payout_amount",
+        "type": "core::integer::u256",
+        "kind": "data"
+      }
+    ]
   },
+  {
+    "type": "event",
+    "name": "roullete::roullete2::RouletteGameFinal::PlayerLost",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "player",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "lost_amount",
+        "type": "core::integer::u256",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "roullete::roullete2::RouletteGameFinal::HouseFundsDeposited",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "amount",
+        "type": "core::integer::u256",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "roullete::roullete2::RouletteGameFinal::HouseFundsWithdrawn",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "amount",
+        "type": "core::integer::u256",
+        "kind": "data"
+      },
+      {
+        "name": "to_address",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "name": "core::bool",
+    "variants": [
+      {
+        "name": "False",
+        "type": "()"
+      },
+      {
+        "name": "True",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "roullete::roullete2::RouletteGameFinal::UserWithdrawal",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "user",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "amount",
+        "type": "core::integer::u256",
+        "kind": "data"
+      },
+      {
+        "name": "fee",
+        "type": "core::integer::u256",
+        "kind": "data"
+      },
+      {
+        "name": "net_amount",
+        "type": "core::integer::u256",
+        "kind": "data"
+      },
+      {
+        "name": "is_original_deposit",
+        "type": "core::bool",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "roullete::roullete2::RouletteGameFinal::BetRejectedInsufficientHouseFunds",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "player",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "required_payout",
+        "type": "core::integer::u256",
+        "kind": "data"
+      },
+      {
+        "name": "available_house_balance",
+        "type": "core::integer::u256",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "roullete::roullete2::RouletteGameFinal::OldBetsCleanedUp",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "player",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "bets_cleaned",
+        "type": "core::integer::u32",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "previous_owner",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "new_owner",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "previous_owner",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "new_owner",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
+    "kind": "enum",
+    "variants": [
+      {
+        "name": "OwnershipTransferred",
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
+        "kind": "nested"
+      },
+      {
+        "name": "OwnershipTransferStarted",
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
+        "kind": "nested"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "openzeppelin_security::reentrancyguard::ReentrancyGuardComponent::Event",
+    "kind": "enum",
+    "variants": []
+  },
+  {
+    "type": "event",
+    "name": "roullete::roullete2::RouletteGameFinal::Event",
+    "kind": "enum",
+    "variants": [
+      {
+        "name": "MultipleBetsPlaced",
+        "type": "roullete::roullete2::RouletteGameFinal::MultipleBetsPlaced",
+        "kind": "nested"
+      },
+      {
+        "name": "SingleBetPlaced",
+        "type": "roullete::roullete2::RouletteGameFinal::SingleBetPlaced",
+        "kind": "nested"
+      },
+      {
+        "name": "WheelSpun",
+        "type": "roullete::roullete2::RouletteGameFinal::WheelSpun",
+        "kind": "nested"
+      },
+      {
+        "name": "PlayerWon",
+        "type": "roullete::roullete2::RouletteGameFinal::PlayerWon",
+        "kind": "nested"
+      },
+      {
+        "name": "PlayerLost",
+        "type": "roullete::roullete2::RouletteGameFinal::PlayerLost",
+        "kind": "nested"
+      },
+      {
+        "name": "HouseFundsDeposited",
+        "type": "roullete::roullete2::RouletteGameFinal::HouseFundsDeposited",
+        "kind": "nested"
+      },
+      {
+        "name": "HouseFundsWithdrawn",
+        "type": "roullete::roullete2::RouletteGameFinal::HouseFundsWithdrawn",
+        "kind": "nested"
+      },
+      {
+        "name": "UserWithdrawal",
+        "type": "roullete::roullete2::RouletteGameFinal::UserWithdrawal",
+        "kind": "nested"
+      },
+      {
+        "name": "BetRejectedInsufficientHouseFunds",
+        "type": "roullete::roullete2::RouletteGameFinal::BetRejectedInsufficientHouseFunds",
+        "kind": "nested"
+      },
+      {
+        "name": "OldBetsCleanedUp",
+        "type": "roullete::roullete2::RouletteGameFinal::OldBetsCleanedUp",
+        "kind": "nested"
+      },
+      {
+        "name": "OwnableEvent",
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
+        "kind": "flat"
+      },
+      {
+        "name": "ReentrancyGuardEvent",
+        "type": "openzeppelin_security::reentrancyguard::ReentrancyGuardComponent::Event",
+        "kind": "flat"
+      }
+    ]
+  }
 ];
