@@ -7,6 +7,10 @@ import { useAccount, useConnect } from "@starknet-react/core";
 import { useRoulette, CHIP_VALUES, SPECIAL_BET_TYPES } from "../hooks/useRouletteContract";
 import toast from "react-hot-toast";
 
+
+//controller
+// @ts-ignore
+// final controller touch 
 let ControllerConnector: any;
 if (typeof window !== 'undefined') {
   import('@cartridge/connector/controller').then(module => {

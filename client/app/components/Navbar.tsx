@@ -7,6 +7,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 
 // Change the import to use dynamic import
+//fully fixed cartridge connector import
+// This ensures it only loads in the browser and avoids SSR issues
+// @ts-ignore - Ignore TypeScript error for dynamic import
+// This is a workaround to ensure the ControllerConnector is loaded only in the browser
 let ControllerConnector: any;
 if (typeof window !== 'undefined') {
   import('@cartridge/connector/controller').then(module => {
@@ -64,6 +68,10 @@ export function Navbar() {
   }, []);
 
   // Track when ControllerConnector is loaded
+  // This ensures the connector is ready before trying to connect
+  // This is necessary to avoid issues with SSR and dynamic imports
+  // @ts-ignore - Ignore TypeScript error for ControllerConnector
+
   useEffect(() => {
     if (ControllerConnector) {
       setControllerReady(true);
@@ -78,6 +86,10 @@ export function Navbar() {
   }, []);
 
   // Controller connection - with safety checks
+  // This ensures that the controller is ready and the address is available before trying to connect
+  // It also checks if the username method exists and is callable
+  // @ts-ignore - Ignore TypeScript error for ControllerConnector
+  
   useEffect(() => {
     if (!address || !controllerReady) return;
     
