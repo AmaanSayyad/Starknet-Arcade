@@ -79,12 +79,35 @@ const policies = {
       ],
     },
     [ROULETTE_ADDRESS]: {
-      name: "Roullete",
-      description:
-        "Allows interaction with the Rock Paper Scissors game contract",
+      name: "Roulette Game",
+      description: "Allows interaction with the Roulette game contract for automated betting",
       methods: [
-        { name: "Spin Roulette", entrypoint: "spin_roulette", session: true },
-        { name: "Withdraw", entrypoint: "withdraw", session: true },
+        // Betting methods
+        { name: "Place Multiple Bets", entrypoint: "place_multiple_bets", session: true },
+        { name: "Place Single Bet", entrypoint: "place_single_bet", session: true },
+        { name: "Spin Wheel", entrypoint: "spin_wheel", session: true },
+        
+        // User withdrawal methods
+        { name: "Withdraw User Winnings", entrypoint: "withdraw_user_winnings", session: true },
+        
+        // View functions (for automation to check states)
+        { name: "Get User Balance", entrypoint: "get_user_balance", session: true },
+        { name: "Get House Balance", entrypoint: "get_house_balance", session: true },
+        { name: "Get Last Result", entrypoint: "get_last_result", session: true },
+        { name: "Get Pending Bets", entrypoint: "get_pending_bets", session: true },
+        { name: "Get Max Payout", entrypoint: "get_max_payout", session: true },
+        { name: "Get Bet Type Info", entrypoint: "get_bet_type_info", session: true },
+        
+        // House management (if user has permissions)
+        { name: "Deposit House Funds", entrypoint: "deposit_house_funds", session: true },
+        { name: "Withdraw House Funds", entrypoint: "withdraw_house_funds", session: true },
+        { name: "Set Bet Limits", entrypoint: "set_bet_limits", session: true },
+        { name: "Set Max Payout Percentage", entrypoint: "set_max_payout_percentage", session: true },
+        
+        // Admin functions
+        { name: "Pause Contract", entrypoint: "pause_contract", session: true },
+        { name: "Unpause Contract", entrypoint: "unpause_contract", session: true },
+        { name: "Cleanup Old Bets", entrypoint: "cleanup_old_bets", session: true },
       ],
     },
   },
