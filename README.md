@@ -85,16 +85,6 @@ Our platform offers transparent outcomes, fair gameplay, and user-first mechanic
 
 ---
 
-## 🔗 Live Links
-
-- 🧩 **Live dApp**: [https://starknet-arcade-flax.vercel.app/](https://starknet-arcade-flax.vercel.app/)
-- 🐦 **Twitter**: [https://x.com/StarkNet_Arcade](https://x.com/StarkNet_Arcade)
-- 💻 **GitHub**: [https://github.com/AmaanSayyad/Starknet-Arcade](https://github.com/AmaanSayyad/Starknet-Arcade)
-- 📘 **Documentation**: [https://amaans-organization.gitbook.io/starknet-arcade](https://amaans-organization.gitbook.io/starknet-arcade)
-- 🖼️ **Presentation Deck**: [View Deck](https://www.canva.com/design/DAGkuwtnWMU/NXdO-4ktMoUcleUFRG283w/view?utm_content=DAGkuwtnWMU&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hb1b396888b)
-
----
-
 ## 📈 Vision & Roadmap
 
 - Launch 25+ on-chain games
@@ -145,7 +135,6 @@ https://github.com/user-attachments/assets/115c73d2-1b4e-4cd0-b280-be02bb4361d5
 
 ## 🌐 **Links**
 
-- **🐦 Twitter**: https://x.com/StarkNet_Arcade
 - **📘 LitePaper / GitBook**: https://amaans-organization.gitbook.io/starknet-arcade
 - **🚀 Live dApp**: https://starknet-arcade.vercel.app/
 - **🎯 Pitch Deck**: https://www.canva.com/design/DAGkuwtnWMU/NXdO-4ktMoUcleUFRG283w/view?utm_content=DAGkuwtnWMU&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hb1b396888b
